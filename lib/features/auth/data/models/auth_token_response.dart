@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import '../../domain/models/auth_response.dart';
+import '../../domain/models/user.dart';
+
 class AuthTokenResponse {
   final String accessToken;
   final String? refreshToken;
@@ -36,6 +39,35 @@ class AuthTokenResponse {
     );
   }
 
+  /// Strongly typed User parsed directly from the login response.
+  User? get user {
+    if (rawResponse != null) {
+      final userMap = rawResponse!['user'] is Map<String, dynamic>
+          ? rawResponse!['user'] as Map<String, dynamic>
+          : rawResponse!;
+      if (userMap.containsKey('role') || userMap.containsKey('id')) {
+        return User.fromJson(userMap);
+      }
+    }
+    return null;
+  }
+
+  AuthResponse toAuthResponse() {
+    final parsedUser = user ??
+        User(
+          id: userId ?? 0,
+          username: username ?? '',
+          email: '',
+          role: role ?? '',
+        );
+    return AuthResponse(
+      access: accessToken,
+      refresh: refreshToken ?? '',
+      user: parsedUser,
+      rawResponse: rawResponse,
+    );
+  }
+
   Map<String, dynamic>? get jwtPayload {
     try {
       final parts = accessToken.split('.');
@@ -51,22 +83,37 @@ class AuthTokenResponse {
 
   String? get role {
     final payload = jwtPayload;
-    return payload?['role']?.toString() ??
+    final userMap = rawResponse?['user'] is Map<String, dynamic>
+        ? rawResponse!['user'] as Map<String, dynamic>
+        : null;
+    return userMap?['role']?.toString() ??
+        payload?['role']?.toString() ??
         payload?['user_role']?.toString() ??
         rawResponse?['role']?.toString();
   }
 
   String? get username {
     final payload = jwtPayload;
-    return payload?['username']?.toString() ??
+    final userMap = rawResponse?['user'] is Map<String, dynamic>
+        ? rawResponse!['user'] as Map<String, dynamic>
+        : null;
+    return userMap?['username']?.toString() ??
+        payload?['username']?.toString() ??
         rawResponse?['username']?.toString();
   }
 
   int? get userId {
     final payload = jwtPayload;
-    final idVal = payload?['user_id'] ?? payload?['id'] ?? rawResponse?['id'];
+    final userMap = rawResponse?['user'] is Map<String, dynamic>
+        ? rawResponse!['user'] as Map<String, dynamic>
+        : null;
+    final idVal = userMap?['id'] ??
+        payload?['user_id'] ??
+        payload?['id'] ??
+        rawResponse?['id'];
     if (idVal is int) return idVal;
     if (idVal is String) return int.tryParse(idVal);
     return null;
   }
 }
+

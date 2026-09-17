@@ -6,6 +6,20 @@ import '../storage/secure_token_storage.dart';
 import 'auth_interceptor.dart';
 import 'error_interceptor.dart';
 
+/// Normalizes request paths so that any leading '/api/' or 'api/' is cleanly stripped,
+/// preventing duplicate '/api/api/' segments when combined with [EnvConfig.apiBaseUrl].
+class PathNormalizerInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    if (options.path.startsWith('/api/')) {
+      options.path = options.path.substring(4);
+    } else if (options.path.startsWith('api/')) {
+      options.path = options.path.substring(3);
+    }
+    handler.next(options);
+  }
+}
+
 final errorInterceptorProvider = Provider<ErrorInterceptor>((ref) {
   final tokenStorage = ref.watch(secureTokenStorageProvider);
   return ErrorInterceptor(tokenStorage: tokenStorage);
@@ -28,7 +42,12 @@ final dioProvider = Provider<Dio>((ref) {
     ),
   );
 
-  dio.interceptors.addAll([AuthInterceptor(tokenStorage), errorInterceptor]);
+  dio.interceptors.addAll([
+    PathNormalizerInterceptor(),
+    AuthInterceptor(tokenStorage),
+    errorInterceptor,
+  ]);
+  errorInterceptor.retryDio = dio;
 
   return dio;
 });

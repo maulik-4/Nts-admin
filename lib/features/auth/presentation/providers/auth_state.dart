@@ -1,4 +1,5 @@
 import '../../data/models/user_profile.dart';
+import '../../domain/models/user_role.dart';
 
 enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
@@ -49,6 +50,14 @@ class AuthState {
       status == AuthStatus.authenticated && user != null;
   bool get isUnauthenticated => status == AuthStatus.unauthenticated;
   bool get hasError => status == AuthStatus.error;
+
+  UserRole? get role => user?.userRole;
+  bool get isSuperAdmin => user?.isSuperAdmin ?? (role == UserRole.superAdmin);
+  bool get isAdmin => user?.isAdmin ?? (role == UserRole.admin);
+  bool get isFirmAdmin => isAdmin;
+  bool get isLawyer => user?.isLawyer ?? (role == UserRole.lawyer);
+  bool get isStaff => user?.isStaff ?? (role == UserRole.staff);
+
 
   @override
   bool operator ==(Object other) =>

@@ -54,6 +54,25 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    if (shouldFail) {
+      throw ApiException(message: failMessage ?? 'Forgot password failed');
+    }
+    return {'message': 'Reset link sent'};
+  }
+
+  @override
+  Future<Map<String, dynamic>> resetPassword({
+    required String token,
+    required String password,
+  }) async {
+    if (shouldFail) {
+      throw ApiException(message: failMessage ?? 'Reset password failed');
+    }
+    return {'message': 'Password reset successful'};
+  }
+
+  @override
   Future<UserProfile?> restoreSession() async {
     if (shouldFail) {
       return null;

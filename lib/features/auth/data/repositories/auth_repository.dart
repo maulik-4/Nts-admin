@@ -43,23 +43,28 @@ class AuthRepository {
       refreshToken: tokenResponse.refreshToken,
     );
 
-    // Fetch and cache user profile
+    // Build user profile directly from the login response (source of truth)
     UserProfile profile;
-    try {
-      profile = await remoteDataSource.getProfile();
-    } catch (_) {
-      // Fallback to token claims if profile endpoint fails or has restricted permissions
-      profile = UserProfile(
-        id: tokenResponse.userId,
-        username: tokenResponse.username ?? username,
-        email: '',
-        role: tokenResponse.role,
-      );
+    if (tokenResponse.user != null) {
+      profile = UserProfile.fromUser(tokenResponse.user!);
+    } else {
+      try {
+        profile = await remoteDataSource.getProfile();
+      } catch (_) {
+        // Fallback to token claims if profile endpoint fails or has restricted permissions
+        profile = UserProfile(
+          id: tokenResponse.userId,
+          username: tokenResponse.username ?? username,
+          email: '',
+          role: tokenResponse.role,
+        );
+      }
     }
 
     await tokenStorage.saveUserProfile(profile.toJsonString());
     return profile;
   }
+
 
   Future<Map<String, dynamic>> register(RegisterRequest request) async {
     return await remoteDataSource.register(request);
@@ -67,6 +72,20 @@ class AuthRepository {
 
   Future<Map<String, dynamic>> acceptInvite(AcceptInviteRequest request) async {
     return await remoteDataSource.acceptInvite(request);
+  }
+
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    return await remoteDataSource.forgotPassword(email);
+  }
+
+  Future<Map<String, dynamic>> resetPassword({
+    required String token,
+    required String password,
+  }) async {
+    return await remoteDataSource.resetPassword(
+      token: token,
+      password: password,
+    );
   }
 
   Future<UserProfile?> restoreSession() async {

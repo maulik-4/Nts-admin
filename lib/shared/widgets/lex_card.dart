@@ -7,6 +7,7 @@ class LexCard extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final double borderRadius;
   final VoidCallback? onTap;
+  final Color? backgroundColor;
 
   const LexCard({
     super.key,
@@ -14,6 +15,7 @@ class LexCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(20),
     this.borderRadius = 10,
     this.onTap,
+    this.backgroundColor,
   });
 
   @override
@@ -23,7 +25,9 @@ class LexCard extends StatelessWidget {
     final card = Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: isDark ? LexColors.surfaceDark : LexColors.surfaceLight,
+        color:
+            backgroundColor ??
+            (isDark ? LexColors.surfaceDark : LexColors.surfaceLight),
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
           color: isDark ? LexColors.borderDark : LexColors.borderLight,

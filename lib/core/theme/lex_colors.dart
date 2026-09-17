@@ -40,4 +40,5 @@ class LexColors {
   static const Color success = Color(0xFF059669);
   static const Color successLight = Color(0xFFECFDF5);
   static const Color warning = Color(0xFFD97706);
+  static const Color warningLight = Color(0xFFFEF3C7);
 }

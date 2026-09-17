@@ -82,6 +82,41 @@ class AuthRemoteDataSource {
     }
   }
 
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final response = await _dio.post(
+        ApiEndpoints.forgotPassword,
+        data: {'email': email},
+      );
+      if (response.data is Map<String, dynamic>) {
+        return response.data as Map<String, dynamic>;
+      }
+      return {'message': 'Password reset request submitted successfully.'};
+    } on DioException catch (e) {
+      if (e.error is ApiException) throw e.error as ApiException;
+      throw ApiException.fromResponse(e.response?.statusCode, e.response?.data);
+    }
+  }
+
+  Future<Map<String, dynamic>> resetPassword({
+    required String token,
+    required String password,
+  }) async {
+    try {
+      final response = await _dio.post(
+        ApiEndpoints.resetPassword,
+        data: {'token': token, 'password': password},
+      );
+      if (response.data is Map<String, dynamic>) {
+        return response.data as Map<String, dynamic>;
+      }
+      return {'message': 'Password updated successfully.'};
+    } on DioException catch (e) {
+      if (e.error is ApiException) throw e.error as ApiException;
+      throw ApiException.fromResponse(e.response?.statusCode, e.response?.data);
+    }
+  }
+
   Future<UserProfile> getProfile() async {
     try {
       final response = await _dio.get(ApiEndpoints.profileMe);

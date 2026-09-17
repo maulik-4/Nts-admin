@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../constants/storage_keys.dart';
+import '../../features/auth/domain/models/user.dart';
 
 final secureTokenStorageProvider = Provider<SecureTokenStorage>((ref) {
   return SecureTokenStorage();
@@ -58,6 +59,20 @@ class SecureTokenStorage {
     }
   }
 
+  Future<void> saveUser(User user) async {
+    await saveUserProfile(user.toJsonString());
+  }
+
+  Future<User?> getUser() async {
+    final raw = await getUserProfile();
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      return User.fromJsonString(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<bool> hasAccessToken() async {
     final token = await getAccessToken();
     return token != null && token.isNotEmpty;
@@ -73,4 +88,7 @@ class SecureTokenStorage {
       await _storage.deleteAll();
     }
   }
+
+  Future<void> clearAll() => clearTokens();
 }
+

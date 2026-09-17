@@ -23,6 +23,10 @@ final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((
   return notifier;
 });
 
+/// Canonical auth provider alias matching the centralized auth architecture.
+final authProvider = authNotifierProvider;
+
+
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
 
@@ -104,6 +108,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = const AuthState.error(
         'Unable to accept invite. Please try again.',
       );
+      return false;
+    }
+  }
+
+  Future<bool> forgotPassword(String email) async {
+    try {
+      await _repository.forgotPassword(email);
+      return true;
+    } catch (_) {
       return false;
     }
   }
