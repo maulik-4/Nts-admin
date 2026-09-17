@@ -723,12 +723,18 @@ class _BrandingSettingsScreenState
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Image.asset(
-          'assets/images/icon.png',
+          'assets/image/icon.png',
           width: 72,
           height: 72,
           fit: BoxFit.cover,
-          errorBuilder: (ctx, err, stack) => Center(
-            child: Icon(Icons.balance, size: 32, color: _draftAccentColor),
+          errorBuilder: (ctx, err, stack) => Image.asset(
+            'assets/images/icon.png',
+            width: 72,
+            height: 72,
+            fit: BoxFit.cover,
+            errorBuilder: (ctx2, err2, stack2) => Center(
+              child: Icon(Icons.balance, size: 32, color: _draftAccentColor),
+            ),
           ),
         ),
       ),

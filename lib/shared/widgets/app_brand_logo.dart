@@ -26,7 +26,8 @@ class AppBrandLogo extends ConsumerWidget {
     this.isCircular = false,
   });
 
-  static const String officialLogoAsset = 'assets/images/icon.png';
+  static const String officialLogoAsset = 'assets/image/icon.png';
+  static const String fallbackLogoAsset = 'assets/images/icon.png';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -101,15 +102,23 @@ class AppBrandLogo extends ConsumerWidget {
       width: renderSize,
       height: renderSize,
       errorBuilder: (ctx, err, stack) {
-        return Container(
-          color: LexColors.slatePrimary,
-          child: Center(
-            child: Icon(
-              Icons.balance,
-              size: renderSize * 0.55,
-              color: Colors.white,
-            ),
-          ),
+        return Image.asset(
+          fallbackLogoAsset,
+          fit: BoxFit.cover,
+          width: renderSize,
+          height: renderSize,
+          errorBuilder: (ctx2, err2, stack2) {
+            return Container(
+              color: LexColors.slatePrimary,
+              child: Center(
+                child: Icon(
+                  Icons.balance,
+                  size: renderSize * 0.55,
+                  color: Colors.white,
+                ),
+              ),
+            );
+          },
         );
       },
     );

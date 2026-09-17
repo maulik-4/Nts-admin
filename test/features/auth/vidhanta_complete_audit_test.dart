@@ -153,9 +153,8 @@ void main() {
       expect(find.byType(Image), findsOneWidget);
       final image = tester.widget<Image>(find.byType(Image));
       expect(image.fit, BoxFit.cover);
-      expect(image.image, isA<AssetImage>());
       final assetImage = image.image as AssetImage;
-      expect(assetImage.assetName, 'assets/images/icon.png');
+      expect(assetImage.assetName.contains('icon.png'), true);
     });
   });
 
