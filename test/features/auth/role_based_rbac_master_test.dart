@@ -15,7 +15,10 @@ class _InMemoryTokenStorage extends SecureTokenStorage {
   String? _userProfile;
 
   @override
-  Future<void> saveTokens({required String accessToken, String? refreshToken}) async {
+  Future<void> saveTokens({
+    required String accessToken,
+    String? refreshToken,
+  }) async {
     _access = accessToken;
     _refresh = refreshToken;
   }
@@ -400,37 +403,48 @@ void main() {
     // 4. ERROR INTERCEPTOR: 401 REFRESH & 403 FORBIDDEN HANDLING
     // =========================================================================
     group('ErrorInterceptor 401 & 403 Handling', () {
-      test('403 Forbidden does NOT trigger auto-logout and does NOT clear storage', () async {
-        final storage = _InMemoryTokenStorage();
-        await storage.saveTokens(accessToken: 'valid_access_token', refreshToken: 'valid_refresh_token');
+      test(
+        '403 Forbidden does NOT trigger auto-logout and does NOT clear storage',
+        () async {
+          final storage = _InMemoryTokenStorage();
+          await storage.saveTokens(
+            accessToken: 'valid_access_token',
+            refreshToken: 'valid_refresh_token',
+          );
 
-        bool unauthorizedCalled = false;
-        final interceptor = ErrorInterceptor(
-          tokenStorage: storage,
-          onUnauthorized: () {
-            unauthorizedCalled = true;
-          },
-        );
+          bool unauthorizedCalled = false;
+          final interceptor = ErrorInterceptor(
+            tokenStorage: storage,
+            onUnauthorized: () {
+              unauthorizedCalled = true;
+            },
+          );
 
-        final dioException = DioException(
-          requestOptions: RequestOptions(path: '/api/payments/'),
-          response: Response(
+          final dioException = DioException(
             requestOptions: RequestOptions(path: '/api/payments/'),
-            statusCode: 403,
-            data: {'detail': 'You do not have permission to perform this action.'},
-          ),
-        );
+            response: Response(
+              requestOptions: RequestOptions(path: '/api/payments/'),
+              statusCode: 403,
+              data: {
+                'detail': 'You do not have permission to perform this action.',
+              },
+            ),
+          );
 
-        final handler = _MockErrorInterceptorHandler();
-        interceptor.onError(dioException, handler);
+          final handler = _MockErrorInterceptorHandler();
+          interceptor.onError(dioException, handler);
 
-        // Verify tokens are NOT cleared
-        expect(await storage.getAccessToken(), 'valid_access_token');
-        expect(unauthorizedCalled, isFalse);
-        expect(handler.rejectedError, isNotNull);
-        expect(handler.rejectedError!.error, isA<ApiException>());
-        expect((handler.rejectedError!.error as ApiException).statusCode, 403);
-      });
+          // Verify tokens are NOT cleared
+          expect(await storage.getAccessToken(), 'valid_access_token');
+          expect(unauthorizedCalled, isFalse);
+          expect(handler.rejectedError, isNotNull);
+          expect(handler.rejectedError!.error, isA<ApiException>());
+          expect(
+            (handler.rejectedError!.error as ApiException).statusCode,
+            403,
+          );
+        },
+      );
 
       test('401 Unauthorized with missing refresh token clears storage and triggers onUnauthorized', () async {
         final storage = _InMemoryTokenStorage();
@@ -471,7 +485,10 @@ class _MockErrorInterceptorHandler extends ErrorInterceptorHandler {
   Response<dynamic>? resolvedResponse;
 
   @override
-  void reject(DioException error, [bool callFollowingErrorInterceptor = false]) {
+  void reject(
+    DioException error, [
+    bool callFollowingErrorInterceptor = false,
+  ]) {
     rejectedError = error;
   }
 
@@ -480,4 +497,3 @@ class _MockErrorInterceptorHandler extends ErrorInterceptorHandler {
     resolvedResponse = response;
   }
 }
-

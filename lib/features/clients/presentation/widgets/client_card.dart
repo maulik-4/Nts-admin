@@ -38,7 +38,7 @@ class ClientCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     color: isDark
                         ? LexColors.accentGold
-                        : LexColors.slatePrimary,
+                        : Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),

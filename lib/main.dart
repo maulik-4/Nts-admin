@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/routing/app_router.dart';
+import 'core/theme/firm_theme_provider.dart';
 import 'core/theme/lex_theme.dart';
 
 void main() {
@@ -15,12 +16,13 @@ class NTSLegalProApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    final firmTheme = ref.watch(firmThemeProvider);
 
     return MaterialApp.router(
-      title: 'NTS Legal Pro',
+      title: firmTheme.firmName ?? 'NTS Legal Pro',
       debugShowCheckedModeBanner: false,
-      theme: LexTheme.lightTheme,
-      darkTheme: LexTheme.darkTheme,
+      theme: LexTheme.buildDynamicTheme(firmTheme: firmTheme, isDark: false),
+      darkTheme: LexTheme.buildDynamicTheme(firmTheme: firmTheme, isDark: true),
       themeMode: ThemeMode.system,
       routerConfig: router,
     );

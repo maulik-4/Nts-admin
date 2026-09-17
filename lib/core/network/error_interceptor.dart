@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:dio/dio.dart';
 
 import '../config/env_config.dart';
@@ -54,7 +55,10 @@ class ErrorInterceptor extends Interceptor {
         try {
           final newAccessToken = await _refreshCompleter!.future;
           if (newAccessToken != null && retryDio != null) {
-            final retriedResponse = await _retryRequest(err.requestOptions, newAccessToken);
+            final retriedResponse = await _retryRequest(
+              err.requestOptions,
+              newAccessToken,
+            );
             return handler.resolve(retriedResponse);
           }
         } catch (_) {
@@ -81,7 +85,10 @@ class ErrorInterceptor extends Interceptor {
 
           // Retry the original failed request with the new access token
           if (retryDio != null) {
-            final retriedResponse = await _retryRequest(err.requestOptions, newAccessToken);
+            final retriedResponse = await _retryRequest(
+              err.requestOptions,
+              newAccessToken,
+            );
             return handler.resolve(retriedResponse);
           }
         } else {
@@ -124,7 +131,8 @@ class ErrorInterceptor extends Interceptor {
 
       if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
         final data = response.data as Map<String, dynamic>;
-        final newAccess = data['access']?.toString() ?? data['token']?.toString();
+        final newAccess =
+            data['access']?.toString() ?? data['token']?.toString();
         final newRefresh = data['refresh']?.toString();
 
         if (newAccess != null && newAccess.isNotEmpty) {
@@ -141,7 +149,10 @@ class ErrorInterceptor extends Interceptor {
     return null;
   }
 
-  Future<Response<dynamic>> _retryRequest(RequestOptions options, String newAccessToken) async {
+  Future<Response<dynamic>> _retryRequest(
+    RequestOptions options,
+    String newAccessToken,
+  ) async {
     final newOptions = options.copyWith(
       headers: Map<String, dynamic>.from(options.headers)
         ..['Authorization'] = 'Bearer $newAccessToken',

@@ -61,7 +61,8 @@ class _PlatformTeamScreenState extends ConsumerState<PlatformTeamScreen> {
             // Search text
             if (_searchQuery.isNotEmpty) {
               final q = _searchQuery.toLowerCase();
-              final matchSearch = m.username.toLowerCase().contains(q) ||
+              final matchSearch =
+                  m.username.toLowerCase().contains(q) ||
                   m.email.toLowerCase().contains(q) ||
                   m.role.toLowerCase().contains(q) ||
                   m.firm.toLowerCase().contains(q);
@@ -128,42 +129,86 @@ class _PlatformTeamScreenState extends ConsumerState<PlatformTeamScreen> {
                 // Role and Firm Filter Chips (Section 20)
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   child: Row(
                     children: [
-                      _buildFilterChip('All Roles', 'all', _selectedRoleFilter, (val) {
-                        setState(() => _selectedRoleFilter = val);
-                      }),
+                      _buildFilterChip(
+                        'All Roles',
+                        'all',
+                        _selectedRoleFilter,
+                        (val) {
+                          setState(() => _selectedRoleFilter = val);
+                        },
+                      ),
                       const SizedBox(width: 6),
-                      _buildFilterChip('Super Admins', 'super_admin', _selectedRoleFilter, (val) {
-                        setState(() => _selectedRoleFilter = val);
-                      }),
+                      _buildFilterChip(
+                        'Super Admins',
+                        'super_admin',
+                        _selectedRoleFilter,
+                        (val) {
+                          setState(() => _selectedRoleFilter = val);
+                        },
+                      ),
                       const SizedBox(width: 6),
-                      _buildFilterChip('Firm Admins', 'admin', _selectedRoleFilter, (val) {
-                        setState(() => _selectedRoleFilter = val);
-                      }),
+                      _buildFilterChip(
+                        'Firm Admins',
+                        'admin',
+                        _selectedRoleFilter,
+                        (val) {
+                          setState(() => _selectedRoleFilter = val);
+                        },
+                      ),
                       const SizedBox(width: 6),
-                      _buildFilterChip('Lawyers', 'lawyer', _selectedRoleFilter, (val) {
-                        setState(() => _selectedRoleFilter = val);
-                      }),
+                      _buildFilterChip(
+                        'Lawyers',
+                        'lawyer',
+                        _selectedRoleFilter,
+                        (val) {
+                          setState(() => _selectedRoleFilter = val);
+                        },
+                      ),
                       const SizedBox(width: 6),
-                      _buildFilterChip('Staff', 'staff', _selectedRoleFilter, (val) {
+                      _buildFilterChip('Staff', 'staff', _selectedRoleFilter, (
+                        val,
+                      ) {
                         setState(() => _selectedRoleFilter = val);
                       }),
                       const SizedBox(width: 14),
-                      Container(height: 20, width: 1, color: Colors.grey.withAlpha(80)),
+                      Container(
+                        height: 20,
+                        width: 1,
+                        color: Colors.grey.withAlpha(80),
+                      ),
                       const SizedBox(width: 14),
-                      _buildFilterChip('All Tenants', 'all', _selectedFirmFilter, (val) {
-                        setState(() => _selectedFirmFilter = val);
-                      }),
+                      _buildFilterChip(
+                        'All Tenants',
+                        'all',
+                        _selectedFirmFilter,
+                        (val) {
+                          setState(() => _selectedFirmFilter = val);
+                        },
+                      ),
                       const SizedBox(width: 6),
-                      _buildFilterChip('Platform Only', 'platform', _selectedFirmFilter, (val) {
-                        setState(() => _selectedFirmFilter = val);
-                      }),
+                      _buildFilterChip(
+                        'Platform Only',
+                        'platform',
+                        _selectedFirmFilter,
+                        (val) {
+                          setState(() => _selectedFirmFilter = val);
+                        },
+                      ),
                       const SizedBox(width: 6),
-                      _buildFilterChip('Firm Members', 'firm_only', _selectedFirmFilter, (val) {
-                        setState(() => _selectedFirmFilter = val);
-                      }),
+                      _buildFilterChip(
+                        'Firm Members',
+                        'firm_only',
+                        _selectedFirmFilter,
+                        (val) {
+                          setState(() => _selectedFirmFilter = val);
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -174,7 +219,8 @@ class _PlatformTeamScreenState extends ConsumerState<PlatformTeamScreen> {
                   child: filtered.isEmpty
                       ? EmptyStateWidget(
                           title: 'No Platform Users Found',
-                          message: _searchQuery.isNotEmpty ||
+                          message:
+                              _searchQuery.isNotEmpty ||
                                   _selectedRoleFilter != 'all' ||
                                   _selectedFirmFilter != 'all'
                               ? 'No users match the active filters.'
@@ -424,7 +470,10 @@ class _PlatformTeamScreenState extends ConsumerState<PlatformTeamScreen> {
                     initialValue: selectedRole,
                     decoration: const InputDecoration(
                       labelText: 'Platform Role *',
-                      prefixIcon: Icon(Icons.admin_panel_settings_outlined, size: 20),
+                      prefixIcon: Icon(
+                        Icons.admin_panel_settings_outlined,
+                        size: 20,
+                      ),
                     ),
                     items: const [
                       DropdownMenuItem(
@@ -495,7 +544,9 @@ class _PlatformTeamScreenState extends ConsumerState<PlatformTeamScreen> {
                       Navigator.pop(ctx);
                       _showDirectAddUserDialog(context);
                     },
-                    child: const Text('Or create firm/platform user with credentials'),
+                    child: const Text(
+                      'Or create firm/platform user with credentials',
+                    ),
                   ),
                 ],
               ),

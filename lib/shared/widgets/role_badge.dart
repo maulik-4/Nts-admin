@@ -24,18 +24,15 @@ class RoleBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = role.badgeColor;
-    final label = customLabel ??
-        (showDescription ? role.description : role.displayTitle);
+    final label =
+        customLabel ?? (showDescription ? role.description : role.displayTitle);
 
     return Container(
       padding: padding,
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: borderRadius ?? BorderRadius.circular(6),
-        border: Border.all(
-          color: color.withValues(alpha: 0.35),
-          width: 1,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.35), width: 1),
       ),
       child: Text(
         label.toUpperCase(),

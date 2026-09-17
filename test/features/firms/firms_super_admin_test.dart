@@ -142,45 +142,49 @@ void main() {
       expect(firms.first.gstNumber, '02AAACH1234A1Z1');
     });
 
-    test('getFirmStats fetches real metrics from GET /api/firms/{id}/stats/', () async {
-      final stats = await firmsRepo.getFirmStats(10);
-      expect(stats['total_cases'], 45);
-      expect(stats['active_cases'], 28);
-      expect(stats['total_lawyers'], 8);
-      expect(stats['total_staff'], 4);
-      expect(stats['total_clients'], 62);
-      expect(stats['storage_used_mb'], 1024);
+    test(
+      'getFirmStats fetches real metrics from GET /api/firms/{id}/stats/',
+      () async {
+        final stats = await firmsRepo.getFirmStats(10);
+        expect(stats['total_cases'], 45);
+        expect(stats['active_cases'], 28);
+        expect(stats['total_lawyers'], 8);
+        expect(stats['total_staff'], 4);
+        expect(stats['total_clients'], 62);
+        expect(stats['storage_used_mb'], 1024);
 
-      expect(
-        mockAdapter.requests.any(
-          (r) => r.path == '/api/firms/10/stats/' && r.method == 'GET',
-        ),
-        isTrue,
-      );
-    });
+        expect(
+          mockAdapter.requests.any(
+            (r) => r.path == '/api/firms/10/stats/' && r.method == 'GET',
+          ),
+          isTrue,
+        );
+      },
+    );
 
-    test('changeAdmin sends correct payload to /api/auth/change-admin/', () async {
-      await firmsRepo.changeAdmin(10, 15);
-      expect(
-        mockAdapter.requests.any(
-          (r) =>
-              r.path == '/api/auth/change-admin/' &&
-              r.method == 'POST' &&
-              r.data is Map &&
-              (r.data as Map)['user_id'] == 15,
-        ),
-        isTrue,
-      );
-    });
+    test(
+      'changeAdmin sends correct payload to /api/auth/change-admin/',
+      () async {
+        await firmsRepo.changeAdmin(10, 15);
+        expect(
+          mockAdapter.requests.any(
+            (r) =>
+                r.path == '/api/auth/change-admin/' &&
+                r.method == 'POST' &&
+                r.data is Map &&
+                (r.data as Map)['user_id'] == 15,
+          ),
+          isTrue,
+        );
+      },
+    );
 
     test('toggleActive calls POST /api/firms/{id}/toggle_active/', () async {
       final isActive = await firmsRepo.toggleActive(10);
       expect(isActive, isFalse);
       expect(
         mockAdapter.requests.any(
-          (r) =>
-              r.path == '/api/firms/10/toggle_active/' &&
-              r.method == 'POST',
+          (r) => r.path == '/api/firms/10/toggle_active/' && r.method == 'POST',
         ),
         isTrue,
       );
@@ -191,9 +195,7 @@ void main() {
       expect(isBlocked, isTrue);
       expect(
         mockAdapter.requests.any(
-          (r) =>
-              r.path == '/api/firms/10/toggle_block/' &&
-              r.method == 'POST',
+          (r) => r.path == '/api/firms/10/toggle_block/' && r.method == 'POST',
         ),
         isTrue,
       );

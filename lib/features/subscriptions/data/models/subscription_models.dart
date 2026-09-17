@@ -159,6 +159,33 @@ class FirmSubscription {
   };
 }
 
+/// Represents the active subscription state returned by /api/subscriptions/active/.
+class ActiveSubscription {
+  final int? plan;
+  final String planName;
+  final String billingCycle;
+
+  const ActiveSubscription({
+    this.plan,
+    required this.planName,
+    this.billingCycle = 'monthly',
+  });
+
+  factory ActiveSubscription.fromJson(Map<String, dynamic> json) {
+    return ActiveSubscription(
+      plan: json['plan'] as int?,
+      planName: json['plan_name']?.toString() ?? 'Active Plan',
+      billingCycle: json['billing_cycle']?.toString() ?? 'monthly',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'plan': plan,
+    'plan_name': planName,
+    'billing_cycle': billingCycle,
+  };
+}
+
 class ClientUsage {
   final int used;
   final int? limit;

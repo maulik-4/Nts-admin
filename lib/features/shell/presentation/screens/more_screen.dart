@@ -83,7 +83,8 @@ class MoreScreen extends ConsumerWidget {
               _buildOperationTile(
                 context,
                 title: 'Tenant Law Firms',
-                subtitle: 'Manage registered firms, status, stats & admin transfer',
+                subtitle:
+                    'Manage registered firms, status, stats & admin transfer',
                 icon: Icons.business_outlined,
                 badgeText: '$firmsCount registered',
                 onTap: () => context.push('/app/firms'),
@@ -110,7 +111,8 @@ class MoreScreen extends ConsumerWidget {
               _buildOperationTile(
                 context,
                 title: 'Support Tickets & Helpdesk',
-                subtitle: 'Resolve tickets, reply to inquiries & platform assistance',
+                subtitle:
+                    'Resolve tickets, reply to inquiries & platform assistance',
                 icon: Icons.support_agent_outlined,
                 badgeText: 'Support',
                 onTap: () => context.push('/app/more/support'),
@@ -164,7 +166,7 @@ class MoreScreen extends ConsumerWidget {
                   fontWeight: FontWeight.w700,
                   color: isDark
                       ? LexColors.textPrimaryDark
-                      : LexColors.slatePrimary,
+                      : Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 12),
@@ -266,7 +268,7 @@ class MoreScreen extends ConsumerWidget {
                   fontWeight: FontWeight.w700,
                   color: isDark
                       ? LexColors.textPrimaryDark
-                      : LexColors.slatePrimary,
+                      : Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 12),
@@ -313,7 +315,7 @@ class MoreScreen extends ConsumerWidget {
                 fontWeight: FontWeight.w700,
                 color: isDark
                     ? LexColors.textPrimaryDark
-                    : LexColors.slatePrimary,
+                    : Theme.of(context).colorScheme.primary,
               ),
             ),
             const SizedBox(height: 12),
@@ -330,7 +332,7 @@ class MoreScreen extends ConsumerWidget {
                       radius: 28,
                       backgroundColor: isDark
                           ? LexColors.surfaceDark
-                          : LexColors.slatePrimary,
+                          : Theme.of(context).colorScheme.primary,
                       child: Text(
                         user?.username.isNotEmpty == true
                             ? user!.username.substring(0, 1).toUpperCase()
@@ -357,7 +359,7 @@ class MoreScreen extends ConsumerWidget {
                               fontWeight: FontWeight.w700,
                               color: isDark
                                   ? LexColors.textPrimaryDark
-                                  : LexColors.slatePrimary,
+                                  : Theme.of(context).colorScheme.primary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -524,7 +526,9 @@ class MoreScreen extends ConsumerWidget {
             child: Icon(
               icon,
               size: 22,
-              color: isDark ? LexColors.accentGold : LexColors.slatePrimary,
+              color: isDark
+                  ? LexColors.accentGold
+                  : Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(width: 14),
@@ -539,7 +543,7 @@ class MoreScreen extends ConsumerWidget {
                     fontWeight: FontWeight.w700,
                     color: isDark
                         ? LexColors.textPrimaryDark
-                        : LexColors.slatePrimary,
+                        : Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 2),

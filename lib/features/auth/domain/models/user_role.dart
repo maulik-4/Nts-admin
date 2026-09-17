@@ -178,4 +178,3 @@ extension UserRoleExtension on UserRole {
   bool get isLawyerRole => this == UserRole.lawyer;
   bool get isStaffRole => this == UserRole.staff;
 }
-

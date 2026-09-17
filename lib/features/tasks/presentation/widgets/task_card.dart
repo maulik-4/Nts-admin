@@ -82,7 +82,7 @@ class TaskCard extends StatelessWidget {
                                   : LexColors.textSecondaryLight)
                             : (isDark
                                   ? LexColors.textPrimaryDark
-                                  : LexColors.slatePrimary),
+                                  : Theme.of(context).colorScheme.primary),
                       ),
                     ),
                     if (task.description != null &&

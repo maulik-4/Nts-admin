@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_1/features/auth/domain/models/auth_response.dart';
 import 'package:flutter_application_1/features/auth/domain/models/user_role.dart';
@@ -10,13 +11,27 @@ void main() {
     final client = HttpClient();
 
     final accounts = [
-      {'u': 'testlawyer_fe69b5', 'p': 'TestPassword@123', 'expectedRole': UserRole.admin},
-      {'u': 'lawyer_7cc7d', 'p': 'TestPassword@123', 'expectedRole': UserRole.lawyer},
-      {'u': 'staff_7cc7d', 'p': 'TestPassword@123', 'expectedRole': UserRole.staff},
+      {
+        'u': 'testlawyer_fe69b5',
+        'p': 'TestPassword@123',
+        'expectedRole': UserRole.admin,
+      },
+      {
+        'u': 'lawyer_7cc7d',
+        'p': 'TestPassword@123',
+        'expectedRole': UserRole.lawyer,
+      },
+      {
+        'u': 'staff_7cc7d',
+        'p': 'TestPassword@123',
+        'expectedRole': UserRole.staff,
+      },
     ];
 
     for (final acc in accounts) {
-      final req = await client.postUrl(Uri.parse('https://api.hphighcourt.site/api/auth/login/'));
+      final req = await client.postUrl(
+        Uri.parse('https://api.hphighcourt.site/api/auth/login/'),
+      );
       req.headers.contentType = ContentType.json;
       req.write(jsonEncode({'username': acc['u'], 'password': acc['p']}));
       final resp = await req.close();

@@ -26,8 +26,12 @@ class LexButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isEnabled = onPressed != null && !isLoading;
+    final primaryColor = theme.colorScheme.primary;
+    final onPrimaryColor = theme.colorScheme.onPrimary;
+    final accentColor = theme.colorScheme.secondary;
 
     Color backgroundColor;
     Color foregroundColor;
@@ -35,26 +39,30 @@ class LexButton extends StatelessWidget {
 
     switch (variant) {
       case LexButtonVariant.primary:
-        backgroundColor = isDark ? Colors.white : LexColors.slatePrimary;
-        foregroundColor = isDark ? LexColors.slateDark : Colors.white;
+        backgroundColor = primaryColor;
+        foregroundColor = onPrimaryColor;
         border = null;
         break;
       case LexButtonVariant.secondary:
         backgroundColor = isDark
             ? LexColors.surfaceDark
-            : LexColors.canvasLight;
-        foregroundColor = isDark ? Colors.white : LexColors.slatePrimary;
+            : primaryColor.withValues(alpha: 0.08);
+        foregroundColor = isDark ? accentColor : primaryColor;
         border = BorderSide(
-          color: isDark ? LexColors.borderDark : LexColors.borderLight,
+          color: isDark
+              ? LexColors.borderDark
+              : primaryColor.withValues(alpha: 0.2),
           width: 1,
         );
         break;
       case LexButtonVariant.outline:
         backgroundColor = Colors.transparent;
-        foregroundColor = isDark ? Colors.white : LexColors.slatePrimary;
+        foregroundColor = isDark ? accentColor : primaryColor;
         border = BorderSide(
-          color: isDark ? LexColors.borderDark : LexColors.borderLight,
-          width: 1,
+          color: isDark
+              ? accentColor.withValues(alpha: 0.6)
+              : primaryColor.withValues(alpha: 0.4),
+          width: 1.5,
         );
         break;
     }

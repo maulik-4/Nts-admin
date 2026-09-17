@@ -49,15 +49,12 @@ void main() {
       expect(UserRole.fromString('STAFF'), UserRole.staff);
     });
 
-    test(
-      'UserRole.fromString falls back to unknown on unrecognized values and never defaults to admin',
-      () {
-        expect(UserRole.fromString('unknown_role'), UserRole.unknown);
-        expect(UserRole.fromString(null), UserRole.unknown);
-        expect(UserRole.fromString(''), UserRole.unknown);
-        expect(UserRole.fromString('random_string'), UserRole.unknown);
-      },
-    );
+    test('UserRole.fromString falls back to unknown on unrecognized values and never defaults to admin', () {
+      expect(UserRole.fromString('unknown_role'), UserRole.unknown);
+      expect(UserRole.fromString(null), UserRole.unknown);
+      expect(UserRole.fromString(''), UserRole.unknown);
+      expect(UserRole.fromString('random_string'), UserRole.unknown);
+    });
 
     test('UserRole booleans behave as expected', () {
       expect(UserRole.superAdmin.isSuperAdmin, isTrue);
@@ -77,25 +74,28 @@ void main() {
       expect(UserRole.staff.isLawyer, isFalse);
     });
 
-    test('RoleConfig provides required titles, descriptions, and badge colors', () {
-      expect(UserRole.superAdmin.config.title, 'Super Admin');
-      expect(
-        UserRole.superAdmin.config.description,
-        'Super Admin / Platform Administrator',
-      );
-      expect(UserRole.firmAdmin.config.title, 'Firm Admin');
-      expect(UserRole.firmAdmin.config.description, 'Firm Administrator');
-      expect(UserRole.lawyer.config.title, 'Lawyer');
-      expect(UserRole.lawyer.config.description, 'Advocate / Lawyer');
-      expect(UserRole.staff.config.title, 'Staff');
-      expect(UserRole.staff.config.description, 'Legal Staff / Paralegal');
+    test(
+      'RoleConfig provides required titles, descriptions, and badge colors',
+      () {
+        expect(UserRole.superAdmin.config.title, 'Super Admin');
+        expect(
+          UserRole.superAdmin.config.description,
+          'Super Admin / Platform Administrator',
+        );
+        expect(UserRole.firmAdmin.config.title, 'Firm Admin');
+        expect(UserRole.firmAdmin.config.description, 'Firm Administrator');
+        expect(UserRole.lawyer.config.title, 'Lawyer');
+        expect(UserRole.lawyer.config.description, 'Advocate / Lawyer');
+        expect(UserRole.staff.config.title, 'Staff');
+        expect(UserRole.staff.config.description, 'Legal Staff / Paralegal');
 
-      for (final role in UserRole.values) {
-        expect(role.badgeColor, isA<Color>());
-        expect(role.displayTitle.isNotEmpty, isTrue);
-        expect(role.description.isNotEmpty, isTrue);
-      }
-    });
+        for (final role in UserRole.values) {
+          expect(role.badgeColor, isA<Color>());
+          expect(role.displayTitle.isNotEmpty, isTrue);
+          expect(role.description.isNotEmpty, isTrue);
+        }
+      },
+    );
 
     test('Critical Super Admin detection: is_superuser = true with role = admin must resolve as Super Admin', () {
       final promotedUser = UserProfile(
@@ -164,10 +164,7 @@ void main() {
       );
       expect(namedUser.displayName, 'John Doe');
 
-      final unnamedUser = UserProfile(
-        username: 'jdoe',
-        email: 'jdoe@firm.com',
-      );
+      final unnamedUser = UserProfile(username: 'jdoe', email: 'jdoe@firm.com');
       expect(unnamedUser.displayName, 'jdoe');
     });
   });

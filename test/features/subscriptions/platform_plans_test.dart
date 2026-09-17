@@ -51,40 +51,47 @@ class _MockDioAdapter implements HttpClientAdapter {
 
 void main() {
   group('Platform SubscriptionPlan Model Tests', () {
-    test('SubscriptionPlan parses is_deleted, description, and audit timestamps', () {
-      final json = {
-        'id': 5,
-        'name': 'Gold Tier Plan',
-        'monthly_price': '1499.00',
-        'yearly_price': '14999.00',
-        'max_clients': 250,
-        'max_team_members': 25,
-        'storage_limit_gb': 100,
-        'message_limit': 10000,
-        'is_active': true,
-        'is_deleted': false,
-        'description': 'Full-featured enterprise legal plan with priority support',
-        'created_at': '2026-01-01T00:00:00Z',
-        'updated_at': '2026-02-01T00:00:00Z',
-      };
+    test(
+      'SubscriptionPlan parses is_deleted, description, and audit timestamps',
+      () {
+        final json = {
+          'id': 5,
+          'name': 'Gold Tier Plan',
+          'monthly_price': '1499.00',
+          'yearly_price': '14999.00',
+          'max_clients': 250,
+          'max_team_members': 25,
+          'storage_limit_gb': 100,
+          'message_limit': 10000,
+          'is_active': true,
+          'is_deleted': false,
+          'description':
+              'Full-featured enterprise legal plan with priority support',
+          'created_at': '2026-01-01T00:00:00Z',
+          'updated_at': '2026-02-01T00:00:00Z',
+        };
 
-      final plan = SubscriptionPlan.fromJson(json);
-      expect(plan.id, 5);
-      expect(plan.name, 'Gold Tier Plan');
-      expect(plan.isDeleted, isFalse);
-      expect(plan.description, 'Full-featured enterprise legal plan with priority support');
-      expect(plan.createdAt, isNotNull);
-      expect(plan.updatedAt, isNotNull);
+        final plan = SubscriptionPlan.fromJson(json);
+        expect(plan.id, 5);
+        expect(plan.name, 'Gold Tier Plan');
+        expect(plan.isDeleted, isFalse);
+        expect(
+          plan.description,
+          'Full-featured enterprise legal plan with priority support',
+        );
+        expect(plan.createdAt, isNotNull);
+        expect(plan.updatedAt, isNotNull);
 
-      final copy = plan.copyWith(
-        isDeleted: true,
-        description: 'Deprecated plan',
-      );
-      expect(copy.id, 5);
-      expect(copy.isDeleted, isTrue);
-      expect(copy.description, 'Deprecated plan');
-      expect(copy.monthlyPrice, 1499.0);
-    });
+        final copy = plan.copyWith(
+          isDeleted: true,
+          description: 'Deprecated plan',
+        );
+        expect(copy.id, 5);
+        expect(copy.isDeleted, isTrue);
+        expect(copy.description, 'Deprecated plan');
+        expect(copy.monthlyPrice, 1499.0);
+      },
+    );
   });
 
   group('SubscriptionsRepository Super Admin Plans Tests', () {
@@ -139,10 +146,13 @@ void main() {
       expect(plans[1].isDeleted, isTrue);
     });
 
-    test('getClientUsage handles 403 gracefully for firm-less Super Admin', () async {
-      final usage = await repo.getClientUsage();
-      expect(usage.unlimited, isTrue);
-      expect(usage.used, 0);
-    });
+    test(
+      'getClientUsage handles 403 gracefully for firm-less Super Admin',
+      () async {
+        final usage = await repo.getClientUsage();
+        expect(usage.unlimited, isTrue);
+        expect(usage.used, 0);
+      },
+    );
   });
 }

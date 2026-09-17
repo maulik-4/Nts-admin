@@ -67,13 +67,13 @@ class SubscriptionNotifier
     }
   }
 
-  Future<void> activatePlan(int planId) async {
+  Future<void> activatePlan(int planId, {String billing = 'monthly'}) async {
     final current = state.valueOrNull;
     if (current != null) {
       state = AsyncValue.data(current.copyWith(isRenewing: true));
     }
     try {
-      await _repository.subscribeToPlan(planId);
+      await _repository.subscribeToPlan(planId, billing: billing);
       await loadSubscriptionData();
     } catch (e, st) {
       if (current != null) {

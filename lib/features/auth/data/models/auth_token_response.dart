@@ -53,7 +53,8 @@ class AuthTokenResponse {
   }
 
   AuthResponse toAuthResponse() {
-    final parsedUser = user ??
+    final parsedUser =
+        user ??
         User(
           id: userId ?? 0,
           username: username ?? '',
@@ -107,7 +108,8 @@ class AuthTokenResponse {
     final userMap = rawResponse?['user'] is Map<String, dynamic>
         ? rawResponse!['user'] as Map<String, dynamic>
         : null;
-    final idVal = userMap?['id'] ??
+    final idVal =
+        userMap?['id'] ??
         payload?['user_id'] ??
         payload?['id'] ??
         rawResponse?['id'];
@@ -116,4 +118,3 @@ class AuthTokenResponse {
     return null;
   }
 }
-

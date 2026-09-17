@@ -23,7 +23,6 @@ class RoleMenuItem {
   String get label => title;
 }
 
-
 /// Centralized role navigation menu configuration.
 /// Ensures each role receives only authorized destinations without cross-role leakage.
 class RoleMenuConfig {

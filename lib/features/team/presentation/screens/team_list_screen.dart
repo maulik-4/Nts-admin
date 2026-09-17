@@ -196,8 +196,8 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
         ref.read(teamFilterProvider.notifier).state = filter;
       },
       selectedColor: isDark
-          ? LexColors.accentGold.withValues(alpha: 0.2)
-          : LexColors.slatePrimary,
+          ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2)
+          : Theme.of(context).colorScheme.primary,
       labelStyle: TextStyle(
         color: isSelected
             ? (isDark ? LexColors.accentGold : Colors.white)
@@ -499,7 +499,7 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
                 onPressed: _isLoading ? null : _submit,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: LexColors.slatePrimary,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                 ),
                 child: _isLoading

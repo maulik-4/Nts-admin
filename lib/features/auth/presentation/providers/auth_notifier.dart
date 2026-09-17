@@ -26,7 +26,6 @@ final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((
 /// Canonical auth provider alias matching the centralized auth architecture.
 final authProvider = authNotifierProvider;
 
-
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _repository;
 

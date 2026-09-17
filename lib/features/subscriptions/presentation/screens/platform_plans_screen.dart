@@ -136,10 +136,7 @@ class _PlatformPlansScreenState extends ConsumerState<PlatformPlansScreen> {
               ),
               if (plan.isDeleted) ...[
                 const SizedBox(width: 6),
-                const StatusBadge(
-                  status: 'Deleted',
-                  color: LexColors.error,
-                ),
+                const StatusBadge(status: 'Deleted', color: LexColors.error),
               ],
               const SizedBox(width: 8),
               PopupMenuButton<String>(
@@ -467,15 +464,19 @@ class _PlatformPlansScreenState extends ConsumerState<PlatformPlansScreen> {
 
                             final payload = <String, dynamic>{
                               'name': nameCtrl.text.trim(),
-                              'monthly_price':
-                                  double.parse(monthlyCtrl.text.trim()),
-                              'yearly_price':
-                                  double.parse(yearlyCtrl.text.trim()),
+                              'monthly_price': double.parse(
+                                monthlyCtrl.text.trim(),
+                              ),
+                              'yearly_price': double.parse(
+                                yearlyCtrl.text.trim(),
+                              ),
                               'max_clients': int.parse(clientsCtrl.text.trim()),
-                              'max_team_members':
-                                  int.parse(membersCtrl.text.trim()),
-                              'storage_limit_gb':
-                                  int.parse(storageCtrl.text.trim()),
+                              'max_team_members': int.parse(
+                                membersCtrl.text.trim(),
+                              ),
+                              'storage_limit_gb': int.parse(
+                                storageCtrl.text.trim(),
+                              ),
                               'description': descCtrl.text.trim(),
                             };
 

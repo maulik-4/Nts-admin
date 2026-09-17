@@ -38,9 +38,9 @@ class CasesListScreen extends ConsumerWidget {
           heroTag: 'fab_add_case',
           onPressed: () => context.push('/app/cases/create'),
           backgroundColor: isDark
-              ? LexColors.accentGold
-              : LexColors.slatePrimary,
-          foregroundColor: isDark ? LexColors.slatePrimary : Colors.white,
+              ? Theme.of(context).colorScheme.secondary
+              : Theme.of(context).colorScheme.primary,
+          foregroundColor: isDark ? Colors.black : Colors.white,
           icon: const Icon(Icons.add_circle_outline, size: 20),
           label: const Text(
             'New Case',

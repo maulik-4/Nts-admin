@@ -14,31 +14,32 @@ class _MockAuthNotifier extends StateNotifier<AuthState>
 }
 
 void main() {
-  testWidgets('LoginScreen does NOT contain Register Firm or Add Firm options', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          authNotifierProvider.overrideWith((ref) => _MockAuthNotifier()),
-        ],
-        child: const MaterialApp(home: LoginScreen()),
-      ),
-    );
+  testWidgets(
+    'LoginScreen does NOT contain Register Firm or Add Firm options',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            authNotifierProvider.overrideWith((ref) => _MockAuthNotifier()),
+          ],
+          child: const MaterialApp(home: LoginScreen()),
+        ),
+      );
 
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-    // Verify appropriate auth features ARE present
-    expect(find.text('Sign In'), findsWidgets);
-    expect(find.text('Username'), findsOneWidget);
-    expect(find.text('Password'), findsOneWidget);
-    expect(find.text('Forgot password?'), findsOneWidget);
-    expect(find.text('Accept Invite'), findsOneWidget);
+      // Verify appropriate auth features ARE present
+      expect(find.text('Sign In'), findsWidgets);
+      expect(find.text('Username'), findsOneWidget);
+      expect(find.text('Password'), findsOneWidget);
+      expect(find.text('Forgot password?'), findsOneWidget);
+      expect(find.text('Accept Invite'), findsOneWidget);
 
-    // CRITICAL REQUIREMENT #4: Add Firm / Register Firm MUST NOT be on the Login page
-    expect(find.text('Register Firm'), findsNothing);
-    expect(find.text('Add Firm'), findsNothing);
-    expect(find.text('Create Firm'), findsNothing);
-    expect(find.text('New law firm? '), findsNothing);
-  });
+      // CRITICAL REQUIREMENT #4: Add Firm / Register Firm MUST NOT be on the Login page
+      expect(find.text('Register Firm'), findsNothing);
+      expect(find.text('Add Firm'), findsNothing);
+      expect(find.text('Create Firm'), findsNothing);
+      expect(find.text('New law firm? '), findsNothing);
+    },
+  );
 }

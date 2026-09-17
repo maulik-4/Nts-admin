@@ -467,7 +467,7 @@ class _CreateTicketSheetState extends ConsumerState<_CreateTicketSheet> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _submit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: LexColors.slatePrimary,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),

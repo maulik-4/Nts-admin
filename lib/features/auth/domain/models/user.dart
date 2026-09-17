@@ -54,7 +54,8 @@ class User {
 
     final rawFirm = userMap['firm'] ?? json['firm'];
     int? parsedFirm;
-    String? parsedFirmName = (userMap['firm_name'] ?? json['firm_name'])?.toString();
+    String? parsedFirmName = (userMap['firm_name'] ?? json['firm_name'])
+        ?.toString();
 
     if (rawFirm is Map<String, dynamic>) {
       parsedFirm = rawFirm['id'] is int
@@ -87,11 +88,12 @@ class User {
         ? userMap['id'] as int
         : int.tryParse((userMap['id'] ?? json['id'])?.toString() ?? '') ?? 0;
 
-    final parsedName = (userMap['name'] ??
-            userMap['full_name'] ??
-            json['name'] ??
-            json['full_name'])
-        ?.toString();
+    final parsedName =
+        (userMap['name'] ??
+                userMap['full_name'] ??
+                json['name'] ??
+                json['full_name'])
+            ?.toString();
 
     return User(
       id: parsedId,

@@ -76,8 +76,7 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText:
-                          'Search by name, email, phone, city, state, PAN, GST...',
+                      hintText: 'Search by name, email, phone, city, state, PAN, GST...',
                       prefixIcon: const Icon(Icons.search, size: 20),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
@@ -365,11 +364,7 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                     'GST: ${firm.gstNumber}',
                     isDark,
                   ),
-                _buildMetaTag(
-                  Icons.tag,
-                  'Firm #${firm.id}',
-                  isDark,
-                ),
+                _buildMetaTag(Icons.tag, 'Firm #${firm.id}', isDark),
               ],
             ),
             const Divider(height: 20),
@@ -478,8 +473,9 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  willDeactivate ? LexColors.warning : LexColors.success,
+              backgroundColor: willDeactivate
+                  ? LexColors.warning
+                  : LexColors.success,
               foregroundColor: Colors.white,
             ),
             onPressed: () async {
@@ -585,12 +581,10 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) => FutureBuilder<Map<String, dynamic>>(
-        future:
-            ref.read(firmsNotifierProvider.notifier).getFirmStats(firm.id),
+        future: ref.read(firmsNotifierProvider.notifier).getFirmStats(firm.id),
         builder: (ctx, snapshot) {
           final stats = snapshot.data ?? {};
-          final isLoading =
-              snapshot.connectionState == ConnectionState.waiting;
+          final isLoading = snapshot.connectionState == ConnectionState.waiting;
 
           return Padding(
             padding: EdgeInsets.only(
@@ -653,10 +647,7 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                   // Statistics Section
                   const Text(
                     'Platform Statistics',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 10),
                   if (isLoading)
@@ -708,10 +699,7 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                   // Firm Details Summary
                   const Text(
                     'Firm Information',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 10),
                   LexCard(
@@ -851,10 +839,7 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
           child: Text(
             value,
             textAlign: TextAlign.end,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -940,7 +925,9 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                         setDialogState(() => isSubmitting = false);
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Failed to change admin: $e')),
+                            SnackBar(
+                              content: Text('Failed to change admin: $e'),
+                            ),
                           );
                         }
                       }
@@ -1101,7 +1088,9 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                           ),
                           textCapitalization: TextCapitalization.characters,
                           validator: (v) {
-                            if (v != null && v.trim().isNotEmpty && v.trim().length != 10) {
+                            if (v != null &&
+                                v.trim().isNotEmpty &&
+                                v.trim().length != 10) {
                               return 'PAN must be 10 characters';
                             }
                             return null;
@@ -1118,7 +1107,9 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                     ),
                     textCapitalization: TextCapitalization.characters,
                     validator: (v) {
-                      if (v != null && v.trim().isNotEmpty && v.trim().length != 15) {
+                      if (v != null &&
+                          v.trim().isNotEmpty &&
+                          v.trim().length != 15) {
                         return 'GST must be 15 characters';
                       }
                       return null;

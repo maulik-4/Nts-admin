@@ -482,7 +482,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         isInitial: authState.isInitial,
       );
     },
-
   );
 });
 
@@ -506,4 +505,3 @@ class RouterNotifier extends ChangeNotifier {
     });
   }
 }
-

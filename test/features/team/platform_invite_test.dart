@@ -82,52 +82,59 @@ void main() {
             "firm": null
           }
         ]''',
-        'POST /api/auth/invite/platform/': '{"status": "invited", "email": "new_super@platform.gov"}',
+        'POST /api/auth/invite/platform/':
+            '{"status": "invited", "email": "new_super@platform.gov"}',
       });
       dio.httpClientAdapter = mockAdapter;
       repo = TeamRepository(dio);
     });
 
-    test('TeamRepository.invitePlatformUser calls POST /api/auth/invite/platform/', () async {
-      await repo.invitePlatformUser(
-        email: 'new_super@platform.gov',
-        role: 'super_admin',
-      );
+    test(
+      'TeamRepository.invitePlatformUser calls POST /api/auth/invite/platform/',
+      () async {
+        await repo.invitePlatformUser(
+          email: 'new_super@platform.gov',
+          role: 'super_admin',
+        );
 
-      expect(
-        mockAdapter.requests.any(
-          (r) =>
-              r.path == '/api/auth/invite/platform/' &&
-              r.method == 'POST' &&
-              r.data is Map &&
-              (r.data as Map)['email'] == 'new_super@platform.gov' &&
-              (r.data as Map)['role'] == 'super_admin',
-        ),
-        isTrue,
-      );
-    });
+        expect(
+          mockAdapter.requests.any(
+            (r) =>
+                r.path == '/api/auth/invite/platform/' &&
+                r.method == 'POST' &&
+                r.data is Map &&
+                (r.data as Map)['email'] == 'new_super@platform.gov' &&
+                (r.data as Map)['role'] == 'super_admin',
+          ),
+          isTrue,
+        );
+      },
+    );
 
-    test('TeamNotifier.invitePlatformUser invokes repository and reloads list', () async {
-      final notifier = TeamNotifier(repo);
-      await notifier.loadTeamMembers();
+    test(
+      'TeamNotifier.invitePlatformUser invokes repository and reloads list',
+      () async {
+        final notifier = TeamNotifier(repo);
+        await notifier.loadTeamMembers();
 
-      expect(notifier.state.value?.length, 1);
+        expect(notifier.state.value?.length, 1);
 
-      await notifier.invitePlatformUser(
-        email: 'analyst@platform.gov',
-        role: 'super_admin',
-      );
+        await notifier.invitePlatformUser(
+          email: 'analyst@platform.gov',
+          role: 'super_admin',
+        );
 
-      expect(
-        mockAdapter.requests.any(
-          (r) =>
-              r.path == '/api/auth/invite/platform/' &&
-              r.method == 'POST' &&
-              r.data is Map &&
-              (r.data as Map)['email'] == 'analyst@platform.gov',
-        ),
-        isTrue,
-      );
-    });
+        expect(
+          mockAdapter.requests.any(
+            (r) =>
+                r.path == '/api/auth/invite/platform/' &&
+                r.method == 'POST' &&
+                r.data is Map &&
+                (r.data as Map)['email'] == 'analyst@platform.gov',
+          ),
+          isTrue,
+        );
+      },
+    );
   });
 }

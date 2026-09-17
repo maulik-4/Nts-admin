@@ -58,7 +58,6 @@ class AuthState {
   bool get isLawyer => user?.isLawyer ?? (role == UserRole.lawyer);
   bool get isStaff => user?.isStaff ?? (role == UserRole.staff);
 
-
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

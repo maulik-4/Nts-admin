@@ -19,7 +19,10 @@ class AuthResponse {
   UserRole get userRole => user.userRole;
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
-    final accessToken = (json['access'] ?? json['token'] ?? json['key'] ?? json['jwt'])?.toString() ?? '';
+    final accessToken =
+        (json['access'] ?? json['token'] ?? json['key'] ?? json['jwt'])
+            ?.toString() ??
+        '';
     final refreshToken = (json['refresh'] ?? '')?.toString() ?? '';
 
     final userObj = User.fromJson(
@@ -37,10 +40,6 @@ class AuthResponse {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'access': access,
-      'refresh': refresh,
-      'user': user.toJson(),
-    };
+    return {'access': access, 'refresh': refresh, 'user': user.toJson()};
   }
 }

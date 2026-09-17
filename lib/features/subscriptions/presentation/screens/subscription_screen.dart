@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/firm_theme_provider.dart';
 import '../../../../core/theme/lex_colors.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../auth/domain/models/role_capabilities.dart';
@@ -12,63 +13,19 @@ import '../providers/subscriptions_notifier.dart';
 class SubscriptionScreen extends ConsumerWidget {
   const SubscriptionScreen({super.key});
 
-  void _confirmPlanActivation(
-    BuildContext context,
-    WidgetRef ref,
-    SubscriptionPlan plan,
-  ) {
+  void _choosePlan(BuildContext context, WidgetRef ref, SubscriptionPlan plan) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Activate ${plan.name}'),
-        content: Text(
-          'Do you want to switch your firm to ${plan.name} at ₹${plan.monthlyPrice.toStringAsFixed(0)}/mo '
-          '(₹${plan.yearlyPrice.toStringAsFixed(0)}/yr)?\n\n'
-          'Includes up to ${plan.maxClients} clients, ${plan.maxTeamMembers} team members, and ${plan.storageLimitGb}GB storage.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              try {
-                await ref
-                    .read(subscriptionNotifierProvider.notifier)
-                    .activatePlan(plan.id);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Plan ${plan.name} activated successfully!',
-                      ),
-                      backgroundColor: LexColors.success,
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to activate plan: $e'),
-                      backgroundColor: LexColors.error,
-                    ),
-                  );
-                }
-              }
-            },
-            child: const Text('Confirm & Activate'),
-          ),
-        ],
-      ),
+      barrierDismissible: false,
+      builder: (ctx) => _BillingSelectionDialog(plan: plan),
     );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final subStateAsync = ref.watch(subscriptionNotifierProvider);
+    final userRole = ref.watch(currentUserRoleProvider);
+    final firmTheme = ref.watch(firmThemeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -117,7 +74,6 @@ class SubscriptionScreen extends ConsumerWidget {
           final activeSub = data.activeSubscription;
           final usage = data.clientUsage;
           final plans = data.availablePlans;
-          final userRole = ref.watch(currentUserRoleProvider);
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(20),
@@ -167,41 +123,100 @@ class SubscriptionScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 20),
                 ],
+
                 if (!userRole.isSuperAdmin) ...[
                   // Active Plan Card
-                  _buildActivePlanCard(context, activeSub, isDark),
-                  const SizedBox(height: 24),
+                  _buildActivePlanCard(
+                    context,
+                    activeSub,
+                    firmTheme.primaryColor,
+                    isDark,
+                  ),
+                  const SizedBox(height: 20),
 
                   // Real-time Quota & Usage Card
-                  _buildQuotaCard(context, usage, isDark),
+                  _buildQuotaCard(
+                    context,
+                    usage,
+                    firmTheme.accentColor,
+                    isDark,
+                  ),
                   const SizedBox(height: 28),
                 ],
 
-                // Available Plans Section
+                // Available Plans Header
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       'Available Subscription Plans',
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
                         color: isDark
                             ? LexColors.textPrimaryDark
-                            : LexColors.slatePrimary,
+                            : firmTheme.primaryColor,
                       ),
+                    ),
+                    Text(
+                      '${plans.length} tiers',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
 
                 if (plans.isEmpty)
-                  const Text('No additional plans available.')
-                else
-                  ...plans.map(
-                    (p) => Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
-                      child: _buildPlanCard(context, ref, p, activeSub, isDark),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(
+                      child: Text('No subscription plans currently available.'),
                     ),
+                  )
+                else
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide = constraints.maxWidth >= 720;
+                      if (isWide) {
+                        return Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          children: plans.map((p) {
+                            final cardWidth = (constraints.maxWidth - 16) / 2;
+                            return SizedBox(
+                              width: cardWidth,
+                              child: _buildPlanCard(
+                                context,
+                                ref,
+                                p,
+                                activeSub,
+                                firmTheme.primaryColor,
+                                firmTheme.accentColor,
+                                isDark,
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      }
+
+                      // Mobile 1-column layout
+                      return Column(
+                        children: plans.map((p) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 14),
+                            child: _buildPlanCard(
+                              context,
+                              ref,
+                              p,
+                              activeSub,
+                              firmTheme.primaryColor,
+                              firmTheme.accentColor,
+                              isDark,
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    },
                   ),
               ],
             ),
@@ -214,18 +229,23 @@ class SubscriptionScreen extends ConsumerWidget {
   Widget _buildActivePlanCard(
     BuildContext context,
     FirmSubscription? sub,
+    Color primaryColor,
     bool isDark,
   ) {
-    final hasActive = sub != null && sub.isActive && !sub.isExpired;
+    final currentSub = sub;
+    final hasActive =
+        currentSub != null &&
+        (currentSub.planId != null || currentSub.planName != null);
     final planTitle =
-        sub?.planName ?? (hasActive ? 'Standard Plan' : 'Trial / Free Tier');
+        currentSub?.planName ??
+        (hasActive ? 'Active Plan' : 'No Active Subscription');
 
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark
               ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
-              : [LexColors.slatePrimary, const Color(0xFF1E293B)],
+              : [primaryColor, const Color(0xFF1E293B)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -264,9 +284,7 @@ class SubscriptionScreen extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      hasActive
-                          ? Icons.check_circle
-                          : Icons.warning_amber_rounded,
+                      hasActive ? Icons.check_circle : Icons.info_outline,
                       size: 14,
                       color: hasActive
                           ? Colors.greenAccent
@@ -274,7 +292,9 @@ class SubscriptionScreen extends ConsumerWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      hasActive ? 'ACTIVE SUBSCRIPTION' : 'FREE / TRIAL',
+                      hasActive
+                          ? 'ACTIVE SUBSCRIPTION'
+                          : 'NO ACTIVE PLAN / FREE TIER',
                       style: TextStyle(
                         color: hasActive
                             ? Colors.greenAccent
@@ -310,9 +330,11 @@ class SubscriptionScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            sub?.endDate != null
-                ? 'Valid until: ${DateFormat.yMMMd().format(sub!.endDate!)}'
-                : 'Full legal practice workspace active',
+            hasActive
+                ? (currentSub.endDate != null
+                      ? 'Valid until: ${DateFormat.yMMMd().format(currentSub.endDate!)}'
+                      : 'Your firm workspace is active with full litigation access')
+                : 'Select a plan below to activate your law firm workspace and unlock resource quotas.',
             style: const TextStyle(color: Colors.white70, fontSize: 13),
           ),
         ],
@@ -323,6 +345,7 @@ class SubscriptionScreen extends ConsumerWidget {
   Widget _buildQuotaCard(
     BuildContext context,
     ClientUsage? usage,
+    Color accentColor,
     bool isDark,
   ) {
     final used = usage?.used ?? 0;
@@ -336,17 +359,37 @@ class SubscriptionScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(
-                Icons.pie_chart_outline,
-                size: 20,
-                color: isDark ? LexColors.accentGold : LexColors.accentBronze,
+              Row(
+                children: [
+                  Icon(Icons.pie_chart_outline, size: 20, color: accentColor),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Workspace Quota & Resource Usage',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              const Text(
-                'Firm Quota & Usage',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-              ),
+              if (usage?.planName != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    usage!.planName!,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: accentColor,
+                    ),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 16),
@@ -373,7 +416,7 @@ class SubscriptionScreen extends ConsumerWidget {
               minHeight: 8,
               backgroundColor: isDark ? Colors.white12 : Colors.black12,
               valueColor: AlwaysStoppedAnimation<Color>(
-                pct > 0.85 ? LexColors.error : LexColors.accentGold,
+                pct > 0.85 ? LexColors.error : accentColor,
               ),
             ),
           ),
@@ -393,7 +436,7 @@ class SubscriptionScreen extends ConsumerWidget {
                 ),
               ),
               const Text(
-                'Includes Document Cloud',
+                'Includes Cloud Storage',
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
             ],
@@ -408,9 +451,13 @@ class SubscriptionScreen extends ConsumerWidget {
     WidgetRef ref,
     SubscriptionPlan plan,
     FirmSubscription? activeSub,
+    Color primaryColor,
+    Color accentColor,
     bool isDark,
   ) {
-    final isCurrent = activeSub?.planId == plan.id;
+    final isCurrent =
+        activeSub?.planId == plan.id ||
+        (activeSub?.planName != null && activeSub?.planName == plan.name);
 
     return LexCard(
       padding: const EdgeInsets.all(20),
@@ -424,90 +471,98 @@ class SubscriptionScreen extends ConsumerWidget {
                 child: Text(
                   plan.name,
                   style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
               if (isCurrent)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
+                    horizontal: 10,
+                    vertical: 4,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.green.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
-                    'CURRENT PLAN',
+                    'ACTIVE PLAN',
                     style: TextStyle(
                       fontSize: 11,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                       color: Colors.green,
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
                 '₹${plan.monthlyPrice.toStringAsFixed(0)}',
-                style: const TextStyle(
-                  fontSize: 24,
+                style: TextStyle(
+                  fontSize: 26,
                   fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : primaryColor,
                 ),
               ),
               const Text(
-                '/month',
+                '/mo',
                 style: TextStyle(color: Colors.grey, fontSize: 13),
               ),
               const SizedBox(width: 12),
               Text(
-                '(₹${plan.yearlyPrice.toStringAsFixed(0)}/year)',
+                '₹${plan.yearlyPrice.toStringAsFixed(0)}/yr',
                 style: const TextStyle(color: Colors.grey, fontSize: 13),
               ),
             ],
           ),
+          const SizedBox(height: 14),
+          const Divider(),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 6,
-            children: [
-              _buildFeatureItem(
-                Icons.people_outline,
-                '${plan.maxClients} Clients',
-              ),
-              _buildFeatureItem(
-                Icons.group_outlined,
-                '${plan.maxTeamMembers} Team Members',
-              ),
-              _buildFeatureItem(
-                Icons.cloud_outlined,
-                '${plan.storageLimitGb} GB Storage',
-              ),
-            ],
+          _buildFeatureRow(
+            Icons.people_alt_outlined,
+            'Up to ${plan.maxClients} Active Clients',
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
+          _buildFeatureRow(
+            Icons.group_outlined,
+            'Up to ${plan.maxTeamMembers} Team Members',
+          ),
+          const SizedBox(height: 8),
+          _buildFeatureRow(
+            Icons.cloud_outlined,
+            '${plan.storageLimitGb} GB Secure Storage',
+          ),
+          if (plan.messageLimit != null) ...[
+            const SizedBox(height: 8),
+            _buildFeatureRow(
+              Icons.chat_outlined,
+              '${plan.messageLimit} Monthly Firm Messages',
+            ),
+          ],
+          const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: isCurrent
                   ? null
-                  : () => _confirmPlanActivation(context, ref, plan),
+                  : () => _choosePlan(context, ref, plan),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isCurrent
-                    ? Colors.grey
-                    : LexColors.slatePrimary,
+                backgroundColor: isCurrent ? Colors.grey : primaryColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: Text(
-                isCurrent ? 'Current Active Plan' : 'Select & Upgrade',
+                isCurrent ? 'Current Plan' : 'Choose Plan',
+                style: const TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -516,13 +571,289 @@ class SubscriptionScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildFeatureItem(IconData icon, String text) {
+  Widget _buildFeatureRow(IconData icon, String text) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 14, color: Colors.grey),
-        const SizedBox(width: 4),
-        Text(text, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Icon(icon, size: 16, color: Colors.grey[600]),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Interactive Billing Period Dialog with loading protection and confirmation
+class _BillingSelectionDialog extends ConsumerStatefulWidget {
+  final SubscriptionPlan plan;
+
+  const _BillingSelectionDialog({required this.plan});
+
+  @override
+  ConsumerState<_BillingSelectionDialog> createState() =>
+      _BillingSelectionDialogState();
+}
+
+class _BillingSelectionDialogState
+    extends ConsumerState<_BillingSelectionDialog> {
+  String _selectedBilling = 'monthly';
+  bool _isSubmitting = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final firmTheme = ref.watch(firmThemeProvider);
+    final monthlyTotalForYear = widget.plan.monthlyPrice * 12;
+    final yearlySavings = monthlyTotalForYear - widget.plan.yearlyPrice;
+    final hasSavings = yearlySavings > 0;
+
+    return AlertDialog(
+      title: Text('Subscribe to ${widget.plan.name}'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Select your preferred billing schedule for your firm:',
+              style: TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+
+            // Monthly Option
+            InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: _isSubmitting
+                  ? null
+                  : () => setState(() => _selectedBilling = 'monthly'),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: _selectedBilling == 'monthly'
+                        ? firmTheme.primaryColor
+                        : Colors.grey.withValues(alpha: 0.3),
+                    width: _selectedBilling == 'monthly' ? 2 : 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 20,
+                      height: 20,
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: _selectedBilling == 'monthly'
+                              ? firmTheme.primaryColor
+                              : Colors.grey,
+                          width: 2,
+                        ),
+                      ),
+                      child: _selectedBilling == 'monthly'
+                          ? Center(
+                              child: Container(
+                                width: 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: firmTheme.primaryColor,
+                                ),
+                              ),
+                            )
+                          : null,
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Monthly Billing',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            '₹${widget.plan.monthlyPrice.toStringAsFixed(0)} / month',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Yearly Option
+            InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: _isSubmitting
+                  ? null
+                  : () => setState(() => _selectedBilling = 'yearly'),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: _selectedBilling == 'yearly'
+                        ? firmTheme.primaryColor
+                        : Colors.grey.withValues(alpha: 0.3),
+                    width: _selectedBilling == 'yearly' ? 2 : 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 20,
+                      height: 20,
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: _selectedBilling == 'yearly'
+                              ? firmTheme.primaryColor
+                              : Colors.grey,
+                          width: 2,
+                        ),
+                      ),
+                      child: _selectedBilling == 'yearly'
+                          ? Center(
+                              child: Container(
+                                width: 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: firmTheme.primaryColor,
+                                ),
+                              ),
+                            )
+                          : null,
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Text(
+                                'Yearly Billing',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              if (hasSavings) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'Save ₹${yearlySavings.toStringAsFixed(0)}',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          Text(
+                            '₹${widget.plan.yearlyPrice.toStringAsFixed(0)} / year',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Includes up to ${widget.plan.maxClients} clients, ${widget.plan.maxTeamMembers} advocates/staff, and ${widget.plan.storageLimitGb}GB cloud storage.',
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: firmTheme.primaryColor,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: _isSubmitting
+              ? null
+              : () async {
+                  setState(() => _isSubmitting = true);
+                  try {
+                    await ref
+                        .read(subscriptionNotifierProvider.notifier)
+                        .activatePlan(
+                          widget.plan.id,
+                          billing: _selectedBilling,
+                        );
+
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Plan ${widget.plan.name} ($_selectedBilling) activated successfully!',
+                          ),
+                          backgroundColor: LexColors.success,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      setState(() => _isSubmitting = false);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Failed to activate plan: $e'),
+                          backgroundColor: LexColors.error,
+                        ),
+                      );
+                    }
+                  }
+                },
+          child: _isSubmitting
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text('Confirm & Activate'),
+        ),
       ],
     );
   }

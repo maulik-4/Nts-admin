@@ -64,7 +64,10 @@ class FirmsRepository {
 
   Future<bool> toggleActive(int firmId) async {
     try {
-      final response = await _dio.post('/api/firms/$firmId/toggle_active/', data: {});
+      final response = await _dio.post(
+        '/api/firms/$firmId/toggle_active/',
+        data: {},
+      );
       if (response.data is Map && response.data['is_active'] != null) {
         return response.data['is_active'] == true;
       }
@@ -77,7 +80,10 @@ class FirmsRepository {
 
   Future<bool> toggleBlock(int firmId) async {
     try {
-      final response = await _dio.post('/api/firms/$firmId/toggle_block/', data: {});
+      final response = await _dio.post(
+        '/api/firms/$firmId/toggle_block/',
+        data: {},
+      );
       if (response.data is Map && response.data['is_blocked'] != null) {
         return response.data['is_blocked'] == true;
       }
@@ -103,10 +109,7 @@ class FirmsRepository {
 
   Future<void> changeAdmin(int firmId, int userId) async {
     try {
-      await _dio.post(
-        '/api/auth/change-admin/',
-        data: {'user_id': userId},
-      );
+      await _dio.post('/api/auth/change-admin/', data: {'user_id': userId});
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
         // Fallback to documented sub-path in OpenAPI schema if direct path 404s

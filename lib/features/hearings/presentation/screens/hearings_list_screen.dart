@@ -35,8 +35,10 @@ class HearingsListScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab_schedule_hearing',
         onPressed: () => context.push('/app/hearings/create'),
-        backgroundColor: isDark ? LexColors.accentGold : LexColors.slatePrimary,
-        foregroundColor: isDark ? LexColors.slatePrimary : Colors.white,
+        backgroundColor: isDark
+            ? Theme.of(context).colorScheme.secondary
+            : Theme.of(context).colorScheme.primary,
+        foregroundColor: isDark ? Colors.black : Colors.white,
         icon: const Icon(Icons.event_available_outlined, size: 20),
         label: const Text(
           'Schedule Hearing',

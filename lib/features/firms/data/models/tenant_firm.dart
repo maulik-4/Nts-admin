@@ -96,7 +96,8 @@ class TenantFirm {
       adminUserId: json['admin_user_id'] is int
           ? json['admin_user_id'] as int
           : (json['admin'] is Map ? json['admin']['id'] as int? : null),
-      adminUsername: json['admin_username']?.toString() ??
+      adminUsername:
+          json['admin_username']?.toString() ??
           (json['admin'] is Map ? json['admin']['username']?.toString() : null),
     );
   }

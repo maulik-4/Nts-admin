@@ -121,9 +121,19 @@ class SubscriptionsRepository {
     }
   }
 
-  Future<void> subscribeToPlan(int planId) async {
+  Future<Map<String, dynamic>> subscribeToPlan(
+    int planId, {
+    String billing = 'monthly',
+  }) async {
     try {
-      await _dio.post('/api/plans/$planId/subscribe/');
+      final response = await _dio.post(
+        '/api/plans/$planId/subscribe/',
+        data: {'billing': billing},
+      );
+      if (response.data is Map<String, dynamic>) {
+        return response.data as Map<String, dynamic>;
+      }
+      return {'message': 'Plan activated'};
     } on DioException catch (e) {
       if (e.error is ApiException) throw e.error as ApiException;
       throw ApiException.fromResponse(e.response?.statusCode, e.response?.data);

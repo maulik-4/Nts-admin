@@ -18,7 +18,8 @@ class RoleGuard {
       return '/splash';
     }
 
-    final isAuthRoute = currentPath == '/login' ||
+    final isAuthRoute =
+        currentPath == '/login' ||
         currentPath == '/register' ||
         currentPath == '/accept-invite';
 
@@ -115,7 +116,6 @@ class RoleGuard {
       }
       return null;
     }
-
 
     // 4f. UNKNOWN ROLE
     // Protect all privileged platform and litigation routes

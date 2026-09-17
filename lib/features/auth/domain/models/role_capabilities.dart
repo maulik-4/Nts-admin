@@ -149,6 +149,7 @@ class RoleCapabilities {
       // General
       UserCapability.viewProfile,
       UserCapability.viewSupport,
+      UserCapability.viewBranding,
     },
     UserRole.staff: {
       UserCapability.viewDashboard,
@@ -164,6 +165,7 @@ class RoleCapabilities {
       // General
       UserCapability.viewProfile,
       UserCapability.viewSupport,
+      UserCapability.viewBranding,
     },
     UserRole.unknown: {UserCapability.viewProfile},
   };
@@ -207,7 +209,6 @@ final isAdminProvider = Provider<bool>((ref) {
   return ref.watch(currentUserRoleProvider).isAdmin;
 });
 
-
 final isLawyerProvider = Provider<bool>((ref) {
   return ref.watch(currentUserRoleProvider).isLawyer;
 });
@@ -229,3 +230,20 @@ final hasCapabilityProvider = Provider.family<bool, UserCapability>((
   return RoleCapabilities.hasCapability(role, capability);
 });
 
+/// Centralized permission helpers matching section 25 of specification
+bool canManageFirmSubscription(UserRole role) => role.isFirmAdmin;
+bool canEditFirmBranding(UserRole role) => role.isFirmAdmin;
+bool canViewFirmBranding(UserRole role) =>
+    role.isFirmAdmin || role.isLawyer || role.isStaff;
+
+final canManageFirmSubscriptionProvider = Provider<bool>((ref) {
+  return canManageFirmSubscription(ref.watch(currentUserRoleProvider));
+});
+
+final canEditFirmBrandingProvider = Provider<bool>((ref) {
+  return canEditFirmBranding(ref.watch(currentUserRoleProvider));
+});
+
+final canViewFirmBrandingProvider = Provider<bool>((ref) {
+  return canViewFirmBranding(ref.watch(currentUserRoleProvider));
+});

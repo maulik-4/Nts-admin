@@ -46,7 +46,6 @@ class UserProfile {
   /// Firm scoping matching User model
   int? get firm => firmId;
 
-
   String get displayName {
     if (name != null && name!.trim().isNotEmpty) return name!.trim();
     if (username.trim().isNotEmpty) return username.trim();
@@ -90,11 +89,12 @@ class UserProfile {
       extractedRole = 'super_admin';
     }
 
-    final parsedName = (userMap['name'] ??
-            userMap['full_name'] ??
-            json['name'] ??
-            json['full_name'])
-        ?.toString();
+    final parsedName =
+        (userMap['name'] ??
+                userMap['full_name'] ??
+                json['name'] ??
+                json['full_name'])
+            ?.toString();
 
     return UserProfile(
       id: userMap['id'] is int
@@ -159,4 +159,3 @@ class UserProfile {
     );
   }
 }
-

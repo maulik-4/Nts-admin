@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/firm_theme_provider.dart';
 import '../../../../core/theme/lex_colors.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
@@ -50,6 +51,14 @@ class DashboardScreen extends ConsumerWidget {
       ref.read(hearingsNotifierProvider.notifier).loadHearings(),
       ref.read(tasksNotifierProvider.notifier).loadTasks(),
     ];
+
+    if (!role.isSuperAdmin) {
+      futures.add(
+        ref
+            .read(firmThemeProvider.notifier)
+            .loadThemeForUser(ref.read(authNotifierProvider).user),
+      );
+    }
 
     if (!role.isStaff) {
       futures.add(ref.read(casesNotifierProvider.notifier).loadCases());
@@ -172,7 +181,7 @@ class DashboardScreen extends ConsumerWidget {
             radius: 24,
             backgroundColor: isDark
                 ? LexColors.surfaceDark
-                : LexColors.slatePrimary,
+                : Theme.of(context).colorScheme.primary,
             child: Icon(
               icon,
               color: isDark ? LexColors.accentGold : Colors.white,
@@ -191,7 +200,7 @@ class DashboardScreen extends ConsumerWidget {
                     fontWeight: FontWeight.w700,
                     color: isDark
                         ? LexColors.textPrimaryDark
-                        : LexColors.slatePrimary,
+                        : Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -228,7 +237,8 @@ class DashboardScreen extends ConsumerWidget {
     return firmsAsync.when(
       data: (firms) {
         final totalFirms = firms.length;
-        final activePlans = plansAsync.valueOrNull
+        final activePlans =
+            plansAsync.valueOrNull
                 ?.where((p) => p.isActive && !p.isDeleted)
                 .length ??
             0;
@@ -504,8 +514,12 @@ class DashboardScreen extends ConsumerWidget {
     required bool isDark,
   }) {
     const goldColor = Color(0xFFC9A84C);
-    final maxVal = [totalFirms, activePlans, platformTeam, 1]
-        .reduce((a, b) => a > b ? a : b);
+    final maxVal = [
+      totalFirms,
+      activePlans,
+      platformTeam,
+      1,
+    ].reduce((a, b) => a > b ? a : b);
 
     return LexCard(
       padding: const EdgeInsets.all(18),
@@ -1030,7 +1044,7 @@ class DashboardScreen extends ConsumerWidget {
                           fontWeight: FontWeight.w700,
                           color: isDark
                               ? LexColors.textPrimaryDark
-                              : LexColors.slatePrimary,
+                              : Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       TextButton(
@@ -1144,7 +1158,7 @@ class DashboardScreen extends ConsumerWidget {
                           fontWeight: FontWeight.w700,
                           color: isDark
                               ? LexColors.textPrimaryDark
-                              : LexColors.slatePrimary,
+                              : Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       TextButton(
@@ -1281,7 +1295,7 @@ class DashboardScreen extends ConsumerWidget {
                   fontWeight: FontWeight.w700,
                   color: isDark
                       ? LexColors.textPrimaryDark
-                      : LexColors.slatePrimary,
+                      : Theme.of(context).colorScheme.primary,
                 ),
               ),
               TextButton(
@@ -1402,7 +1416,7 @@ class DashboardScreen extends ConsumerWidget {
                   fontWeight: FontWeight.w700,
                   color: isDark
                       ? LexColors.textPrimaryDark
-                      : LexColors.slatePrimary,
+                      : Theme.of(context).colorScheme.primary,
                 ),
               ),
               TextButton(
@@ -1514,7 +1528,8 @@ class DashboardScreen extends ConsumerWidget {
     required String label,
     required VoidCallback onTap,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return InkWell(
       onTap: onTap,
@@ -1533,7 +1548,9 @@ class DashboardScreen extends ConsumerWidget {
             Icon(
               icon,
               size: 20,
-              color: isDark ? LexColors.accentGold : LexColors.slatePrimary,
+              color: isDark
+                  ? theme.colorScheme.secondary
+                  : theme.colorScheme.primary,
             ),
             const SizedBox(height: 6),
             Text(
@@ -1616,4 +1633,3 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 }
-

@@ -33,8 +33,10 @@ class ClientsListScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab_add_client',
         onPressed: () => context.push('/app/clients/create'),
-        backgroundColor: isDark ? LexColors.accentGold : LexColors.slatePrimary,
-        foregroundColor: isDark ? LexColors.slatePrimary : Colors.white,
+        backgroundColor: isDark
+            ? Theme.of(context).colorScheme.secondary
+            : Theme.of(context).colorScheme.primary,
+        foregroundColor: isDark ? Colors.black : Colors.white,
         icon: const Icon(Icons.person_add_outlined, size: 20),
         label: const Text(
           'Add Client',

@@ -1,7 +1,56 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/firm_theme_provider.dart';
 import '../../data/models/branding_models.dart';
+import '../../data/models/firm_profile.dart';
 import '../../data/repositories/branding_repository.dart';
+
+final firmProfileNotifierProvider =
+    StateNotifierProvider<FirmProfileNotifier, AsyncValue<FirmProfile>>((ref) {
+      final repository = ref.watch(brandingRepositoryProvider);
+      return FirmProfileNotifier(repository, ref);
+    });
+
+class FirmProfileNotifier extends StateNotifier<AsyncValue<FirmProfile>> {
+  final BrandingRepository _repository;
+  final Ref _ref;
+
+  FirmProfileNotifier(this._repository, this._ref)
+    : super(const AsyncValue.loading()) {
+    loadProfile();
+  }
+
+  Future<void> loadProfile() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => _repository.getFirmProfile());
+  }
+
+  Future<FirmProfile> saveBranding({
+    required String themeColor,
+    required String accentColor,
+    required String fontFamily,
+    required bool sidebarDark,
+    String? logoFilePath,
+    String? logoFileName,
+    List<int>? logoBytes,
+  }) async {
+    final updatedProfile = await _repository.updateFirmBranding(
+      themeColor: themeColor,
+      accentColor: accentColor,
+      fontFamily: fontFamily,
+      sidebarDark: sidebarDark,
+      logoFilePath: logoFilePath,
+      logoFileName: logoFileName,
+      logoBytes: logoBytes,
+    );
+    state = AsyncValue.data(updatedProfile);
+
+    // Immediately update global firm theme across the application
+    _ref.read(firmThemeProvider.notifier).updateFromProfile(updatedProfile);
+
+    return updatedProfile;
+  }
+}
 
 final brandingNotifierProvider =
     StateNotifierProvider<BrandingNotifier, AsyncValue<FirmWebsiteBranding>>((

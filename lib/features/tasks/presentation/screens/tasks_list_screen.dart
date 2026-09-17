@@ -49,8 +49,10 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/app/more/tasks/create'),
-        backgroundColor: isDark ? LexColors.accentGold : LexColors.slatePrimary,
-        foregroundColor: isDark ? LexColors.slatePrimary : Colors.white,
+        backgroundColor: isDark
+            ? Theme.of(context).colorScheme.secondary
+            : Theme.of(context).colorScheme.primary,
+        foregroundColor: isDark ? Colors.black : Colors.white,
         icon: const Icon(Icons.add_task),
         label: const Text(
           'New Task',
@@ -273,7 +275,9 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
       ),
       selected: isSelected,
       onSelected: (_) => onSelected(),
-      selectedColor: isDark ? LexColors.accentGold : LexColors.slatePrimary,
+      selectedColor: isDark
+          ? Theme.of(context).colorScheme.secondary
+          : Theme.of(context).colorScheme.primary,
       backgroundColor: isDark ? LexColors.surfaceDark : const Color(0xFFF1F5F9),
       side: BorderSide(
         color: isSelected

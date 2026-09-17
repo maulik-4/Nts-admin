@@ -57,7 +57,7 @@ class EmptyStateWidget extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 color: isDark
                     ? LexColors.textPrimaryDark
-                    : LexColors.slatePrimary,
+                    : Theme.of(context).colorScheme.primary,
               ),
             ),
             const SizedBox(height: 8),

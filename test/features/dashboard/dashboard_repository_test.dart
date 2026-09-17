@@ -138,10 +138,13 @@ class MockHearingsRepo implements HearingsRepository {
       throw UnimplementedError();
 
   @override
-  Future<List<Hearing>> getUpcomingHearings({int days = 7}) async => getHearings();
+  Future<List<Hearing>> getUpcomingHearings({int days = 7}) async =>
+      getHearings();
 
   @override
-  Future<Map<String, dynamic>> notifyClient(int id) async => {'message': 'Notified'};
+  Future<Map<String, dynamic>> notifyClient(int id) async => {
+    'message': 'Notified',
+  };
 
   @override
   Future<void> deleteHearing(int id) => throw UnimplementedError();

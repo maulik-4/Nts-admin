@@ -55,9 +55,9 @@ class _DocumentsListScreenState extends ConsumerState<DocumentsListScreen> {
         child: FloatingActionButton.extended(
           onPressed: () => context.push('/app/more/documents/upload'),
           backgroundColor: isDark
-              ? LexColors.accentGold
-              : LexColors.slatePrimary,
-          foregroundColor: isDark ? LexColors.slatePrimary : Colors.white,
+              ? Theme.of(context).colorScheme.secondary
+              : Theme.of(context).colorScheme.primary,
+          foregroundColor: isDark ? Colors.black : Colors.white,
           icon: const Icon(Icons.upload_file),
           label: const Text(
             'Upload File',
@@ -245,7 +245,9 @@ class _DocumentsListScreenState extends ConsumerState<DocumentsListScreen> {
       ),
       selected: isSelected,
       onSelected: (_) => onSelected(),
-      selectedColor: isDark ? LexColors.accentGold : LexColors.slatePrimary,
+      selectedColor: isDark
+          ? Theme.of(context).colorScheme.secondary
+          : Theme.of(context).colorScheme.primary,
       backgroundColor: isDark ? LexColors.surfaceDark : const Color(0xFFF1F5F9),
       side: BorderSide(
         color: isSelected

@@ -65,7 +65,6 @@ class AuthRepository {
     return profile;
   }
 
-
   Future<Map<String, dynamic>> register(RegisterRequest request) async {
     return await remoteDataSource.register(request);
   }
