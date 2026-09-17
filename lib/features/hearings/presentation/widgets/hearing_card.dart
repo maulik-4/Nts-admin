@@ -127,16 +127,20 @@ class HearingCard extends StatelessWidget {
                           : LexColors.textSecondaryLight,
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      hearing.startTime != null
-                          ? '${hearing.startTime}${hearing.endTime != null ? " - ${hearing.endTime}" : ""}'
-                          : 'Time not specified',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: isDark
-                            ? LexColors.textSecondaryDark
-                            : LexColors.textSecondaryLight,
+                    Expanded(
+                      child: Text(
+                        hearing.startTime != null
+                            ? '${hearing.startTime}${hearing.endTime != null ? " - ${hearing.endTime}" : ""}'
+                            : 'Time not specified',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: isDark
+                              ? LexColors.textSecondaryDark
+                              : LexColors.textSecondaryLight,
+                        ),
                       ),
                     ),
                   ],
@@ -170,10 +174,12 @@ class HearingCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(
+          Icon(
             Icons.chevron_right,
             size: 20,
-            color: LexColors.textSecondaryLight,
+            color: isDark
+                ? LexColors.textSecondaryDark
+                : LexColors.textSecondaryLight,
           ),
         ],
       ),

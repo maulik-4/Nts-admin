@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/errors/api_exception.dart';
 import '../../../../core/theme/lex_colors.dart';
 import '../../../../shared/widgets/lex_button.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
 import '../../../cases/presentation/providers/cases_notifier.dart';
+import '../../../dashboard/presentation/providers/dashboard_notifier.dart';
+import '../../../team/presentation/providers/team_notifier.dart';
 import '../../data/models/task_model.dart';
 import '../providers/tasks_notifier.dart';
 
@@ -28,6 +31,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   late final TextEditingController _descriptionController;
 
   int? _selectedCaseId;
+  int? _selectedAssigneeId;
   TaskPriority _selectedPriority = TaskPriority.medium;
   TaskStatus _selectedStatus = TaskStatus.pending;
   DateTime? _selectedDueDate;
@@ -59,6 +63,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
       _titleController.text = task.title;
       _descriptionController.text = task.description ?? '';
       _selectedCaseId = task.caseId;
+      _selectedAssigneeId = task.assignedTo?.id;
       _selectedPriority = task.priority;
       _selectedStatus = task.status;
       if (task.dueDate != null) {
@@ -105,6 +110,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
               ? _descriptionController.text.trim()
               : null,
           caseId: _selectedCaseId,
+          assignedToId: _selectedAssigneeId,
           priority: _selectedPriority,
           status: _selectedStatus,
           dueDate: dueDateStr,
@@ -121,12 +127,15 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
               ? _descriptionController.text.trim()
               : null,
           caseId: _selectedCaseId,
+          assignedToId: _selectedAssigneeId,
           priority: _selectedPriority,
           status: _selectedStatus,
           dueDate: dueDateStr,
         );
         await ref.read(tasksNotifierProvider.notifier).createTask(request);
       }
+
+      ref.invalidate(dashboardNotifierProvider);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -142,10 +151,14 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
         context.pop();
       }
     } catch (e) {
+      String errorMessage = e.toString();
+      if (e is ApiException) {
+        errorMessage = e.message;
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save task: $e'),
+            content: Text('Failed to save task: $errorMessage'),
             backgroundColor: LexColors.error,
           ),
         );
@@ -160,6 +173,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isEditing = widget.taskId != null;
     final casesAsync = ref.watch(casesNotifierProvider);
+    final teamAsync = ref.watch(filteredTeamMembersProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(isEditing ? 'Edit Task' : 'New Task')),
@@ -248,6 +262,47 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                               ],
                               onChanged: (val) {
                                 setState(() => _selectedCaseId = val);
+                              },
+                            );
+                          },
+                          loading: () => const LinearProgressIndicator(),
+                          error: (err, stack) => const SizedBox.shrink(),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Assignee Dropdown (Firm Members)
+                        teamAsync.when(
+                          data: (members) {
+                            return DropdownButtonFormField<int?>(
+                              initialValue: _selectedAssigneeId,
+                              decoration: InputDecoration(
+                                labelText:
+                                    'Assigned Advocate / Staff (Optional)',
+                                filled: true,
+                                fillColor: isDark
+                                    ? LexColors.surfaceDark
+                                    : LexColors.surfaceLight,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              items: [
+                                const DropdownMenuItem<int?>(
+                                  value: null,
+                                  child: Text('Unassigned (General Firm Task)'),
+                                ),
+                                ...members.map((m) {
+                                  return DropdownMenuItem<int?>(
+                                    value: m.id,
+                                    child: Text(
+                                      '${m.username} (${m.displayRole})',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  );
+                                }),
+                              ],
+                              onChanged: (val) {
+                                setState(() => _selectedAssigneeId = val);
                               },
                             );
                           },

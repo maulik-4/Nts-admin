@@ -78,11 +78,44 @@ class SecureTokenStorage {
     return token != null && token.isNotEmpty;
   }
 
+  Future<void> saveCredentials({
+    required String username,
+    required String password,
+  }) async {
+    await _storage.write(key: StorageKeys.authUsername, value: username);
+    await _storage.write(key: StorageKeys.authPassword, value: password);
+  }
+
+  Future<Map<String, String>?> getCredentials() async {
+    try {
+      final username = await _storage.read(key: StorageKeys.authUsername);
+      final password = await _storage.read(key: StorageKeys.authPassword);
+      if (username != null &&
+          username.isNotEmpty &&
+          password != null &&
+          password.isNotEmpty) {
+        return {'username': username, 'password': password};
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> clearCredentials() async {
+    try {
+      await _storage.delete(key: StorageKeys.authUsername);
+      await _storage.delete(key: StorageKeys.authPassword);
+    } catch (_) {}
+  }
+
   Future<void> clearTokens() async {
     try {
       await _storage.delete(key: StorageKeys.accessToken);
       await _storage.delete(key: StorageKeys.refreshToken);
       await _storage.delete(key: StorageKeys.userProfile);
+      await _storage.delete(key: StorageKeys.authUsername);
+      await _storage.delete(key: StorageKeys.authPassword);
     } catch (_) {
       // In case of any deletion error, wipe everything
       await _storage.deleteAll();
@@ -90,4 +123,16 @@ class SecureTokenStorage {
   }
 
   Future<void> clearAll() => clearTokens();
+
+  Future<void> saveThemeMode(String mode) async {
+    await _storage.write(key: StorageKeys.themeMode, value: mode);
+  }
+
+  Future<String?> getThemeMode() async {
+    try {
+      return await _storage.read(key: StorageKeys.themeMode);
+    } catch (_) {
+      return null;
+    }
+  }
 }

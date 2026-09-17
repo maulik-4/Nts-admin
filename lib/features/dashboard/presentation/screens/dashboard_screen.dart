@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/firm_theme_provider.dart';
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../shared/widgets/app_brand_logo.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/lex_card.dart';
@@ -26,6 +27,7 @@ import '../../../team/presentation/providers/team_notifier.dart';
 import '../../data/models/dashboard_models.dart';
 import '../providers/dashboard_notifier.dart';
 import '../widgets/metric_card.dart';
+import '../widgets/responsive_metric_grid.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -82,22 +84,35 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              userRole.isSuperAdmin
-                  ? 'Platform Overview'
-                  : (user?.firmName ?? 'NTS Legal Pro'),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-            Text(
-              todayFormatted,
-              style: TextStyle(
-                fontSize: 11,
-                color: isDark
-                    ? LexColors.textSecondaryDark
-                    : LexColors.textSecondaryLight,
+            const AppBrandLogo(size: 34),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    userRole.isSuperAdmin
+                        ? 'Platform Overview'
+                        : (user?.firmName ?? 'Vidhanta'),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    todayFormatted,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark
+                          ? LexColors.textSecondaryDark
+                          : LexColors.textSecondaryLight,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
           ],
@@ -302,87 +317,53 @@ class DashboardScreen extends ConsumerWidget {
             const SizedBox(height: 16),
 
             // Platform Metrics (Total / Tenant Firms, Active Firms, Blocked / Inactive, Active Plans, Team)
-            Row(
+            ResponsiveMetricGrid(
               children: [
-                Expanded(
-                  child: MetricCard(
-                    title: 'Tenant Firms',
-                    value: '$totalFirms',
-                    subtitle: 'Registered law firms',
-                    icon: Icons.apartment_outlined,
-                    iconColor: superAdminGold,
-                    iconBgColor: superAdminGold.withAlpha(40),
-                    onTap: () => context.push('/app/firms'),
-                  ),
+                MetricCard(
+                  title: 'Tenant Firms',
+                  value: '$totalFirms',
+                  subtitle: 'Registered law firms',
+                  icon: Icons.apartment_outlined,
+                  iconColor: superAdminGold,
+                  iconBgColor: superAdminGold.withAlpha(40),
+                  onTap: () => context.push('/app/firms'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: MetricCard(
-                    title: 'Active Firms',
-                    value:
-                        '${firms.where((f) => f.isActive && !f.isBlocked).length}',
-                    subtitle: 'Unblocked & active',
-                    icon: Icons.verified_outlined,
-                    iconColor: LexColors.success,
-                    iconBgColor: LexColors.successLight,
-                    onTap: () => context.push('/app/firms'),
-                  ),
+                MetricCard(
+                  title: 'Active Firms',
+                  value:
+                      '${firms.where((f) => f.isActive && !f.isBlocked).length}',
+                  subtitle: 'Unblocked & active',
+                  icon: Icons.verified_outlined,
+                  iconColor: LexColors.success,
+                  iconBgColor: LexColors.successLight,
+                  onTap: () => context.push('/app/firms'),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: MetricCard(
-                    title: 'Blocked / Inactive',
-                    value: '${firms.where((f) => f.isBlocked).length}',
-                    subtitle: 'Access restricted',
-                    icon: Icons.block_outlined,
-                    iconColor: LexColors.error,
-                    iconBgColor: LexColors.errorLight,
-                    onTap: () => context.push('/app/firms'),
-                  ),
+                MetricCard(
+                  title: 'Blocked / Inactive',
+                  value: '${firms.where((f) => f.isBlocked).length}',
+                  subtitle: 'Access restricted',
+                  icon: Icons.block_outlined,
+                  iconColor: LexColors.error,
+                  iconBgColor: LexColors.errorLight,
+                  onTap: () => context.push('/app/firms'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: MetricCard(
-                    title: 'Active Plans',
-                    value: '$activePlans',
-                    subtitle: 'Configured tiers',
-                    icon: Icons.card_membership_outlined,
-                    iconColor: const Color(0xFF3B82F6),
-                    iconBgColor: const Color(0xFF3B82F6).withAlpha(40),
-                    onTap: () => context.push('/app/plans'),
-                  ),
+                MetricCard(
+                  title: 'Active Plans',
+                  value: '$activePlans',
+                  subtitle: 'Configured tiers',
+                  icon: Icons.card_membership_outlined,
+                  iconColor: const Color(0xFF3B82F6),
+                  iconBgColor: const Color(0xFF3B82F6).withAlpha(40),
+                  onTap: () => context.push('/app/plans'),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: MetricCard(
-                    title: 'Platform Team',
-                    value: '$totalTeam',
-                    subtitle: 'Global users & team',
-                    icon: Icons.badge_outlined,
-                    iconColor: LexColors.slatePrimary,
-                    iconBgColor: LexColors.accentLight.withAlpha(80),
-                    onTap: () => context.push('/app/platform-team'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: MetricCard(
-                    title: 'Platform Status',
-                    value: '100%',
-                    subtitle: 'Cloud API operational',
-                    icon: Icons.dns_outlined,
-                    iconColor: const Color(0xFF3B82F6),
-                    iconBgColor: const Color(0xFFEFF6FF),
-                    onTap: () {},
-                  ),
+                MetricCard(
+                  title: 'Platform Team',
+                  value: '$totalTeam',
+                  subtitle: 'Global users & team',
+                  icon: Icons.badge_outlined,
+                  iconColor: LexColors.slatePrimary,
+                  iconBgColor: LexColors.accentLight.withAlpha(80),
+                  onTap: () => context.push('/app/platform-team'),
                 ),
               ],
             ),
@@ -530,14 +511,18 @@ class DashboardScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.bar_chart_rounded, color: goldColor, size: 20),
               const SizedBox(width: 8),
-              Text(
-                'Platform Overview Statistics',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? LexColors.textPrimaryDark
-                      : LexColors.slatePrimary,
+              Expanded(
+                child: Text(
+                  'Platform Overview Statistics',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? LexColors.textPrimaryDark
+                        : LexColors.slatePrimary,
+                  ),
                 ),
               ),
             ],
@@ -584,16 +569,21 @@ class DashboardScreen extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isDark
-                    ? LexColors.textPrimaryDark
-                    : LexColors.slatePrimary,
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isDark
+                      ? LexColors.textPrimaryDark
+                      : LexColors.slatePrimary,
+                ),
               ),
             ),
+            const SizedBox(width: 8),
             Text(
               '$count',
               style: TextStyle(
@@ -651,114 +641,95 @@ class DashboardScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Firm Admin Quick Actions (Full Suite including Payment and Task)
-            Row(
-              children: [
-                Expanded(
-                  child: _buildQuickActionButton(
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildQuickActionButton(
                     context,
+                    minWidth: 78,
                     icon: Icons.add_circle_outline,
                     label: 'New Case',
                     onTap: () => context.push('/app/cases/create'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildQuickActionButton(
+                  const SizedBox(width: 8),
+                  _buildQuickActionButton(
                     context,
+                    minWidth: 78,
                     icon: Icons.person_add_outlined,
                     label: 'New Client',
                     onTap: () => context.push('/app/clients/create'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildQuickActionButton(
+                  const SizedBox(width: 8),
+                  _buildQuickActionButton(
                     context,
+                    minWidth: 78,
                     icon: Icons.event_available_outlined,
                     label: 'Hearing',
                     onTap: () => context.push('/app/hearings/create'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildQuickActionButton(
+                  const SizedBox(width: 8),
+                  _buildQuickActionButton(
                     context,
+                    minWidth: 78,
                     icon: Icons.payments_outlined,
                     label: 'Payment',
                     onTap: () => context.push('/app/more/payments/create'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildQuickActionButton(
+                  const SizedBox(width: 8),
+                  _buildQuickActionButton(
                     context,
+                    minWidth: 78,
                     icon: Icons.task_alt_outlined,
                     label: 'New Task',
                     onTap: () => context.push('/app/tasks/create'),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 20),
 
-            // Metrics Row 1: Clients & Cases
-            Row(
+            // Metrics: Clients, Cases, Hearings & Collections
+            ResponsiveMetricGrid(
               children: [
-                Expanded(
-                  child: MetricCard(
-                    title: 'Active Clients',
-                    value: '${data.totalClients}',
-                    subtitle: data.clientUsage?.unlimited == true
-                        ? 'Unlimited quota'
-                        : '${data.clientUsage?.used ?? data.totalClients} registered',
-                    icon: Icons.people_outline,
-                    iconColor: LexColors.accentWarm,
-                    iconBgColor: LexColors.accentLight.withAlpha(120),
-                    onTap: () => context.push('/app/clients'),
-                  ),
+                MetricCard(
+                  title: 'Active Clients',
+                  value: '${data.totalClients}',
+                  subtitle: data.clientUsage?.unlimited == true
+                      ? 'Unlimited quota'
+                      : '${data.clientUsage?.used ?? data.totalClients} registered',
+                  icon: Icons.people_outline,
+                  iconColor: LexColors.accentWarm,
+                  iconBgColor: LexColors.accentLight.withAlpha(120),
+                  onTap: () => context.push('/app/clients'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: MetricCard(
-                    title: 'Total Cases',
-                    value: '${data.totalCases}',
-                    subtitle:
-                        '${data.openCases} open • ${data.closedCases} closed',
-                    icon: Icons.folder_outlined,
-                    iconColor: LexColors.success,
-                    iconBgColor: LexColors.successLight,
-                    onTap: () => context.push('/app/cases'),
-                  ),
+                MetricCard(
+                  title: 'Total Cases',
+                  value: '${data.totalCases}',
+                  subtitle:
+                      '${data.openCases} open • ${data.closedCases} closed',
+                  icon: Icons.folder_outlined,
+                  iconColor: LexColors.success,
+                  iconBgColor: LexColors.successLight,
+                  onTap: () => context.push('/app/cases'),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Metrics Row 2: Hearings & Collections
-            Row(
-              children: [
-                Expanded(
-                  child: MetricCard(
-                    title: 'Hearings',
-                    value: '${data.upcomingHearingsCount}',
-                    subtitle: 'Courtroom calendar',
-                    icon: Icons.gavel_outlined,
-                    iconColor: LexColors.accentBronze,
-                    iconBgColor: LexColors.accentLight.withAlpha(120),
-                    onTap: () => context.push('/app/hearings'),
-                  ),
+                MetricCard(
+                  title: 'Hearings',
+                  value: '${data.upcomingHearingsCount}',
+                  subtitle: 'Courtroom calendar',
+                  icon: Icons.gavel_outlined,
+                  iconColor: LexColors.accentBronze,
+                  iconBgColor: LexColors.accentLight.withAlpha(120),
+                  onTap: () => context.push('/app/hearings'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: MetricCard(
-                    title: 'Firm Collections',
-                    value: formattedCollections,
-                    subtitle: '$paymentsCount billing receipts',
-                    icon: Icons.payments_outlined,
-                    iconColor: const Color(0xFF10B981),
-                    iconBgColor: const Color(0xFFECFDF5),
-                    onTap: () => context.push('/app/more/payments'),
-                  ),
+                MetricCard(
+                  title: 'Firm Collections',
+                  value: formattedCollections,
+                  subtitle: '$paymentsCount billing receipts',
+                  icon: Icons.payments_outlined,
+                  iconColor: const Color(0xFF10B981),
+                  iconBgColor: const Color(0xFFECFDF5),
+                  onTap: () => context.push('/app/more/payments'),
                 ),
               ],
             ),
@@ -801,100 +772,84 @@ class DashboardScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Lawyer Quick Actions (Cases, Clients, Hearings, Tasks — No Payments)
-            Row(
-              children: [
-                Expanded(
-                  child: _buildQuickActionButton(
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildQuickActionButton(
                     context,
+                    minWidth: 78,
                     icon: Icons.add_circle_outline,
                     label: 'New Case',
                     onTap: () => context.push('/app/cases/create'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildQuickActionButton(
+                  const SizedBox(width: 8),
+                  _buildQuickActionButton(
                     context,
+                    minWidth: 78,
                     icon: Icons.person_add_outlined,
                     label: 'New Client',
                     onTap: () => context.push('/app/clients/create'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildQuickActionButton(
+                  const SizedBox(width: 8),
+                  _buildQuickActionButton(
                     context,
+                    minWidth: 78,
                     icon: Icons.event_available_outlined,
                     label: 'Hearing',
                     onTap: () => context.push('/app/hearings/create'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _buildQuickActionButton(
+                  const SizedBox(width: 8),
+                  _buildQuickActionButton(
                     context,
+                    minWidth: 78,
                     icon: Icons.task_alt_outlined,
                     label: 'New Task',
                     onTap: () => context.push('/app/tasks/create'),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 20),
 
             // Lawyer Metrics: Active Cases, Upcoming Hearings, Pending Tasks, Documents
-            Row(
+            ResponsiveMetricGrid(
               children: [
-                Expanded(
-                  child: MetricCard(
-                    title: 'Active Cases',
-                    value: '${data.openCases}',
-                    subtitle: '${data.totalCases} total portfolio',
-                    icon: Icons.folder_outlined,
-                    iconColor: LexColors.success,
-                    iconBgColor: LexColors.successLight,
-                    onTap: () => context.push('/app/cases'),
-                  ),
+                MetricCard(
+                  title: 'Active Cases',
+                  value: '${data.openCases}',
+                  subtitle: '${data.totalCases} total portfolio',
+                  icon: Icons.folder_outlined,
+                  iconColor: LexColors.success,
+                  iconBgColor: LexColors.successLight,
+                  onTap: () => context.push('/app/cases'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: MetricCard(
-                    title: 'Court Hearings',
-                    value: '${data.upcomingHearingsCount}',
-                    subtitle: 'Scheduled appearances',
-                    icon: Icons.gavel_outlined,
-                    iconColor: LexColors.accentBronze,
-                    iconBgColor: LexColors.accentLight.withAlpha(120),
-                    onTap: () => context.push('/app/hearings'),
-                  ),
+                MetricCard(
+                  title: 'Court Hearings',
+                  value: '${data.upcomingHearingsCount}',
+                  subtitle: 'Scheduled appearances',
+                  icon: Icons.gavel_outlined,
+                  iconColor: LexColors.accentBronze,
+                  iconBgColor: LexColors.accentLight.withAlpha(120),
+                  onTap: () => context.push('/app/hearings'),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: MetricCard(
-                    title: 'Assigned Tasks',
-                    value: '${data.taskStats?.pending ?? 0}',
-                    subtitle: '${data.taskStats?.completed ?? 0} finished',
-                    icon: Icons.check_circle_outline,
-                    iconColor: const Color(0xFF3B82F6),
-                    iconBgColor: const Color(0xFFEFF6FF),
-                    onTap: () => context.push('/app/tasks'),
-                  ),
+                MetricCard(
+                  title: 'Assigned Tasks',
+                  value: '${data.taskStats?.pending ?? 0}',
+                  subtitle: '${data.taskStats?.completed ?? 0} finished',
+                  icon: Icons.check_circle_outline,
+                  iconColor: const Color(0xFF3B82F6),
+                  iconBgColor: const Color(0xFFEFF6FF),
+                  onTap: () => context.push('/app/tasks'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: MetricCard(
-                    title: 'Documents',
-                    value: '$documentsCount',
-                    subtitle: 'Petitions & files',
-                    icon: Icons.folder_shared_outlined,
-                    iconColor: LexColors.accentWarm,
-                    iconBgColor: LexColors.accentLight.withAlpha(120),
-                    onTap: () => context.push('/app/more/documents'),
-                  ),
+                MetricCard(
+                  title: 'Documents',
+                  value: '$documentsCount',
+                  subtitle: 'Petitions & files',
+                  icon: Icons.folder_shared_outlined,
+                  iconColor: LexColors.accentWarm,
+                  iconBgColor: LexColors.accentLight.withAlpha(120),
+                  onTap: () => context.push('/app/more/documents'),
                 ),
               ],
             ),
@@ -971,58 +926,43 @@ class DashboardScreen extends ConsumerWidget {
             const SizedBox(height: 20),
 
             // Staff Operational Metrics: Pending Tasks, Completed Tasks, Hearings, Clients
-            Row(
+            ResponsiveMetricGrid(
               children: [
-                Expanded(
-                  child: MetricCard(
-                    title: 'Pending Tasks',
-                    value: '${pendingTasks.length}',
-                    subtitle: 'Require action',
-                    icon: Icons.assignment_late_outlined,
-                    iconColor: LexColors.warning,
-                    iconBgColor: LexColors.warningLight,
-                    onTap: () => context.push('/app/tasks'),
-                  ),
+                MetricCard(
+                  title: 'Pending Tasks',
+                  value: '${pendingTasks.length}',
+                  subtitle: 'Require action',
+                  icon: Icons.assignment_late_outlined,
+                  iconColor: LexColors.warning,
+                  iconBgColor: LexColors.warningLight,
+                  onTap: () => context.push('/app/tasks'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: MetricCard(
-                    title: 'Completed',
-                    value: '${completedTasks.length}',
-                    subtitle: 'Successfully closed',
-                    icon: Icons.check_circle_outline,
-                    iconColor: LexColors.success,
-                    iconBgColor: LexColors.successLight,
-                    onTap: () => context.push('/app/tasks'),
-                  ),
+                MetricCard(
+                  title: 'Completed',
+                  value: '${completedTasks.length}',
+                  subtitle: 'Successfully closed',
+                  icon: Icons.check_circle_outline,
+                  iconColor: LexColors.success,
+                  iconBgColor: LexColors.successLight,
+                  onTap: () => context.push('/app/tasks'),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: MetricCard(
-                    title: 'Court Hearings',
-                    value: '${upcomingHearings.length}',
-                    subtitle: 'Lawyer appearances',
-                    icon: Icons.gavel_outlined,
-                    iconColor: LexColors.accentBronze,
-                    iconBgColor: LexColors.accentLight.withAlpha(120),
-                    onTap: () => context.push('/app/hearings'),
-                  ),
+                MetricCard(
+                  title: 'Court Hearings',
+                  value: '${upcomingHearings.length}',
+                  subtitle: 'Lawyer appearances',
+                  icon: Icons.gavel_outlined,
+                  iconColor: LexColors.accentBronze,
+                  iconBgColor: LexColors.accentLight.withAlpha(120),
+                  onTap: () => context.push('/app/hearings'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: MetricCard(
-                    title: 'Clients',
-                    value: '$clientsCount',
-                    subtitle: 'Active roster',
-                    icon: Icons.people_outline,
-                    iconColor: LexColors.accentWarm,
-                    iconBgColor: LexColors.accentLight.withAlpha(120),
-                    onTap: () => context.push('/app/clients'),
-                  ),
+                MetricCard(
+                  title: 'Clients',
+                  value: '$clientsCount',
+                  subtitle: 'Active roster',
+                  icon: Icons.people_outline,
+                  iconColor: LexColors.accentWarm,
+                  iconBgColor: LexColors.accentLight.withAlpha(120),
+                  onTap: () => context.push('/app/clients'),
                 ),
               ],
             ),
@@ -1527,6 +1467,7 @@ class DashboardScreen extends ConsumerWidget {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    double? minWidth,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -1535,7 +1476,10 @@ class DashboardScreen extends ConsumerWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        constraints: minWidth != null
+            ? BoxConstraints(minWidth: minWidth)
+            : null,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
         decoration: BoxDecoration(
           color: isDark ? LexColors.surfaceDark : LexColors.surfaceLight,
           borderRadius: BorderRadius.circular(10),
@@ -1544,6 +1488,8 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
@@ -1555,6 +1501,9 @@ class DashboardScreen extends ConsumerWidget {
             const SizedBox(height: 6),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,

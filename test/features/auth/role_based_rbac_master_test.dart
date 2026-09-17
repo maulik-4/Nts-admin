@@ -99,11 +99,12 @@ void main() {
       final lawyerMenu = RoleMenuConfig.getMenuForRole(UserRole.lawyer);
       final titles = lawyerMenu.map((m) => m.title).toList();
       expect(titles, contains('Dashboard'));
-      expect(titles, contains('My Cases'));
-      expect(titles, contains('My Clients'));
+      expect(titles, contains('Cases'));
+      expect(titles, contains('Tasks'));
       expect(titles, contains('Hearings'));
-      expect(titles, contains('Workspace'));
+      expect(titles, contains('More'));
       expect(titles, isNot(contains('Tenant Firms')));
+      expect(titles, isNot(contains('Firms')));
       expect(titles, isNot(contains('Platform Team')));
 
       // 5. RoleGuard protection for Lawyer

@@ -91,10 +91,12 @@ class DocumentCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const Icon(
+          Icon(
             Icons.chevron_right,
             size: 20,
-            color: LexColors.textSecondaryLight,
+            color: isDark
+                ? LexColors.textSecondaryDark
+                : LexColors.textSecondaryLight,
           ),
         ],
       ),
@@ -102,26 +104,33 @@ class DocumentCard extends StatelessWidget {
   }
 
   Widget _buildFileIcon(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     IconData icon;
     Color iconColor;
     Color bgColor;
 
     if (document.isPdf) {
       icon = Icons.picture_as_pdf;
-      iconColor = const Color(0xFFDC2626);
-      bgColor = const Color(0xFFFEF2F2);
+      iconColor = isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626);
+      bgColor = isDark
+          ? iconColor.withValues(alpha: 0.18)
+          : const Color(0xFFFEF2F2);
     } else if (document.isImage) {
       icon = Icons.image_outlined;
-      iconColor = const Color(0xFF059669);
-      bgColor = const Color(0xFFECFDF5);
+      iconColor = isDark ? const Color(0xFF34D399) : const Color(0xFF059669);
+      bgColor = isDark
+          ? iconColor.withValues(alpha: 0.18)
+          : const Color(0xFFECFDF5);
     } else if (document.isDoc) {
       icon = Icons.description_outlined;
-      iconColor = const Color(0xFF2563EB);
-      bgColor = const Color(0xFFEFF6FF);
+      iconColor = isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB);
+      bgColor = isDark
+          ? iconColor.withValues(alpha: 0.18)
+          : const Color(0xFFEFF6FF);
     } else {
       icon = Icons.insert_drive_file_outlined;
-      iconColor = LexColors.slateLight;
-      bgColor = const Color(0xFFF1F5F9);
+      iconColor = isDark ? LexColors.textSecondaryDark : LexColors.slateLight;
+      bgColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9);
     }
 
     return Container(

@@ -360,10 +360,14 @@ class CaseDetailScreen extends ConsumerWidget {
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: () => context.push(
-                                '/app/more/tasks/create?caseId=${caseItem.id}',
+                                '/app/tasks/create?caseId=${caseItem.id}',
                               ),
                               icon: const Icon(Icons.add_task, size: 16),
-                              label: const Text('Add Task'),
+                              label: const Text(
+                                'Add Task',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -373,7 +377,11 @@ class CaseDetailScreen extends ConsumerWidget {
                                 '/app/more/documents/upload?caseId=${caseItem.id}',
                               ),
                               icon: const Icon(Icons.upload_file, size: 16),
-                              label: const Text('Upload Doc'),
+                              label: const Text(
+                                'Upload Doc',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
                         ],

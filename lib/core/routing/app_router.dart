@@ -347,7 +347,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   // Backwards compatibility redirects for /app/more/tasks/*
                   GoRoute(
                     path: 'tasks',
-                    redirect: (context, state) => '/app/tasks',
+                    redirect: (context, state) {
+                      final path = state.uri.path;
+                      if (path == '/app/more/tasks' ||
+                          path == '/app/more/tasks/') {
+                        return '/app/tasks';
+                      }
+                      if (path.startsWith('/app/more/tasks/create')) {
+                        final caseId = state.uri.queryParameters['caseId'];
+                        return caseId != null
+                            ? '/app/tasks/create?caseId=$caseId'
+                            : '/app/tasks/create';
+                      }
+                      return null;
+                    },
                     routes: [
                       GoRoute(
                         path: 'create',

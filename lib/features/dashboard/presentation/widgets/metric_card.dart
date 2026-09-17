@@ -29,25 +29,30 @@ class MetricCard extends StatelessWidget {
 
     return LexCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                  color: isDark
-                      ? LexColors.textSecondaryDark
-                      : LexColors.textSecondaryLight,
+              Expanded(
+                child: Text(
+                  title.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                    color: isDark
+                        ? LexColors.textSecondaryDark
+                        : LexColors.textSecondaryLight,
+                  ),
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
@@ -68,11 +73,13 @@ class MetricCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 26,
+              fontSize: 24,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,
               color: isDark
@@ -81,7 +88,7 @@ class MetricCard extends StatelessWidget {
             ),
           ),
           if (subtitle != null) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             Text(
               subtitle!,
               maxLines: 1,

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/api_exception.dart';
@@ -27,6 +28,7 @@ class AuthRepository {
     required String username,
     required String password,
   }) async {
+    debugPrint('[AUTH] Initiating user login for: $username');
     final tokenResponse = await remoteDataSource.login(
       LoginRequest(username: username, password: password),
     );
@@ -37,11 +39,12 @@ class AuthRepository {
       );
     }
 
-    // Save tokens securely
+    // Save tokens and credentials securely
     await tokenStorage.saveTokens(
       accessToken: tokenResponse.accessToken,
       refreshToken: tokenResponse.refreshToken,
     );
+    await tokenStorage.saveCredentials(username: username, password: password);
 
     // Build user profile directly from the login response (source of truth)
     UserProfile profile;
@@ -61,7 +64,21 @@ class AuthRepository {
       }
     }
 
+    // If user belongs to a firm and firmName is empty, fetch firm details
+    if (profile.firm != null &&
+        (profile.firmName == null || profile.firmName!.isEmpty)) {
+      try {
+        final firmData = await remoteDataSource.getFirmProfile();
+        if (firmData != null && firmData['name'] != null) {
+          profile = profile.copyWith(firmName: firmData['name'].toString());
+        }
+      } catch (_) {}
+    }
+
     await tokenStorage.saveUserProfile(profile.toJsonString());
+    debugPrint(
+      '[AUTH] User successfully logged in: role=${profile.role}, firm=${profile.firmName ?? profile.firm}',
+    );
     return profile;
   }
 
@@ -90,10 +107,11 @@ class AuthRepository {
   Future<UserProfile?> restoreSession() async {
     final hasToken = await tokenStorage.hasAccessToken();
     if (!hasToken) {
+      debugPrint('[AUTH] No stored access token found. Presenting login.');
       return null;
     }
 
-    // Attempt to load cached profile first for fast startup
+    // Attempt to load cached profile first for instant UI availability
     final cachedJson = await tokenStorage.getUserProfile();
     UserProfile? cachedProfile;
     if (cachedJson != null && cachedJson.isNotEmpty) {
@@ -102,23 +120,74 @@ class AuthRepository {
       } catch (_) {}
     }
 
+    // If cached profile is missing firmName, attempt firm profile resolution
+    if (cachedProfile != null &&
+        cachedProfile.firm != null &&
+        (cachedProfile.firmName == null || cachedProfile.firmName!.isEmpty)) {
+      try {
+        final firmData = await remoteDataSource.getFirmProfile();
+        if (firmData != null && firmData['name'] != null) {
+          cachedProfile = cachedProfile.copyWith(
+            firmName: firmData['name'].toString(),
+          );
+          await tokenStorage.saveUserProfile(cachedProfile.toJsonString());
+        }
+      } catch (_) {}
+    }
+
     // Attempt to verify session by fetching fresh profile
     try {
       final freshProfile = await remoteDataSource.getProfile();
-      await tokenStorage.saveUserProfile(freshProfile.toJsonString());
-      return freshProfile;
+      final resolvedFirmName = freshProfile.firmName ?? cachedProfile?.firmName;
+      final updatedProfile = freshProfile.copyWith(firmName: resolvedFirmName);
+      await tokenStorage.saveUserProfile(updatedProfile.toJsonString());
+      debugPrint(
+        '[AUTH] Session restored and verified online: ${updatedProfile.username}',
+      );
+      return updatedProfile;
     } catch (e) {
-      // If 401, session is invalid
       if (e is ApiException && e.statusCode == 401) {
-        await tokenStorage.clearTokens();
-        return null;
+        debugPrint(
+          '[AUTH] Access token expired on session restore. Attempting silent renewal...',
+        );
+        final creds = await tokenStorage.getCredentials();
+        if (creds != null &&
+            creds['username'] != null &&
+            creds['password'] != null) {
+          try {
+            final renewedProfile = await login(
+              username: creds['username']!,
+              password: creds['password']!,
+            );
+            debugPrint(
+              '[AUTH] Silent session renewal succeeded on app launch.',
+            );
+            return renewedProfile;
+          } catch (reAuthErr) {
+            if (reAuthErr is ApiException &&
+                (reAuthErr.statusCode == 400 ||
+                    reAuthErr.statusCode == 401 ||
+                    reAuthErr.statusCode == 403)) {
+              debugPrint(
+                '[AUTH] Stored credentials invalid or account disabled. Clearing session.',
+              );
+              await tokenStorage.clearTokens();
+              return null;
+            }
+          }
+        }
       }
-      // On offline/network failure, fall back to cached session if available
+
+      // On network errors or profile endpoint restrictions: PRESERVE SESSION!
+      debugPrint(
+        '[AUTH] Network or endpoint failure on session restore. Preserving cached session.',
+      );
       return cachedProfile;
     }
   }
 
   Future<void> logout() async {
+    debugPrint('[AUTH] User manually logged out.');
     await tokenStorage.clearTokens();
   }
 }

@@ -13,7 +13,9 @@ import 'package:flutter_application_1/shared/widgets/lex_button.dart';
 
 void main() {
   group('FirmWatermarkBackground Tests', () {
-    testWidgets('renders classical legal seal when logoUrl is null', (tester) async {
+    testWidgets('renders classical legal seal when logoUrl is null', (
+      tester,
+    ) async {
       final customTheme = FirmTheme(
         firmName: 'Veritas Legal Advocates',
         primaryColor: const Color(0xFF780016), // Deep Burgundy
@@ -45,7 +47,9 @@ void main() {
       expect(ignorePointer.ignoring, isTrue);
     });
 
-    testWidgets('renders network image when logoUrl is provided', (tester) async {
+    testWidgets('renders network image when logoUrl is provided', (
+      tester,
+    ) async {
       final customTheme = FirmTheme(
         firmName: 'Apex Legal Chambers',
         primaryColor: const Color(0xFF0F5132), // Emerald
@@ -70,7 +74,9 @@ void main() {
       expect(find.text('APEX LEGAL CHAMBERS'), findsOneWidget);
     });
 
-    testWidgets('calibrates opacity between underlay and overlay modes', (tester) async {
+    testWidgets('calibrates opacity between underlay and overlay modes', (
+      tester,
+    ) async {
       final customTheme = FirmTheme.defaultTheme();
 
       await tester.pumpWidget(
@@ -107,29 +113,40 @@ void main() {
   });
 
   group('LexTheme Dynamic Styling Tests', () {
-    test('buildDynamicTheme sets primary and accent colors across components', () {
-      final customTheme = FirmTheme(
-        firmName: 'Justice & Associates',
-        primaryColor: const Color(0xFF1E3A8A), // Royal Blue
-        accentColor: const Color(0xFFF59E0B),  // Amber Gold
-        fontFamily: 'system',
-        sidebarDark: false,
-      );
+    test(
+      'buildDynamicTheme sets primary and accent colors across components',
+      () {
+        final customTheme = FirmTheme(
+          firmName: 'Justice & Associates',
+          primaryColor: const Color(0xFF1E3A8A), // Royal Blue
+          accentColor: const Color(0xFFF59E0B), // Amber Gold
+          fontFamily: 'system',
+          sidebarDark: false,
+        );
 
-      final lightTheme = LexTheme.buildDynamicTheme(
-        firmTheme: customTheme,
-        isDark: false,
-      );
+        final lightTheme = LexTheme.buildDynamicTheme(
+          firmTheme: customTheme,
+          isDark: false,
+        );
 
-      expect(lightTheme.colorScheme.primary, const Color(0xFF1E3A8A));
-      expect(lightTheme.colorScheme.secondary, const Color(0xFFF59E0B));
-      expect(lightTheme.floatingActionButtonTheme.backgroundColor, const Color(0xFF1E3A8A));
-      expect(lightTheme.floatingActionButtonTheme.foregroundColor, Colors.white);
-      expect(lightTheme.tabBarTheme.labelColor, const Color(0xFF1E3A8A));
-      expect(lightTheme.scaffoldBackgroundColor, Colors.transparent);
-    });
+        expect(lightTheme.colorScheme.primary, const Color(0xFF1E3A8A));
+        expect(lightTheme.colorScheme.secondary, const Color(0xFFF59E0B));
+        expect(
+          lightTheme.floatingActionButtonTheme.backgroundColor,
+          const Color(0xFF1E3A8A),
+        );
+        expect(
+          lightTheme.floatingActionButtonTheme.foregroundColor,
+          Colors.white,
+        );
+        expect(lightTheme.tabBarTheme.labelColor, const Color(0xFF1E3A8A));
+        expect(lightTheme.scaffoldBackgroundColor, Colors.transparent);
+      },
+    );
 
-    testWidgets('LexButton adopts dynamic primary and secondary colors', (tester) async {
+    testWidgets('LexButton adopts dynamic primary and secondary colors', (
+      tester,
+    ) async {
       final customTheme = FirmTheme(
         firmName: 'Elite Law Firm',
         primaryColor: const Color(0xFF831843), // Crimson
@@ -219,9 +236,7 @@ void main() {
               (ref) => _StaticFirmThemeNotifier(customTheme),
             ),
           ],
-          child: MaterialApp.router(
-            routerConfig: router,
-          ),
+          child: MaterialApp.router(routerConfig: router),
         ),
       );
 
@@ -233,7 +248,9 @@ void main() {
       expect(find.text('VERITAS LEGAL CHAMBERS'), findsWidgets);
     });
 
-    testWidgets('does NOT render firm watermark for super admin role', (tester) async {
+    testWidgets('does NOT render firm watermark for super admin role', (
+      tester,
+    ) async {
       final router = createTestRouter();
 
       await tester.pumpWidget(
@@ -241,9 +258,7 @@ void main() {
           overrides: [
             currentUserRoleProvider.overrideWithValue(UserRole.superAdmin),
           ],
-          child: MaterialApp.router(
-            routerConfig: router,
-          ),
+          child: MaterialApp.router(routerConfig: router),
         ),
       );
 

@@ -208,8 +208,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                           child: ElevatedButton(
                             onPressed: _isSaving ? null : _saveProfile,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .primary,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),

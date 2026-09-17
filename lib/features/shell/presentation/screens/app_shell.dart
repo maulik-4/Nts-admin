@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routing/role_menu_config.dart';
 import '../../../../core/theme/firm_theme_provider.dart';
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../shared/widgets/app_brand_logo.dart';
 import '../../../../shared/widgets/firm_watermark_background.dart';
 import '../../../auth/domain/models/role_capabilities.dart';
 
@@ -37,17 +38,11 @@ class AppShell extends ConsumerWidget {
     final isTablet = width >= 600;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final darkFirmBg =
-        Color.lerp(firmTheme.primaryColor, Colors.black, 0.45) ??
-        const Color(0xFF0F172A);
-
-    final sidebarBg = isDark
-        ? const Color(0xFF0A0F1D)
-        : (firmTheme.sidebarDark ? darkFirmBg : LexColors.canvasLight);
-    final sidebarTextDark = isDark || firmTheme.sidebarDark;
+    final sidebarBg = isDark ? const Color(0xFF0A0F1D) : LexColors.canvasLight;
+    final sidebarTextDark = isDark;
     final selectedColor = userRole.isSuperAdmin
         ? (isDark ? LexColors.accentGold : LexColors.slatePrimary)
-        : firmTheme.accentColor;
+        : (isDark ? firmTheme.accentColor : firmTheme.primaryColor);
 
     Widget buildScreenWithWatermark(Widget child) {
       return Stack(
@@ -67,9 +62,7 @@ class AppShell extends ConsumerWidget {
               ),
             ),
           // Screen Route Content
-          Positioned.fill(
-            child: child,
-          ),
+          Positioned.fill(child: child),
           // Ambient watermark overlay across cards
           if (!userRole.isSuperAdmin)
             Positioned.fill(
@@ -102,12 +95,12 @@ class AppShell extends ConsumerWidget {
               ),
               unselectedIconTheme: IconThemeData(
                 color: sidebarTextDark
-                    ? Colors.white60
+                    ? LexColors.textSecondaryDark
                     : LexColors.textSecondaryLight,
               ),
               unselectedLabelTextStyle: TextStyle(
                 color: sidebarTextDark
-                    ? Colors.white60
+                    ? LexColors.textSecondaryDark
                     : LexColors.textSecondaryLight,
               ),
               leading: Padding(
@@ -115,37 +108,7 @@ class AppShell extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: userRole.isSuperAdmin
-                            ? LexColors.slatePrimary
-                            : firmTheme.primaryColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child:
-                          !userRole.isSuperAdmin &&
-                                  firmTheme.logoUrl != null &&
-                                  firmTheme.logoUrl!.isNotEmpty
-                              ? Image.network(
-                                  firmTheme.logoUrl!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (ctx, err, stack) => Icon(
-                                    Icons.balance,
-                                    size: 20,
-                                    color: selectedColor,
-                                  ),
-                                )
-                              : Icon(
-                                  userRole.isSuperAdmin
-                                      ? Icons.admin_panel_settings
-                                      : Icons.balance,
-                                  size: 20,
-                                  color: selectedColor,
-                                ),
-                    ),
+                    const AppBrandLogo(size: 38),
                     if (isExpanded) ...[
                       const SizedBox(width: 10),
                       Column(
@@ -154,12 +117,14 @@ class AppShell extends ConsumerWidget {
                           Text(
                             !userRole.isSuperAdmin && firmTheme.firmName != null
                                 ? firmTheme.firmName!
-                                : 'NTS Legal Pro',
+                                : 'Vidhanta',
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.3,
-                              color: sidebarTextDark ? Colors.white : null,
+                              color: isDark
+                                  ? LexColors.textPrimaryDark
+                                  : LexColors.textPrimaryLight,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -197,24 +162,58 @@ class AppShell extends ConsumerWidget {
     // Mobile layout (< 600dp)
     return Scaffold(
       body: buildScreenWithWatermark(navigationShell),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: onTap,
-        backgroundColor: isDark
-            ? LexColors.surfaceDark
-            : (firmTheme.sidebarDark ? darkFirmBg : LexColors.surfaceLight),
-        indicatorColor: selectedColor.withValues(alpha: 0.25),
-        destinations: [
-          for (final d in destinations)
-            NavigationDestination(
-              icon: Icon(
-                d.icon,
-                color: sidebarTextDark ? Colors.white70 : null,
-              ),
-              selectedIcon: Icon(d.selectedIcon, color: selectedColor),
-              label: d.label,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: isDark ? LexColors.borderDark : LexColors.borderLight,
+              width: 1.0,
             ),
-        ],
+          ),
+        ),
+        child: NavigationBarTheme(
+          data: NavigationBarThemeData(
+            labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: selectedColor,
+                );
+              }
+              return TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: isDark
+                    ? LexColors.textSecondaryDark
+                    : LexColors.textSecondaryLight,
+              );
+            }),
+          ),
+          child: NavigationBar(
+            selectedIndex: selectedIndex,
+            onDestinationSelected: onTap,
+            backgroundColor: isDark
+                ? LexColors.surfaceDark
+                : LexColors.surfaceLight,
+            indicatorColor: selectedColor.withValues(
+              alpha: isDark ? 0.25 : 0.15,
+            ),
+            destinations: [
+              for (final d in destinations)
+                NavigationDestination(
+                  icon: Icon(
+                    d.icon,
+                    color: isDark
+                        ? LexColors.textSecondaryDark
+                        : LexColors.textSecondaryLight,
+                  ),
+                  selectedIcon: Icon(d.selectedIcon, color: selectedColor),
+                  label: d.label,
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

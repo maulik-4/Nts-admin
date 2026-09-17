@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/lex_colors.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../shared/widgets/app_brand_logo.dart';
 import '../../../../shared/widgets/lex_button.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
@@ -132,37 +133,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 // Branding Header
                 Center(
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? LexColors.surfaceDark
-                          : LexColors.slatePrimary,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isDark
-                            ? LexColors.accentGold
-                            : LexColors.borderLight,
-                        width: 1.2,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'NTS',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
-                          color: isDark ? LexColors.accentGold : Colors.white,
-                        ),
-                      ),
-                    ),
+                  child: AppBrandLogo(
+                    size: 72,
+                    borderRadius: BorderRadius.circular(18),
+                    showBorder: true,
                   ),
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Welcome to NTS Legal Pro',
+                  'Welcome to Vidhanta',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineSmall
                       ?.copyWith(fontWeight: FontWeight.w700),

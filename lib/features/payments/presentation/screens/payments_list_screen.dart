@@ -115,6 +115,8 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
                         const SizedBox(height: 6),
                         Text(
                           '₹${totalPaid.toStringAsFixed(2)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
@@ -156,6 +158,8 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
                         const SizedBox(height: 6),
                         Text(
                           '₹${totalPending.toStringAsFixed(2)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,

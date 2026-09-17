@@ -43,14 +43,15 @@ class LexTheme {
         textTheme: textTheme,
         appBarTheme: AppBarTheme(
           elevation: 0,
-          scrolledUnderElevation: 0,
-          backgroundColor: Colors.transparent,
+          scrolledUnderElevation: 1,
+          backgroundColor: LexColors.surfaceDark,
           foregroundColor: LexColors.textPrimaryDark,
+          surfaceTintColor: Colors.transparent,
           iconTheme: IconThemeData(color: firmTheme.accentColor),
           actionsIconTheme: IconThemeData(color: firmTheme.accentColor),
           titleTextStyle: textTheme.titleLarge?.copyWith(
             color: LexColors.textPrimaryDark,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
         cardTheme: CardThemeData(
@@ -82,12 +83,8 @@ class LexTheme {
             color: firmTheme.accentColor,
             fontWeight: FontWeight.w600,
           ),
-          side: BorderSide(
-            color: firmTheme.accentColor.withValues(alpha: 0.3),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          side: BorderSide(color: firmTheme.accentColor.withValues(alpha: 0.3)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         tabBarTheme: TabBarThemeData(
           labelColor: firmTheme.accentColor,
@@ -165,8 +162,30 @@ class LexTheme {
           ),
         ),
         navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: sidebarBg,
+          backgroundColor: LexColors.surfaceDark,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
           indicatorColor: firmTheme.accentColor.withValues(alpha: 0.25),
+          labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: firmTheme.accentColor,
+              );
+            }
+            return const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: LexColors.textSecondaryDark,
+            );
+          }),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return IconThemeData(color: firmTheme.accentColor);
+            }
+            return const IconThemeData(color: LexColors.textSecondaryDark);
+          }),
         ),
         dividerTheme: const DividerThemeData(
           color: LexColors.borderDark,
@@ -202,13 +221,14 @@ class LexTheme {
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
         elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: firmTheme.primaryColor,
+        scrolledUnderElevation: 1,
+        backgroundColor: LexColors.surfaceLight,
+        foregroundColor: LexColors.textPrimaryLight,
+        surfaceTintColor: Colors.transparent,
         iconTheme: IconThemeData(color: firmTheme.primaryColor),
         actionsIconTheme: IconThemeData(color: firmTheme.primaryColor),
         titleTextStyle: textTheme.titleLarge?.copyWith(
-          color: firmTheme.primaryColor,
+          color: LexColors.textPrimaryLight,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -225,9 +245,7 @@ class LexTheme {
         elevation: 3,
         backgroundColor: firmTheme.primaryColor,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
       chipTheme: ChipThemeData(
         selectedColor: firmTheme.primaryColor.withValues(alpha: 0.15),
@@ -241,22 +259,15 @@ class LexTheme {
           color: firmTheme.primaryColor,
           fontWeight: FontWeight.w600,
         ),
-        side: BorderSide(
-          color: firmTheme.primaryColor.withValues(alpha: 0.2),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        side: BorderSide(color: firmTheme.primaryColor.withValues(alpha: 0.2)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       tabBarTheme: TabBarThemeData(
         labelColor: firmTheme.primaryColor,
         unselectedLabelColor: LexColors.textSecondaryLight,
         indicatorColor: firmTheme.primaryColor,
         indicatorSize: TabBarIndicatorSize.tab,
-        labelStyle: const TextStyle(
-          fontWeight: FontWeight.w700,
-          fontSize: 13,
-        ),
+        labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: firmTheme.primaryColor,
@@ -329,10 +340,30 @@ class LexTheme {
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: sidebarBg,
-        indicatorColor: firmTheme.sidebarDark
-            ? firmTheme.accentColor.withValues(alpha: 0.3)
-            : const Color(0xFFE2E8F0),
+        backgroundColor: LexColors.surfaceLight,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        indicatorColor: firmTheme.primaryColor.withValues(alpha: 0.15),
+        labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: firmTheme.primaryColor,
+            );
+          }
+          return const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: LexColors.textSecondaryLight,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return IconThemeData(color: firmTheme.primaryColor);
+          }
+          return const IconThemeData(color: LexColors.textSecondaryLight);
+        }),
       ),
       dividerTheme: const DividerThemeData(
         color: LexColors.borderLight,

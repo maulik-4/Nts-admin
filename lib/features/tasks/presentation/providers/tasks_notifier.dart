@@ -66,19 +66,23 @@ class TasksNotifier extends StateNotifier<AsyncValue<List<Task>>> {
 
   Future<Task> createTask(CreateTaskRequest request) async {
     final newTask = await _repository.createTask(request);
-    state.whenData((list) {
-      state = AsyncValue.data([newTask, ...list]);
-    });
+    if (state.hasValue && state.value != null) {
+      state = AsyncValue.data([newTask, ...state.value!]);
+    } else {
+      await loadTasks();
+    }
     return newTask;
   }
 
   Future<Task> updateTask(int id, UpdateTaskRequest request) async {
     final updated = await _repository.updateTask(id, request);
-    state.whenData((list) {
+    if (state.hasValue && state.value != null) {
       state = AsyncValue.data(
-        list.map((t) => t.id == id ? updated : t).toList(),
+        state.value!.map((t) => t.id == id ? updated : t).toList(),
       );
-    });
+    } else {
+      await loadTasks();
+    }
     return updated;
   }
 

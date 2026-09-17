@@ -715,12 +715,22 @@ class _BrandingSettingsScreenState
     return Container(
       width: 72,
       height: 72,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: _draftPrimaryColor,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Center(
-        child: Icon(Icons.balance, size: 32, color: _draftAccentColor),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.asset(
+          'assets/images/icon.png',
+          width: 72,
+          height: 72,
+          fit: BoxFit.cover,
+          errorBuilder: (ctx, err, stack) => Center(
+            child: Icon(Icons.balance, size: 32, color: _draftAccentColor),
+          ),
+        ),
       ),
     );
   }

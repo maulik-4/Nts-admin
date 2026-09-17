@@ -178,6 +178,8 @@ class SupportTicketsListScreen extends ConsumerWidget {
         children: [
           Text(
             value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
@@ -187,9 +189,11 @@ class SupportTicketsListScreen extends ConsumerWidget {
           const SizedBox(height: 2),
           Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontSize: 11,
-              color: Colors.grey,
+              color: LexColors.textSecondaryLight,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -282,17 +286,33 @@ class SupportTicketsListScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Category: ${ticket.category.toUpperCase()}',
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                Expanded(
+                  child: Text(
+                    'Category: ${ticket.category.toUpperCase()}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark
+                          ? LexColors.textSecondaryDark
+                          : LexColors.textSecondaryLight,
+                    ),
+                  ),
                 ),
-                if (ticket.createdAt != null)
+                if (ticket.createdAt != null) ...[
+                  const SizedBox(width: 8),
                   Text(
                     DateFormat.yMMMd().format(ticket.createdAt!),
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark
+                          ? LexColors.textSecondaryDark
+                          : LexColors.textSecondaryLight,
+                    ),
                   ),
+                ],
               ],
             ),
           ],

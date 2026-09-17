@@ -30,6 +30,8 @@ class StatusBadge extends StatelessWidget {
       ),
       child: Text(
         status.toUpperCase(),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           color: color ?? textColor,
           fontSize: 11,
@@ -41,6 +43,7 @@ class StatusBadge extends StatelessWidget {
   }
 
   (Color, Color) _resolveColors(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final normalized = status.toLowerCase().trim();
 
     if (normalized == 'open' ||
@@ -48,24 +51,40 @@ class StatusBadge extends StatelessWidget {
         normalized == 'paid' ||
         normalized == 'completed' ||
         normalized == 'resolved') {
-      return (LexColors.success, LexColors.successLight);
+      final text = isDark ? const Color(0xFF34D399) : LexColors.success;
+      final bg = isDark
+          ? const Color(0xFF34D399).withValues(alpha: 0.18)
+          : LexColors.successLight;
+      return (text, bg);
     }
 
     if (normalized == 'pending' ||
         normalized == 'in_progress' ||
         normalized == 'in progress' ||
         normalized == 'trial') {
-      return (LexColors.warning, LexColors.accentLight);
+      final text = isDark ? LexColors.accentGold : LexColors.warning;
+      final bg = isDark
+          ? LexColors.accentGold.withValues(alpha: 0.18)
+          : LexColors.accentLight;
+      return (text, bg);
     }
 
     if (normalized == 'urgent' ||
         normalized == 'critical' ||
         normalized == 'overdue' ||
         normalized == 'cancelled') {
-      return (LexColors.error, LexColors.errorLight);
+      final text = isDark ? const Color(0xFFF87171) : LexColors.error;
+      final bg = isDark
+          ? const Color(0xFFF87171).withValues(alpha: 0.18)
+          : LexColors.errorLight;
+      return (text, bg);
     }
 
     // Default / closed
-    return (LexColors.textSecondaryLight, const Color(0xFFF1F5F9));
+    final text = isDark
+        ? LexColors.textSecondaryDark
+        : LexColors.textSecondaryLight;
+    final bg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9);
+    return (text, bg);
   }
 }

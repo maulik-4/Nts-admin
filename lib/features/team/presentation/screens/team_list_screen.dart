@@ -7,6 +7,7 @@ import '../../../../shared/widgets/capability_gate.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
 import '../../../auth/domain/models/role_capabilities.dart';
+import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../data/models/team_member.dart';
 import '../providers/team_notifier.dart';
 
@@ -20,6 +21,8 @@ class TeamListScreen extends ConsumerStatefulWidget {
 }
 
 class _TeamListScreenState extends ConsumerState<TeamListScreen> {
+  final TextEditingController _searchCtrl = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -32,12 +35,132 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
   void _showAddMemberModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => const _AddMemberModalSheet(),
+    );
+  }
+
+  void _showMemberDetailsDialog(BuildContext context, TeamMember member) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Row(
+          children: [
+            CircleAvatar(
+              radius: 20,
+              backgroundColor: member.badgeColor.withValues(alpha: 0.15),
+              child: Text(
+                member.username.isNotEmpty
+                    ? member.username[0].toUpperCase()
+                    : 'U',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: member.badgeColor,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    member.username,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    member.displayRole,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: member.badgeColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildDetailRow('Email', member.email, isDark),
+            const Divider(height: 16),
+            _buildDetailRow(
+              'Firm Organization',
+              member.firm.isNotEmpty ? member.firm : 'Current Firm',
+              isDark,
+            ),
+            const Divider(height: 16),
+            _buildDetailRow('Role Authority', member.displayRole, isDark),
+            if (member.joined != null) ...[
+              const Divider(height: 16),
+              _buildDetailRow(
+                'Member Since',
+                DateFormat.yMMMMd().format(member.joined!),
+                isDark,
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: isDark
+                  ? LexColors.textSecondaryDark
+                  : LexColors.textSecondaryLight,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: isDark
+                  ? LexColors.textPrimaryDark
+                  : LexColors.textPrimaryLight,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -49,7 +172,11 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Firm Team & Advocates'),
+        title: Text(
+          activeFilter == TeamFilter.advocates
+              ? 'Firm Advocates'
+              : 'Firm Team & Advocates',
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -69,9 +196,9 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
       ),
       body: Column(
         children: [
-          // Filter Tabs
+          // Search & Filter Header
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: isDark ? LexColors.surfaceDark : LexColors.canvasLight,
               border: Border(
@@ -81,99 +208,148 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                 ),
               ),
             ),
-            child: Row(
+            child: Column(
               children: [
-                _buildFilterChip('All', TeamFilter.all, activeFilter),
-                const SizedBox(width: 8),
-                _buildFilterChip(
-                  'Advocates',
-                  TeamFilter.advocates,
-                  activeFilter,
+                // Search Input
+                TextField(
+                  controller: _searchCtrl,
+                  onChanged: (val) {
+                    ref.read(teamSearchQueryProvider.notifier).state = val;
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Search by name, email, or role...',
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    suffixIcon: _searchCtrl.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 18),
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              ref.read(teamSearchQueryProvider.notifier).state =
+                                  '';
+                            },
+                          )
+                        : null,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 8),
-                _buildFilterChip('Staff', TeamFilter.staff, activeFilter),
+                const SizedBox(height: 10),
+                // Filter Tabs
+                Row(
+                  children: [
+                    _buildFilterChip('All', TeamFilter.all, activeFilter),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      'Advocates',
+                      TeamFilter.advocates,
+                      activeFilter,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip('Staff', TeamFilter.staff, activeFilter),
+                  ],
+                ),
               ],
             ),
           ),
 
           // Member List
           Expanded(
-            child: filteredMembersAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: LexColors.error,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Error loading team: $err',
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => ref
-                            .read(teamNotifierProvider.notifier)
-                            .loadTeamMembers(),
-                        child: const Text('Retry'),
-                      ),
-                    ],
+            child: RefreshIndicator(
+              onRefresh: () =>
+                  ref.read(teamNotifierProvider.notifier).loadTeamMembers(),
+              child: filteredMembersAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, _) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: LexColors.error,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Error loading team: $err',
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => ref
+                              .read(teamNotifierProvider.notifier)
+                              .loadTeamMembers(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              data: (members) {
-                if (members.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.group_outlined,
-                            size: 64,
-                            color: isDark
-                                ? LexColors.textSecondaryDark
-                                : LexColors.textSecondaryLight,
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'No team members found',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
+                data: (members) {
+                  if (members.isEmpty) {
+                    return ListView(
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.4,
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.group_outlined,
+                                    size: 64,
+                                    color: isDark
+                                        ? LexColors.textSecondaryDark
+                                        : LexColors.textSecondaryLight,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    activeFilter == TeamFilter.advocates
+                                        ? 'No advocates found in your firm'
+                                        : 'No team members found in your firm',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Add lawyers and staff to collaborate in your firm workspace.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: isDark
+                                          ? LexColors.textSecondaryDark
+                                          : LexColors.textSecondaryLight,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Add lawyers and staff to collaborate in your firm.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: isDark
-                                  ? LexColors.textSecondaryDark
-                                  : LexColors.textSecondaryLight,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
+                        ),
+                      ],
+                    );
+                  }
 
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: members.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (ctx, idx) =>
-                      _buildMemberCard(context, members[idx]),
-                );
-              },
+                  return ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: members.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    itemBuilder: (ctx, idx) =>
+                        _buildMemberCard(context, members[idx]),
+                  );
+                },
+              ),
             ),
           ),
         ],
@@ -217,6 +393,7 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
 
     return LexCard(
       padding: const EdgeInsets.all(16),
+      onTap: () => _showMemberDetailsDialog(context, member),
       child: Row(
         children: [
           CircleAvatar(
@@ -241,12 +418,15 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                     Expanded(
                       child: Text(
                         member.username,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -274,15 +454,19 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.email_outlined,
                       size: 14,
-                      color: Colors.grey,
+                      color: isDark
+                          ? LexColors.textSecondaryDark
+                          : LexColors.textSecondaryLight,
                     ),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         member.email,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13,
                           color: isDark
@@ -297,14 +481,24 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                   const SizedBox(height: 4),
                   Text(
                     'Joined: ${DateFormat.yMMMd().format(member.joined!)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 11,
-                      color: isDark ? Colors.white38 : Colors.black38,
+                      color: isDark
+                          ? LexColors.textMutedDark
+                          : LexColors.textMutedLight,
                     ),
                   ),
                 ],
               ],
             ),
+          ),
+          const SizedBox(width: 8),
+          Icon(
+            Icons.chevron_right,
+            size: 20,
+            color: isDark ? LexColors.textMutedDark : LexColors.textMutedLight,
           ),
         ],
       ),
@@ -321,12 +515,12 @@ class _AddMemberModalSheet extends ConsumerStatefulWidget {
 }
 
 class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
-  int _mode = 0; // 0 = Add User Directly, 1 = Invite via Email
   final _formKey = GlobalKey<FormState>();
   final _usernameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   String _selectedRole = 'lawyer';
+  int _mode = 0; // 0: Add Directly, 1: Send Invite
   bool _isLoading = false;
 
   @override
@@ -343,6 +537,7 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
     setState(() => _isLoading = true);
     try {
       if (_mode == 0) {
+        final currentFirmId = ref.read(authNotifierProvider).user?.firm;
         await ref
             .read(teamNotifierProvider.notifier)
             .addUser(
@@ -350,6 +545,7 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
               email: _emailCtrl.text.trim(),
               password: _passwordCtrl.text,
               role: _selectedRole,
+              firmId: currentFirmId,
             );
         if (mounted) {
           Navigator.of(context).pop();
@@ -416,7 +612,9 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
               ),
               const SizedBox(height: 16),
               Text(
-                _mode == 0 ? 'Add Team Member Directly' : 'Invite Team Member',
+                _mode == 0
+                    ? 'Add Team Member to Firm'
+                    : 'Invite Team Member to Firm',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,

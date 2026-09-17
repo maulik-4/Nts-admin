@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../shared/widgets/capability_gate.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
+import '../../../auth/domain/models/role_capabilities.dart';
 import '../../data/models/task_model.dart';
 import '../providers/tasks_notifier.dart';
 import '../widgets/task_card.dart';
@@ -47,16 +49,19 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/app/more/tasks/create'),
-        backgroundColor: isDark
-            ? Theme.of(context).colorScheme.secondary
-            : Theme.of(context).colorScheme.primary,
-        foregroundColor: isDark ? Colors.black : Colors.white,
-        icon: const Icon(Icons.add_task),
-        label: const Text(
-          'New Task',
-          style: TextStyle(fontWeight: FontWeight.w700),
+      floatingActionButton: CapabilityGate(
+        capability: UserCapability.createTask,
+        child: FloatingActionButton.extended(
+          onPressed: () => context.push('/app/tasks/create'),
+          backgroundColor: isDark
+              ? Theme.of(context).colorScheme.secondary
+              : Theme.of(context).colorScheme.primary,
+          foregroundColor: isDark ? Colors.black : Colors.white,
+          icon: const Icon(Icons.add_task),
+          label: const Text(
+            'New Task',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
         ),
       ),
       body: Column(

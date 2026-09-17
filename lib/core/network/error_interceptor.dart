@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../config/env_config.dart';
 import '../constants/api_endpoints.dart';
@@ -39,19 +40,24 @@ class ErrorInterceptor extends Interceptor {
     );
 
     // =========================================================================
-    // 401 UNAUTHORIZED: TOKEN REFRESH FLOW
+    // 401 UNAUTHORIZED: TOKEN REFRESH & SILENT RE-AUTH LIFECYCLE
     // =========================================================================
     if (statusCode == 401 && !isAuthEndpoint) {
       final isRetry = err.requestOptions.extra['is_retry'] == true;
 
-      // Avoid infinite refresh loops
+      // Avoid infinite retry loops
       if (isRetry) {
-        await _clearSessionAndNotify();
+        debugPrint(
+          '[AUTH] Retried request failed with 401. Rejecting request.',
+        );
         return _rejectWithError(err, handler);
       }
 
-      // If a refresh is already underway, wait for it
+      // If a refresh/re-auth is already underway, wait for it (single-flight mutex)
       if (_refreshCompleter != null && !_refreshCompleter!.isCompleted) {
+        debugPrint(
+          '[AUTH] Concurrent 401 detected; waiting for in-flight session refresh.',
+        );
         try {
           final newAccessToken = await _refreshCompleter!.future;
           if (newAccessToken != null && retryDio != null) {
@@ -64,22 +70,17 @@ class ErrorInterceptor extends Interceptor {
         } catch (_) {
           // If waiting failed, proceed to rejection
         }
-        await _clearSessionAndNotify();
         return _rejectWithError(err, handler);
       }
 
       // Start new refresh operation
       _refreshCompleter = Completer<String?>();
-      final refreshToken = await tokenStorage.getRefreshToken();
-
-      if (refreshToken == null || refreshToken.trim().isEmpty) {
-        _refreshCompleter!.complete(null);
-        await _clearSessionAndNotify();
-        return _rejectWithError(err, handler);
-      }
+      debugPrint(
+        '[AUTH] Access token expired or invalid (HTTP 401). Initiating session refresh...',
+      );
 
       try {
-        final newAccessToken = await _executeRefresh(refreshToken);
+        final newAccessToken = await _executeRefresh();
         if (newAccessToken != null && newAccessToken.isNotEmpty) {
           _refreshCompleter!.complete(newAccessToken);
 
@@ -93,12 +94,11 @@ class ErrorInterceptor extends Interceptor {
           }
         } else {
           _refreshCompleter!.complete(null);
-          await _clearSessionAndNotify();
           return _rejectWithError(err, handler);
         }
       } catch (refreshErr) {
+        debugPrint('[AUTH] Error during session refresh: $refreshErr');
         _refreshCompleter!.complete(null);
-        await _clearSessionAndNotify();
         return _rejectWithError(err, handler);
       }
     }
@@ -106,46 +106,119 @@ class ErrorInterceptor extends Interceptor {
     // =========================================================================
     // 403 FORBIDDEN: ROLE / ACCESS RESTRICTED (DO NOT LOG OUT!)
     // =========================================================================
-    // 403 Forbidden is handled without clearing tokens or triggering onUnauthorized
     return _rejectWithError(err, handler);
   }
 
-  Future<String?> _executeRefresh(String refreshToken) async {
-    try {
-      final client = Dio(
-        BaseOptions(
-          baseUrl: EnvConfig.apiBaseUrl,
-          connectTimeout: EnvConfig.connectTimeout,
-          receiveTimeout: EnvConfig.receiveTimeout,
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        ),
-      );
+  Future<String?> _executeRefresh() async {
+    final client = Dio(
+      BaseOptions(
+        baseUrl: EnvConfig.apiBaseUrl,
+        connectTimeout: EnvConfig.connectTimeout,
+        receiveTimeout: EnvConfig.receiveTimeout,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
 
-      final response = await client.post(
-        ApiEndpoints.tokenRefresh,
-        data: {'refresh': refreshToken},
-      );
+    // 1. Attempt token refresh endpoint if refreshToken exists
+    final refreshToken = await tokenStorage.getRefreshToken();
+    if (refreshToken != null && refreshToken.trim().isNotEmpty) {
+      try {
+        debugPrint('[AUTH] Attempting token refresh via refresh token...');
+        final response = await client.post(
+          ApiEndpoints.tokenRefresh,
+          data: {'refresh': refreshToken},
+        );
 
-      if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
-        final data = response.data as Map<String, dynamic>;
-        final newAccess =
-            data['access']?.toString() ?? data['token']?.toString();
-        final newRefresh = data['refresh']?.toString();
+        if (response.statusCode == 200 &&
+            response.data is Map<String, dynamic>) {
+          final data = response.data as Map<String, dynamic>;
+          final newAccess =
+              data['access']?.toString() ?? data['token']?.toString();
+          final newRefresh = data['refresh']?.toString();
 
-        if (newAccess != null && newAccess.isNotEmpty) {
-          await tokenStorage.saveTokens(
-            accessToken: newAccess,
-            refreshToken: newRefresh ?? refreshToken,
+          if (newAccess != null && newAccess.isNotEmpty) {
+            await tokenStorage.saveTokens(
+              accessToken: newAccess,
+              refreshToken: newRefresh ?? refreshToken,
+            );
+            debugPrint('[AUTH] Token refresh successful.');
+            return newAccess;
+          }
+        }
+      } catch (_) {
+        debugPrint(
+          '[AUTH] Refresh endpoint unavailable or rejected. Falling back to credentials.',
+        );
+      }
+    }
+
+    // 2. Silent re-authentication using securely stored credentials
+    final credentials = await tokenStorage.getCredentials();
+    if (credentials != null) {
+      final username = credentials['username'];
+      final password = credentials['password'];
+
+      if (username != null && password != null) {
+        try {
+          debugPrint(
+            '[AUTH] Attempting silent re-authentication for session renewal...',
           );
-          return newAccess;
+          final response = await client.post(
+            ApiEndpoints.login,
+            data: {'username': username, 'password': password},
+          );
+
+          if (response.statusCode == 200 &&
+              response.data is Map<String, dynamic>) {
+            final data = response.data as Map<String, dynamic>;
+            final newAccess =
+                data['access']?.toString() ?? data['token']?.toString();
+            final newRefresh = data['refresh']?.toString();
+
+            if (newAccess != null && newAccess.isNotEmpty) {
+              await tokenStorage.saveTokens(
+                accessToken: newAccess,
+                refreshToken: newRefresh,
+              );
+              debugPrint(
+                '[AUTH] Silent re-authentication successful. Session renewed.',
+              );
+              return newAccess;
+            }
+          }
+        } on DioException catch (dioErr) {
+          final status = dioErr.response?.statusCode;
+          if (status == 400 || status == 401 || status == 403) {
+            // Backend explicitly rejected credentials (e.g. password changed or account blocked)
+            debugPrint(
+              '[AUTH] Silent re-auth rejected with HTTP $status. Clearing session.',
+            );
+            await _clearSessionAndNotify();
+            return null;
+          } else {
+            // Temporary network error or server 5xx: DO NOT LOG OUT!
+            debugPrint(
+              '[AUTH] Network/server error during re-auth ($status). Preserving session.',
+            );
+            return null;
+          }
+        } catch (e) {
+          debugPrint(
+            '[AUTH] Unexpected error during re-auth: $e. Preserving session.',
+          );
+          return null;
         }
       }
-    } catch (_) {
-      // Backend does not support refresh endpoint or token expired
     }
+
+    // If both refresh token and credentials failed or are missing
+    debugPrint(
+      '[AUTH] No valid session refresh mechanism available. Clearing session.',
+    );
+    await _clearSessionAndNotify();
     return null;
   }
 
@@ -162,6 +235,7 @@ class ErrorInterceptor extends Interceptor {
   }
 
   Future<void> _clearSessionAndNotify() async {
+    debugPrint('[AUTH] Clearing tokens and notifying session expiration.');
     await tokenStorage.clearTokens();
     onUnauthorized?.call();
   }

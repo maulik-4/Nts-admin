@@ -39,6 +39,8 @@ class PaymentCard extends StatelessWidget {
                   children: [
                     Text(
                       formattedAmount,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -52,6 +54,8 @@ class PaymentCard extends StatelessWidget {
                         payment.clientName!.isNotEmpty)
                       Text(
                         payment.clientName!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -63,6 +67,8 @@ class PaymentCard extends StatelessWidget {
                     else
                       Text(
                         'General Client Payment',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13,
                           color: isDark

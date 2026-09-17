@@ -5,6 +5,8 @@ import 'core/routing/app_router.dart';
 import 'core/theme/firm_theme_provider.dart';
 import 'core/theme/lex_theme.dart';
 
+import 'core/theme/theme_mode_provider.dart';
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const ProviderScope(child: NTSLegalProApp()));
@@ -17,13 +19,14 @@ class NTSLegalProApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
     final firmTheme = ref.watch(firmThemeProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
-      title: firmTheme.firmName ?? 'NTS Legal Pro',
+      title: firmTheme.firmName ?? 'Vidhanta',
       debugShowCheckedModeBanner: false,
       theme: LexTheme.buildDynamicTheme(firmTheme: firmTheme, isDark: false),
       darkTheme: LexTheme.buildDynamicTheme(firmTheme: firmTheme, isDark: true),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       routerConfig: router,
     );
   }

@@ -126,32 +126,6 @@ class MoreScreen extends ConsumerWidget {
                 badgeText: 'Subscriptions',
                 onTap: () => context.push('/app/more/subscriptions'),
               ),
-              const SizedBox(height: 10),
-              _buildOperationTile(
-                context,
-                title: 'Platform Settings',
-                subtitle: 'Configure platform preferences & security',
-                icon: Icons.settings_outlined,
-                badgeText: 'Settings',
-                onTap: () => context.push('/app/more/settings'),
-              ),
-              const SizedBox(height: 10),
-              _buildOperationTile(
-                context,
-                title: 'System Cloud Health',
-                subtitle: 'API status: api.hphighcourt.site • Active',
-                icon: Icons.cloud_done_outlined,
-                badgeText: 'ONLINE',
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Platform cloud services operating at 100%',
-                      ),
-                    ),
-                  );
-                },
-              ),
               const SizedBox(height: 24),
             ],
 
@@ -428,48 +402,6 @@ class MoreScreen extends ConsumerWidget {
               const SizedBox(height: 16),
             ],
 
-            // App & Security Information
-            LexCard(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Platform & Security',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: isDark
-                          ? LexColors.textPrimaryDark
-                          : LexColors.slatePrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildRow(
-                    context,
-                    'API Host',
-                    'api.hphighcourt.site',
-                    Icons.cloud_done_outlined,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildRow(
-                    context,
-                    'Security',
-                    'JWT Bearer Authentication',
-                    Icons.lock_outline,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildRow(
-                    context,
-                    'RBAC Engine',
-                    'Role-Based Capability Matrix',
-                    Icons.security_outlined,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
             // Settings Tile
             _buildOperationTile(
               context,
@@ -625,13 +557,20 @@ class MoreScreen extends ConsumerWidget {
                 : LexColors.textSecondaryLight,
           ),
         ),
-        const Spacer(),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: isDark ? LexColors.textPrimaryDark : LexColors.slatePrimary,
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isDark
+                  ? LexColors.textPrimaryDark
+                  : LexColors.slatePrimary,
+            ),
           ),
         ),
       ],

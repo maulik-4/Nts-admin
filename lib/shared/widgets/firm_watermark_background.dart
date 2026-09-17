@@ -27,7 +27,8 @@ class FirmWatermarkBackground extends StatelessWidget {
 
     final firmColor = isDark ? firmTheme.accentColor : firmTheme.primaryColor;
     final firmName = firmTheme.firmName ?? 'NTS Legal Pro';
-    final hasLogo = firmTheme.logoUrl != null && firmTheme.logoUrl!.trim().isNotEmpty;
+    final hasLogo =
+        firmTheme.logoUrl != null && firmTheme.logoUrl!.trim().isNotEmpty;
 
     return IgnorePointer(
       child: Center(
@@ -116,10 +117,7 @@ class FirmWatermarkBackground extends StatelessWidget {
       height: 220,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(
-          color: firmColor,
-          width: 2.5,
-        ),
+        border: Border.all(color: firmColor, width: 2.5),
       ),
       child: Center(
         child: Container(
@@ -135,11 +133,7 @@ class FirmWatermarkBackground extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.balance,
-                size: 80,
-                color: firmColor,
-              ),
+              Icon(Icons.balance, size: 80, color: firmColor),
               const SizedBox(height: 6),
               Text(
                 'LEX • JUSTITIA',

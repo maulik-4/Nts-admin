@@ -131,4 +131,14 @@ class AuthRemoteDataSource {
       throw ApiException.fromResponse(e.response?.statusCode, e.response?.data);
     }
   }
+
+  Future<Map<String, dynamic>?> getFirmProfile() async {
+    try {
+      final response = await _dio.get('/api/profile/firm/');
+      if (response.data is Map<String, dynamic>) {
+        return response.data as Map<String, dynamic>;
+      }
+    } catch (_) {}
+    return null;
+  }
 }

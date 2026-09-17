@@ -116,7 +116,7 @@ class TaskCard extends StatelessWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               // Priority Chip
-              _buildPriorityBadge(task.priority),
+              _buildPriorityBadge(context, task.priority),
 
               // Due Date
               if (task.dueDate != null)
@@ -212,26 +212,33 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPriorityBadge(TaskPriority priority) {
+  Widget _buildPriorityBadge(BuildContext context, TaskPriority priority) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     Color color;
     Color bgColor;
 
     switch (priority) {
       case TaskPriority.urgent:
-        color = LexColors.error;
-        bgColor = LexColors.errorLight;
+        color = isDark ? const Color(0xFFF87171) : LexColors.error;
+        bgColor = isDark ? color.withValues(alpha: 0.18) : LexColors.errorLight;
         break;
       case TaskPriority.high:
-        color = const Color(0xFFE11D48);
-        bgColor = const Color(0xFFFFF1F2);
+        color = isDark ? const Color(0xFFFB7185) : const Color(0xFFE11D48);
+        bgColor = isDark
+            ? color.withValues(alpha: 0.18)
+            : const Color(0xFFFFF1F2);
         break;
       case TaskPriority.medium:
-        color = LexColors.warning;
-        bgColor = LexColors.accentLight;
+        color = isDark ? LexColors.accentGold : LexColors.warning;
+        bgColor = isDark
+            ? color.withValues(alpha: 0.18)
+            : LexColors.accentLight;
         break;
       case TaskPriority.low:
-        color = LexColors.textSecondaryLight;
-        bgColor = const Color(0xFFF1F5F9);
+        color = isDark
+            ? LexColors.textSecondaryDark
+            : LexColors.textSecondaryLight;
+        bgColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9);
         break;
     }
 

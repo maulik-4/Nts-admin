@@ -15,9 +15,12 @@ class TeamRepository {
 
   TeamRepository(this._dio);
 
-  Future<List<TeamMember>> getTeamMembers() async {
+  Future<List<TeamMember>> getTeamMembers({int? firmId}) async {
     try {
-      final response = await _dio.get('/api/auth/users/');
+      final response = await _dio.get(
+        '/api/auth/users/',
+        queryParameters: firmId != null ? {'firm': firmId} : null,
+      );
       if (response.data is List) {
         return (response.data as List)
             .map((item) => TeamMember.fromJson(item as Map<String, dynamic>))

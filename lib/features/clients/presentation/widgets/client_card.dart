@@ -69,13 +69,17 @@ class ClientCard extends StatelessWidget {
                                 : LexColors.textSecondaryLight,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            client.city!,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isDark
-                                  ? LexColors.textSecondaryDark
-                                  : LexColors.textSecondaryLight,
+                          Expanded(
+                            child: Text(
+                              client.city!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? LexColors.textSecondaryDark
+                                    : LexColors.textSecondaryLight,
+                              ),
                             ),
                           ),
                         ],
@@ -100,18 +104,22 @@ class ClientCard extends StatelessWidget {
                     : LexColors.textSecondaryLight,
               ),
               const SizedBox(width: 6),
-              Text(
-                client.phone,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: isDark
-                      ? LexColors.textPrimaryDark
-                      : LexColors.slatePrimary,
+              Flexible(
+                child: Text(
+                  client.phone,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? LexColors.textPrimaryDark
+                        : LexColors.slatePrimary,
+                  ),
                 ),
               ),
               if (client.email != null && client.email!.isNotEmpty) ...[
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Icon(
                   Icons.email_outlined,
                   size: 14,

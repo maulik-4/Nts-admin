@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../shared/widgets/app_brand_logo.dart';
 import '../providers/auth_notifier.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -32,50 +33,26 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Legal Brand Icon / Monogram
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: isDark ? LexColors.surfaceDark : LexColors.slatePrimary,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isDark ? LexColors.accentGold : LexColors.borderLight,
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Text(
-                  'NTS',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.5,
-                    color: isDark ? LexColors.accentGold : Colors.white,
-                  ),
-                ),
-              ),
+            // Vidhanta Brand Logo - completely covers container with BoxFit.cover
+            AppBrandLogo(
+              size: 84,
+              borderRadius: BorderRadius.circular(22),
+              showBorder: true,
             ),
             const SizedBox(height: 24),
             Text(
-              'NTS Legal Pro',
+              'VIDHANTA',
               style: Theme.of(context).textTheme.headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.2),
+                  ?.copyWith(fontWeight: FontWeight.w800, letterSpacing: 2.0),
             ),
             const SizedBox(height: 6),
             Text(
-              'Legal Practice & SaaS Management',
+              'Legal Management System',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: isDark
                     ? LexColors.textSecondaryDark
                     : LexColors.textSecondaryLight,
+                letterSpacing: 0.5,
               ),
             ),
             const SizedBox(height: 48),

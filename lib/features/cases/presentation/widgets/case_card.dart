@@ -24,51 +24,70 @@ class CaseCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? LexColors.surfaceDark
-                      : const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: isDark
-                        ? LexColors.borderDark
-                        : LexColors.borderLight,
-                  ),
-                ),
-                child: Text(
-                  caseItem.caseNumber,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? LexColors.accentGold
-                        : Theme.of(context).colorScheme.primary,
-                  ),
+              Expanded(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? LexColors.surfaceDark
+                            : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: isDark
+                              ? LexColors.borderDark
+                              : LexColors.borderLight,
+                        ),
+                      ),
+                      child: Text(
+                        caseItem.caseNumber,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? LexColors.accentGold
+                              : Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    if (caseItem.caseType.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFE2E8F0),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          caseItem.caseType,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? LexColors.textSecondaryDark
+                                : LexColors.slateLight,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
               const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF1E293B)
-                      : const Color(0xFFE2E8F0),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  caseItem.caseType,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? LexColors.textSecondaryDark
-                        : LexColors.slateLight,
-                  ),
-                ),
-              ),
-              const Spacer(),
               StatusBadge(status: caseItem.status),
             ],
           ),
@@ -160,6 +179,8 @@ class CaseCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Next Hearing: ${caseItem.upcomingHearing!.date}${caseItem.upcomingHearing!.startTime != null ? " at ${caseItem.upcomingHearing!.startTime}" : ""}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,

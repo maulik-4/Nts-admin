@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/theme/theme_mode_provider.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../notifications/data/repositories/notifications_repository.dart';
 
@@ -61,6 +62,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentThemeMode = ref.watch(themeModeProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings & Preferences')),
@@ -69,6 +71,69 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           : ListView(
               padding: const EdgeInsets.all(20),
               children: [
+                // Theme & Appearance Section
+                Text(
+                  'Appearance & Theme',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? LexColors.textPrimaryDark
+                        : LexColors.slatePrimary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                LexCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Select Application Theme',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? LexColors.textSecondaryDark
+                              : LexColors.textSecondaryLight,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: SegmentedButton<ThemeMode>(
+                          segments: const [
+                            ButtonSegment(
+                              value: ThemeMode.system,
+                              label: Text('System'),
+                              icon: Icon(Icons.brightness_auto_outlined),
+                            ),
+                            ButtonSegment(
+                              value: ThemeMode.light,
+                              label: Text('Light'),
+                              icon: Icon(Icons.light_mode_outlined),
+                            ),
+                            ButtonSegment(
+                              value: ThemeMode.dark,
+                              label: Text('Dark'),
+                              icon: Icon(Icons.dark_mode_outlined),
+                            ),
+                          ],
+                          selected: {currentThemeMode},
+                          onSelectionChanged: (set) {
+                            if (set.isNotEmpty) {
+                              ref
+                                  .read(themeModeProvider.notifier)
+                                  .setThemeMode(set.first);
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
                 Text(
                   'Email & Alert Notifications',
                   style: TextStyle(
@@ -126,7 +191,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 24),
 
                 Text(
-                  'Application & Security',
+                  'Application Information',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -141,26 +206,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      _buildInfoRow('Application Name', 'NTS Legal Pro'),
+                      _buildInfoRow(context, 'Application Name', 'Vidhanta'),
                       const Divider(),
                       _buildInfoRow(
+                        context,
                         'Build Version',
                         '1.0.0+1 (Production Release)',
                       ),
                       const Divider(),
                       _buildInfoRow(
-                        'Cloud API',
-                        'api.hphighcourt.site (TLS Secure)',
+                        context,
+                        'Legal Services',
+                        'Role-based Legal Management System',
                       ),
                       const Divider(),
                       _buildInfoRow(
-                        'Session Security',
-                        'Encrypted JWT with Keystore/Keychain',
+                        context,
+                        'Security Standard',
+                        'Encrypted Credentials & Session Management',
                       ),
                       const Divider(),
                       _buildInfoRow(
-                        'Data Isolation',
-                        'Strict Multi-Tenant Separation',
+                        context,
+                        'Support Desk',
+                        'support@vidhanta.com',
                       ),
                     ],
                   ),
@@ -170,16 +239,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(BuildContext context, String label, String value) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
           Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            label,
+            style: TextStyle(
+              color: isDark
+                  ? LexColors.textSecondaryDark
+                  : LexColors.textSecondaryLight,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: isDark
+                    ? LexColors.textPrimaryDark
+                    : LexColors.textPrimaryLight,
+              ),
+            ),
           ),
         ],
       ),

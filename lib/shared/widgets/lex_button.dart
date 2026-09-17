@@ -84,13 +84,17 @@ class LexButton extends StatelessWidget {
         children: [
           Icon(icon, size: 18, color: foregroundColor),
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: foregroundColor,
-              letterSpacing: 0.2,
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: foregroundColor,
+                letterSpacing: 0.2,
+              ),
             ),
           ),
         ],
@@ -98,6 +102,9 @@ class LexButton extends StatelessWidget {
     } else {
       content = Text(
         label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
@@ -121,7 +128,10 @@ class LexButton extends StatelessWidget {
         child: InkWell(
           onTap: isEnabled ? onPressed : null,
           borderRadius: BorderRadius.circular(8),
-          child: Center(child: content),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Center(child: content),
+          ),
         ),
       ),
     );

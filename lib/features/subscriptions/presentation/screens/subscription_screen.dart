@@ -148,16 +148,21 @@ class SubscriptionScreen extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Available Subscription Plans',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: isDark
-                            ? LexColors.textPrimaryDark
-                            : firmTheme.primaryColor,
+                    Expanded(
+                      child: Text(
+                        'Available Subscription Plans',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: isDark
+                              ? LexColors.textPrimaryDark
+                              : firmTheme.primaryColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       '${plans.length} tiers',
                       style: const TextStyle(fontSize: 12, color: Colors.grey),

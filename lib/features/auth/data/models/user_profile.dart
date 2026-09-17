@@ -158,4 +158,28 @@ class UserProfile {
       isSuperuser: isSuperuser,
     );
   }
+
+  UserProfile copyWith({
+    int? id,
+    String? username,
+    String? email,
+    String? name,
+    String? role,
+    int? firmId,
+    String? firmName,
+    String? phone,
+    bool? isSuperuser,
+  }) {
+    return UserProfile(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      role: role ?? this.role,
+      firmId: firmId ?? this.firmId,
+      firmName: firmName ?? this.firmName,
+      phone: phone ?? this.phone,
+      isSuperuser: isSuperuser ?? this.isSuperuser,
+    );
+  }
 }
