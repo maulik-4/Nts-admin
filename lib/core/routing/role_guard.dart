@@ -18,6 +18,11 @@ class RoleGuard {
       return '/splash';
     }
 
+    // Allow splash screen to display its artwork and manage its own transition
+    if (currentPath == '/splash') {
+      return null;
+    }
+
     final isAuthRoute =
         currentPath == '/login' ||
         currentPath == '/register' ||
@@ -25,14 +30,14 @@ class RoleGuard {
 
     // 2. Unauthenticated check
     if (!isAuthenticated) {
-      if (currentPath.startsWith('/app') || currentPath == '/splash') {
+      if (currentPath.startsWith('/app')) {
         return '/login';
       }
       return null;
     }
 
     // 3. Authenticated user landing on entry or auth routes
-    if (currentPath == '/splash' || isAuthRoute || currentPath == '/app') {
+    if (isAuthRoute || currentPath == '/app') {
       return '/app/dashboard';
     }
 

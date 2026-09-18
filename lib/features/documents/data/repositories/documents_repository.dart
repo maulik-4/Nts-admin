@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,6 +41,16 @@ class DocumentsRepository {
   }) => _remoteDataSource.downloadDocument(
     id: id,
     savePath: savePath,
+    onProgress: onProgress,
+  );
+
+  Future<Uint8List> getDocumentBytes({
+    required int id,
+    String? fileUrl,
+    ProgressCallback? onProgress,
+  }) => _remoteDataSource.getDocumentBytes(
+    id: id,
+    fileUrl: fileUrl,
     onProgress: onProgress,
   );
 }

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_application_1/core/errors/api_exception.dart';
@@ -73,6 +75,18 @@ class MockDocumentsRemoteDataSource implements DocumentsRemoteDataSource {
     }
     return savePath;
   }
+
+  @override
+  Future<Uint8List> getDocumentBytes({
+    required int id,
+    String? fileUrl,
+    ProgressCallback? onProgress,
+  }) async {
+    if (shouldThrowError) {
+      throw const ApiException(message: 'Error fetching document bytes');
+    }
+    return Uint8List.fromList([0x25, 0x50, 0x44, 0x46]); // %PDF
+  }
 }
 
 void main() {
@@ -115,6 +129,12 @@ void main() {
         savePath: '/local/docs/sample_brief.pdf',
       );
       expect(path, '/local/docs/sample_brief.pdf');
+    });
+
+    test('getDocumentBytes returns valid bytes', () async {
+      final bytes = await repository.getDocumentBytes(id: 4);
+      expect(bytes.length, 4);
+      expect(bytes, Uint8List.fromList([0x25, 0x50, 0x44, 0x46]));
     });
 
     test('rethrows ApiException on remote failure', () async {

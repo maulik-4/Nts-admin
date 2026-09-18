@@ -14,6 +14,7 @@ import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../data/models/document_model.dart';
 import '../../data/repositories/documents_repository.dart';
 import '../providers/documents_notifier.dart';
+import '../widgets/pdf_viewer/pdf_viewer_modal.dart';
 
 class DocumentDetailScreen extends ConsumerStatefulWidget {
   final int documentId;
@@ -140,6 +141,16 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
       appBar: AppBar(
         title: const Text('Document Details'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.visibility_outlined),
+            tooltip: 'Preview Document',
+            onPressed: () {
+              final doc = docAsync.asData?.value;
+              if (doc != null) {
+                PdfViewerModal.show(context, doc);
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.delete_outline, color: LexColors.error),
             tooltip: 'Delete Document',
@@ -275,12 +286,24 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
                   const SizedBox(height: 16),
                 ],
 
+                // Preview Document Action Button
+                LexButton(
+                  label: 'Preview Document',
+                  icon: Icons.visibility_outlined,
+                  variant: LexButtonVariant.primary,
+                  onPressed: doc.file.isNotEmpty
+                      ? () => PdfViewerModal.show(context, doc)
+                      : null,
+                ),
+                const SizedBox(height: 12),
+
                 // Download Action Button
                 LexButton(
                   label: _downloadedFilePath != null
                       ? 'Download Again'
                       : 'Download Document',
                   icon: Icons.download_rounded,
+                  variant: LexButtonVariant.secondary,
                   isLoading: _isDownloading,
                   onPressed: _isDownloading ? null : () => _handleDownload(doc),
                 ),

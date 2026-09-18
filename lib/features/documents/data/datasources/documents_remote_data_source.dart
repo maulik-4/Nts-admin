@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -111,5 +113,50 @@ class DocumentsRemoteDataSource {
       if (e.error is ApiException) throw e.error as ApiException;
       throw ApiException.fromResponse(e.response?.statusCode, e.response?.data);
     }
+  }
+
+  Future<Uint8List> getDocumentBytes({
+    required int id,
+    String? fileUrl,
+    ProgressCallback? onProgress,
+  }) async {
+    try {
+      final response = await _dio.get<List<int>>(
+        '${ApiEndpoints.documents}$id/download/',
+        options: Options(responseType: ResponseType.bytes),
+        onReceiveProgress: onProgress,
+      );
+      if (response.data != null) {
+        return Uint8List.fromList(response.data!);
+      }
+    } on DioException catch (e) {
+      if (fileUrl != null && fileUrl.isNotEmpty) {
+        try {
+          final fallbackResponse = await _dio.get<List<int>>(
+            fileUrl,
+            options: Options(responseType: ResponseType.bytes),
+            onReceiveProgress: onProgress,
+          );
+          if (fallbackResponse.data != null) {
+            return Uint8List.fromList(fallbackResponse.data!);
+          }
+        } on DioException catch (fallbackErr) {
+          if (fallbackErr.error is ApiException) {
+            throw fallbackErr.error as ApiException;
+          }
+          throw ApiException.fromResponse(
+            fallbackErr.response?.statusCode,
+            fallbackErr.response?.data,
+          );
+        }
+      }
+
+      if (e.error is ApiException) throw e.error as ApiException;
+      throw ApiException.fromResponse(e.response?.statusCode, e.response?.data);
+    }
+
+    throw const ApiException(
+      message: 'Empty response while fetching document.',
+    );
   }
 }

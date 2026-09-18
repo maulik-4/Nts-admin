@@ -11,6 +11,7 @@ import '../../../../shared/widgets/lex_card.dart';
 import '../../../auth/domain/models/role_capabilities.dart';
 import '../../data/models/firm_profile.dart';
 import '../providers/branding_notifier.dart';
+import '../widgets/preview/firm_app_preview.dart';
 
 class BrandingSettingsScreen extends ConsumerStatefulWidget {
   const BrandingSettingsScreen({super.key});
@@ -355,10 +356,19 @@ class _BrandingSettingsScreenState
                       const VerticalDivider(width: 1, thickness: 1),
                       // Live Preview Column
                       Expanded(
-                        flex: 5,
+                        flex: 6,
                         child: SingleChildScrollView(
                           padding: const EdgeInsets.all(24),
-                          child: _buildLivePreviewCard(context, profile),
+                          child: FirmAppPreview(
+                            profile: profile,
+                            draftPrimaryColor: _draftPrimaryColor,
+                            draftAccentColor: _draftAccentColor,
+                            draftFontFamily: _draftFontFamily,
+                            draftSidebarDark: _draftSidebarDark,
+                            pickedLogoFile: _pickedLogoFile,
+                            existingLogoUrl: _existingLogoUrl,
+                            hasUnsavedChanges: _hasUnsavedChanges,
+                          ),
                         ),
                       ),
                     ],
@@ -371,8 +381,16 @@ class _BrandingSettingsScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Live Preview Card on top or bottom
-                      _buildLivePreviewCard(context, profile),
+                      FirmAppPreview(
+                        profile: profile,
+                        draftPrimaryColor: _draftPrimaryColor,
+                        draftAccentColor: _draftAccentColor,
+                        draftFontFamily: _draftFontFamily,
+                        draftSidebarDark: _draftSidebarDark,
+                        pickedLogoFile: _pickedLogoFile,
+                        existingLogoUrl: _existingLogoUrl,
+                        hasUnsavedChanges: _hasUnsavedChanges,
+                      ),
                       const SizedBox(height: 24),
                       _buildControls(context, profile, isDark),
                     ],
@@ -865,330 +883,6 @@ class _BrandingSettingsScreenState
           ],
         ),
       ],
-    );
-  }
-
-  /// Interactive live preview demonstrating the unsaved draft theme in real time
-  Widget _buildLivePreviewCard(BuildContext context, FirmProfile profile) {
-    final sidebarBg = _draftSidebarDark
-        ? const Color(0xFF0F172A)
-        : const Color(0xFFF1F5F9);
-    final sidebarText = _draftSidebarDark ? Colors.white : _draftPrimaryColor;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'LIVE PREVIEW',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.2,
-                color: Colors.grey,
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: _hasUnsavedChanges
-                    ? Colors.amber.withValues(alpha: 0.2)
-                    : Colors.green.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                _hasUnsavedChanges ? 'UNSAVED DRAFT' : 'CURRENT SAVED',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: _hasUnsavedChanges
-                      ? Colors.orange[800]
-                      : Colors.green[800],
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Container(
-          height: 380,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.grey.withValues(alpha: 0.25),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 18,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              // Mini App Bar
-              Container(
-                height: 44,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: _draftPrimaryColor,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Colors.black.withValues(alpha: 0.1),
-                    ),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: _draftAccentColor,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Icon(
-                        Icons.balance,
-                        size: 14,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        profile.name.isNotEmpty
-                            ? profile.name
-                            : 'Smith & Co. Law',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: _draftFontFamily,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Icon(
-                      Icons.notifications_none,
-                      size: 18,
-                      color: _draftAccentColor,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Mock Window Body: Mini Sidebar + Mini Content
-              Expanded(
-                child: Row(
-                  children: [
-                    // Mini Sidebar
-                    Container(
-                      width: 95,
-                      color: sidebarBg,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Column(
-                        children: [
-                          _buildMiniNavItem(
-                            icon: Icons.dashboard,
-                            label: 'Dashboard',
-                            isActive: true,
-                            activeColor: _draftAccentColor,
-                            textColor: sidebarText,
-                          ),
-                          _buildMiniNavItem(
-                            icon: Icons.people,
-                            label: 'Clients',
-                            isActive: false,
-                            activeColor: _draftAccentColor,
-                            textColor: sidebarText,
-                          ),
-                          _buildMiniNavItem(
-                            icon: Icons.gavel,
-                            label: 'Cases',
-                            isActive: false,
-                            activeColor: _draftAccentColor,
-                            textColor: sidebarText,
-                          ),
-                          _buildMiniNavItem(
-                            icon: Icons.group,
-                            label: 'Team',
-                            isActive: false,
-                            activeColor: _draftAccentColor,
-                            textColor: sidebarText,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Mini Content Area
-                    Expanded(
-                      child: Container(
-                        color: const Color(0xFFF8FAFC),
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Advocate Workspace',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                color: const Color(0xFF0F172A),
-                                fontFamily: _draftFontFamily,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Mini Metric Cards
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _buildMiniStatCard(
-                                    title: 'Active Cases',
-                                    value: '24',
-                                    accent: _draftAccentColor,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: _buildMiniStatCard(
-                                    title: 'Hearings',
-                                    value: '6',
-                                    accent: _draftPrimaryColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            // Mini Action Button
-                            Container(
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: _draftPrimaryColor,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  'Create New Case',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    fontFamily: _draftFontFamily,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Mini Accent Chip
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _draftAccentColor.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: _draftAccentColor,
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: Text(
-                                '• Hearing Scheduled Tomorrow',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                  color: _draftPrimaryColor,
-                                  fontFamily: _draftFontFamily,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMiniNavItem({
-    required IconData icon,
-    required String label,
-    required bool isActive,
-    required Color activeColor,
-    required Color textColor,
-  }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      decoration: BoxDecoration(
-        color: isActive
-            ? activeColor.withValues(alpha: 0.2)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 13,
-            color: isActive ? activeColor : textColor.withValues(alpha: 0.6),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-              color: isActive ? activeColor : textColor.withValues(alpha: 0.8),
-              fontFamily: _draftFontFamily,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMiniStatCard({
-    required String title,
-    required String value,
-    required Color accent,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(fontSize: 9, color: Colors.grey)),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: accent,
-              fontFamily: _draftFontFamily,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

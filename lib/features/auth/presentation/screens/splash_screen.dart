@@ -1,72 +1,132 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/lex_colors.dart';
-import '../../../../shared/widgets/app_brand_logo.dart';
 import '../providers/auth_notifier.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
-  const SplashScreen({super.key});
+  final Duration minDuration;
+
+  const SplashScreen({
+    super.key,
+    this.minDuration = const Duration(milliseconds: 1800),
+  });
 
   @override
   ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
+  Timer? _timer;
+
   @override
   void initState() {
     super.initState();
-    // Initialize session check as soon as widget builds
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.read(authNotifierProvider.notifier).checkSession();
+      _startInitialization();
     });
   }
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
+  Future<void> _startInitialization() async {
+    final stopwatch = Stopwatch()..start();
+
+    // Execute session restoration
+    try {
+      await ref.read(authNotifierProvider.notifier).checkSession();
+    } catch (_) {}
+
+    if (!mounted) return;
+
+    // Guarantee minimum display duration so the splash artwork is perceived
+    final elapsed = stopwatch.elapsedMilliseconds;
+    final remaining = widget.minDuration.inMilliseconds - elapsed;
+    if (remaining > 0) {
+      _timer = Timer(Duration(milliseconds: remaining), () {
+        if (!mounted) return;
+        _navigateToNext();
+      });
+    } else {
+      _navigateToNext();
+    }
+  }
+
+  void _navigateToNext() {
+    final authState = ref.read(authNotifierProvider);
+    if (authState.isAuthenticated) {
+      context.go('/app/dashboard');
+    } else {
+      context.go('/login');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: isDark ? LexColors.canvasDark : LexColors.canvasLight,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Vidhanta Brand Logo - completely covers container with BoxFit.cover
-            AppBrandLogo(
-              size: 84,
-              borderRadius: BorderRadius.circular(22),
-              showBorder: true,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'VIDHANTA',
-              style: Theme.of(context).textTheme.headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.w800, letterSpacing: 2.0),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Legal Management System',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isDark
-                    ? LexColors.textSecondaryDark
-                    : LexColors.textSecondaryLight,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(height: 48),
-            SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  isDark ? LexColors.accentGold : LexColors.accentBronze,
+      backgroundColor: Colors.white,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+          systemNavigationBarColor: Colors.white,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+        child: SafeArea(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Main Splash Screen Artwork - preserves exact aspect ratio & scales gracefully
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 24,
+                  ),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 480,
+                      maxHeight: 480,
+                    ),
+                    child: Image.asset(
+                      'assets/image/splashScreen.png',
+                      fit: BoxFit.contain,
+                      semanticLabel: 'Vidhanta Law Firm Management System',
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ],
+
+              // Subtle Loading Indicator at bottom during startup
+              const Positioned(
+                bottom: 32,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        LexColors.accentBronze,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
