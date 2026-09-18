@@ -18,6 +18,19 @@ void main() {
       expect(json.length, 2);
     });
 
+    test('LoginRequest includes fcm_token when provided', () {
+      const req = LoginRequest(
+        username: 'lawyer1',
+        password: 'secure_password',
+        fcmToken: 'sample_fcm_token_xyz',
+      );
+      final json = req.toJson();
+      expect(json['username'], 'lawyer1');
+      expect(json['password'], 'secure_password');
+      expect(json['fcm_token'], 'sample_fcm_token_xyz');
+      expect(json.length, 3);
+    });
+
     test('AuthTokenResponse parses DRF access token', () {
       final json = {
         'access': 'sample_jwt_access_token',

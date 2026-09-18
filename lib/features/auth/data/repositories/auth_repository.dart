@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/api_exception.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../../../core/storage/secure_token_storage.dart';
 import '../datasources/auth_remote_data_source.dart';
 import '../models/accept_invite_request.dart';
@@ -27,10 +28,31 @@ class AuthRepository {
   Future<UserProfile> login({
     required String username,
     required String password,
+    String? fcmToken,
   }) async {
     debugPrint('[AUTH] Initiating user login for: $username');
+
+    // Retrieve FCM device token if not explicitly provided
+    String? resolvedFcmToken = fcmToken;
+    if (resolvedFcmToken == null) {
+      try {
+        resolvedFcmToken = await NotificationService.instance.getDeviceToken();
+        if (resolvedFcmToken != null && resolvedFcmToken.isNotEmpty) {
+          debugPrint(
+            '[AUTH] Attaching FCM token to login request: $resolvedFcmToken',
+          );
+        }
+      } catch (e) {
+        debugPrint('[AUTH] Note on FCM token retrieval: $e');
+      }
+    }
+
     final tokenResponse = await remoteDataSource.login(
-      LoginRequest(username: username, password: password),
+      LoginRequest(
+        username: username,
+        password: password,
+        fcmToken: resolvedFcmToken,
+      ),
     );
 
     if (tokenResponse.accessToken.isEmpty) {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "853485234899",
+    "project_id": "astrogurujii-6c8b4",
+    "storage_bucket": "astrogurujii-6c8b4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:853485234899:android:33579fe2bb8b992a608226",
+        "android_client_info": {
+          "package_name": "com.app.vidhanta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbz46i87HnYZcSpZIf7FBK28ohL2Dj9mM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

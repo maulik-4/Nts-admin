@@ -24,6 +24,7 @@ class FakeAuthRepository implements AuthRepository {
   Future<UserProfile> login({
     required String username,
     required String password,
+    String? fcmToken,
   }) async {
     if (shouldFail) {
       throw ApiException(message: failMessage ?? 'Invalid credentials');
