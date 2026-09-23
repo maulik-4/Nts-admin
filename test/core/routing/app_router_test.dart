@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_application_1/core/models/app_update_info.dart';
+import 'package:flutter_application_1/core/providers/app_update_provider.dart';
 import 'package:flutter_application_1/core/routing/app_router.dart';
 import 'package:flutter_application_1/features/auth/data/models/user_profile.dart';
 import 'package:flutter_application_1/features/auth/domain/models/role_capabilities.dart';
@@ -58,6 +60,22 @@ class _MockPaymentsNotifier extends StateNotifier<AsyncValue<List<Payment>>>
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
+class _MockAppUpdateNotifier extends StateNotifier<AppUpdateInfo>
+    implements AppUpdateNotifier {
+  _MockAppUpdateNotifier(super.state);
+
+  @override
+  Future<AppUpdateInfo> checkAppVersion({
+    String? currentVersion,
+    int? currentBuildNumber,
+  }) async {
+    return state;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
 class _MockFirmsNotifier extends StateNotifier<AsyncValue<List<TenantFirm>>>
     implements FirmsNotifier {
   _MockFirmsNotifier(super.state);
@@ -67,6 +85,9 @@ class _MockFirmsNotifier extends StateNotifier<AsyncValue<List<TenantFirm>>>
 }
 
 final _mockOverrides = [
+  appUpdateNotifierProvider.overrideWith(
+    (ref) => _MockAppUpdateNotifier(const AppUpdateInfo()),
+  ),
   dashboardNotifierProvider.overrideWith(
     (ref) => _MockDashboardNotifier(const AsyncValue.data(DashboardData())),
   ),

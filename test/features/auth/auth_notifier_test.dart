@@ -4,6 +4,7 @@ import 'package:flutter_application_1/core/storage/secure_token_storage.dart';
 import 'package:flutter_application_1/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:flutter_application_1/features/auth/data/models/accept_invite_request.dart';
 import 'package:flutter_application_1/features/auth/data/models/register_request.dart';
+import 'package:flutter_application_1/features/auth/data/models/user_feedback_request.dart';
 import 'package:flutter_application_1/features/auth/data/models/user_profile.dart';
 import 'package:flutter_application_1/features/auth/data/repositories/auth_repository.dart';
 import 'package:flutter_application_1/features/auth/presentation/providers/auth_notifier.dart';
@@ -71,6 +72,16 @@ class FakeAuthRepository implements AuthRepository {
       throw ApiException(message: failMessage ?? 'Reset password failed');
     }
     return {'message': 'Password reset successful'};
+  }
+
+  @override
+  Future<Map<String, dynamic>> submitUserFeedback(
+    UserFeedbackRequest request,
+  ) async {
+    if (shouldFail) {
+      throw ApiException(message: failMessage ?? 'Feedback submission failed');
+    }
+    return {'message': 'Feedback submitted successfully'};
   }
 
   @override

@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/providers/app_update_provider.dart';
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../shared/widgets/force_update_dialog.dart';
 import '../providers/auth_notifier.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -41,7 +43,22 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Future<void> _startInitialization() async {
     final stopwatch = Stopwatch()..start();
 
-    // Execute session restoration
+    // 1. Check for App Updates first
+    bool isForceUpdate = false;
+    try {
+      final updateInfo = await ref
+          .read(appUpdateNotifierProvider.notifier)
+          .checkAppVersion();
+      if (updateInfo.isForceUpdate && mounted) {
+        isForceUpdate = true;
+        await ForceUpdateDialog.show(context, updateInfo);
+        return; // App is blocked by non-dismissible force update modal
+      }
+    } catch (_) {}
+
+    if (!mounted || isForceUpdate) return;
+
+    // 2. Execute session restoration
     try {
       await ref.read(authNotifierProvider.notifier).checkSession();
     } catch (_) {}

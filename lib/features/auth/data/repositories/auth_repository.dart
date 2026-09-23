@@ -8,6 +8,7 @@ import '../datasources/auth_remote_data_source.dart';
 import '../models/accept_invite_request.dart';
 import '../models/login_request.dart';
 import '../models/register_request.dart';
+import '../models/user_feedback_request.dart';
 import '../models/user_profile.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -124,6 +125,12 @@ class AuthRepository {
       token: token,
       password: password,
     );
+  }
+
+  Future<Map<String, dynamic>> submitUserFeedback(
+    UserFeedbackRequest request,
+  ) async {
+    return await remoteDataSource.submitUserFeedback(request);
   }
 
   Future<UserProfile?> restoreSession() async {

@@ -13,6 +13,7 @@ class ApiEndpoints {
   static const String users = '/auth/users/';
   static const String changeAdmin = '/auth/change-admin/';
   static const String tokenRefresh = '/auth/token/refresh/';
+  static const String userFeedback = '/user_feedback/';
 
   // Super Admin & Firms
   static const String adminCreateFirm = '/admin/create-firm/';

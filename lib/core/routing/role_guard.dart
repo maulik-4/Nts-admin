@@ -25,6 +25,7 @@ class RoleGuard {
 
     final isAuthRoute =
         currentPath == '/login' ||
+        currentPath == '/new-user' ||
         currentPath == '/register' ||
         currentPath == '/accept-invite';
 

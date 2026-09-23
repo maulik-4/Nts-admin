@@ -262,7 +262,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Navigation actions (Register Firm & Accept Invite)
+                // Navigation actions (New User inquiry & Accept Invite)
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 4,
+                  runSpacing: 8,
+                  children: [
+                    Text(
+                      'New User?',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    GestureDetector(
+                      onTap: () => context.push('/new-user'),
+                      child: Text(
+                        'Get in Touch / Request Access',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? LexColors.accentGold
+                              : LexColors.accentBronze,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 Wrap(
                   alignment: WrapAlignment.center,
                   crossAxisAlignment: WrapCrossAlignment.center,

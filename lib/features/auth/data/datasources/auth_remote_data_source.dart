@@ -8,6 +8,7 @@ import '../models/accept_invite_request.dart';
 import '../models/auth_token_response.dart';
 import '../models/login_request.dart';
 import '../models/register_request.dart';
+import '../models/user_feedback_request.dart';
 import '../models/user_profile.dart';
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
@@ -140,5 +141,23 @@ class AuthRemoteDataSource {
       }
     } catch (_) {}
     return null;
+  }
+
+  Future<Map<String, dynamic>> submitUserFeedback(UserFeedbackRequest request) async {
+    try {
+      final response = await _dio.post(
+        ApiEndpoints.userFeedback,
+        data: request.toJson(),
+      );
+      if (response.data is Map<String, dynamic>) {
+        return response.data as Map<String, dynamic>;
+      }
+      return {'message': 'Feedback submitted successfully'};
+    } on DioException catch (e) {
+      if (e.error is ApiException) {
+        throw e.error as ApiException;
+      }
+      throw ApiException.fromResponse(e.response?.statusCode, e.response?.data);
+    }
   }
 }

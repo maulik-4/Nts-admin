@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/providers/app_update_provider.dart';
 import '../../../../core/theme/lex_colors.dart';
 import '../../../../core/theme/theme_mode_provider.dart';
+import '../../../../shared/widgets/force_update_dialog.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../notifications/data/repositories/notifications_repository.dart';
 
@@ -211,7 +213,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       _buildInfoRow(
                         context,
                         'Build Version',
-                        '1.0.0+1 (Production Release)',
+                        '1.0.1+2 (Production Release)',
                       ),
                       const Divider(),
                       _buildInfoRow(
@@ -230,6 +232,45 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         context,
                         'Support Desk',
                         'support@vidhanta.com',
+                      ),
+                      const Divider(),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(
+                          Icons.system_update_alt,
+                          color: LexColors.accentBronze,
+                        ),
+                        title: const Text(
+                          'Check for Updates',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: const Text(
+                          'Ensure your app is up to date',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        trailing: OutlinedButton(
+                          onPressed: () async {
+                            final scaffold = ScaffoldMessenger.of(context);
+                            final info = await ref
+                                .read(appUpdateNotifierProvider.notifier)
+                                .checkAppVersion();
+                            if (!context.mounted) return;
+                            if (info.isForceUpdate) {
+                              ForceUpdateDialog.show(context, info);
+                            } else {
+                              scaffold.showSnackBar(
+                                const SnackBar(
+                                  content: Text('Vidhanta is currently up to date (v1.0.1).'),
+                                  backgroundColor: LexColors.success,
+                                ),
+                              );
+                            }
+                          },
+                          child: const Text('Check Now'),
+                        ),
                       ),
                     ],
                   ),
