@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/app_brand_logo.dart';
 import '../../../../shared/widgets/lex_button.dart';
@@ -88,18 +89,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             .forgotPassword(email);
                         if (dialogCtx.mounted) {
                           Navigator.of(dialogCtx).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                success
-                                    ? 'If that email exists in the system, password reset instructions have been sent.'
-                                    : 'Unable to submit reset request. Please check your network and try again.',
-                              ),
-                              backgroundColor: success
-                                  ? LexColors.success
-                                  : LexColors.error,
-                            ),
-                          );
+                          if (success) {
+                            AppAlerts.showSuccess(
+                              context,
+                              'If that email exists in the system, password reset instructions have been sent.',
+                            );
+                          } else {
+                            AppAlerts.showError(
+                              context,
+                              'Unable to submit reset request. Please check your network and try again.',
+                            );
+                          }
                         }
                       },
                 child: isSubmitting

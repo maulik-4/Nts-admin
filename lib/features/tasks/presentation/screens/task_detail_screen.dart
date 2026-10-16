@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/lex_button.dart';
 import '../../../../shared/widgets/lex_card.dart';
@@ -43,12 +44,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
       ref.invalidate(taskDetailProvider(widget.taskId));
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to update task status: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to update task status: $e');
       }
     } finally {
       if (mounted) setState(() => _isTogglingStatus = false);
@@ -67,21 +63,11 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
       _commentController.clear();
       ref.invalidate(taskDetailProvider(widget.taskId));
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Comment added successfully.'),
-            backgroundColor: LexColors.success,
-          ),
-        );
+        AppAlerts.showSuccess(context, 'Comment added successfully.');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to add comment: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to add comment: $e');
       }
     } finally {
       if (mounted) setState(() => _isPostingComment = false);
@@ -115,19 +101,12 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
     try {
       await ref.read(tasksNotifierProvider.notifier).deleteTask(widget.taskId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Task deleted successfully.')),
-        );
+        AppAlerts.showSuccess(context, 'Task deleted successfully.');
         context.pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to delete task: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to delete task: $e');
       }
     }
   }
@@ -167,6 +146,8 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               children: [
                 // Header Card
                 LexCard(
+                  borderRadius: 18,
+                  leftAccentColor: task.priority.color,
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,7 +171,10 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          StatusBadge(status: task.status.displayName),
+                          StatusBadge(
+                            status: task.status.displayName,
+                            showDot: true,
+                          ),
                         ],
                       ),
                       const SizedBox(height: 16),

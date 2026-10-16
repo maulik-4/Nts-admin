@@ -4,9 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/errors/api_exception.dart';
-import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../core/utils/validators.dart';
-import '../../../../shared/widgets/lex_button.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
 import '../../../cases/presentation/providers/cases_notifier.dart';
@@ -36,7 +35,6 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
 
   int? _selectedCaseId;
   bool _isLoading = false;
-  String? _serverError;
   bool _initialized = false;
 
   bool get isEdit => widget.hearingId != null;
@@ -138,11 +136,10 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
   }
 
   Future<void> _submit() async {
-    setState(() => _serverError = null);
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedCaseId == null) {
-      setState(() => _serverError = 'Please select a case for this hearing.');
+      AppAlerts.showError(context, 'Please select a case for this hearing.');
       return;
     }
 
@@ -151,15 +148,15 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
     try {
       if (isEdit) {
         final request = UpdateHearingRequest(
-          title: _titleController.text,
-          date: _dateController.text,
+          title: _titleController.text.trim(),
+          date: _dateController.text.trim(),
           startTime: _startTimeController.text.trim().isNotEmpty
               ? _startTimeController.text.trim()
               : null,
           endTime: _endTimeController.text.trim().isNotEmpty
               ? _endTimeController.text.trim()
               : null,
-          courtName: _courtNameController.text,
+          courtName: _courtNameController.text.trim(),
           judgeName: _judgeNameController.text.trim().isNotEmpty
               ? _judgeNameController.text.trim()
               : null,
@@ -172,22 +169,20 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
             .read(hearingsNotifierProvider.notifier)
             .updateHearing(widget.hearingId!, request);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Hearing updated successfully')),
-          );
+          AppAlerts.showSuccess(context, 'Hearing updated successfully.');
           context.pop();
         }
       } else {
         final request = CreateHearingRequest(
-          title: _titleController.text,
-          date: _dateController.text,
+          title: _titleController.text.trim(),
+          date: _dateController.text.trim(),
           startTime: _startTimeController.text.trim().isNotEmpty
               ? _startTimeController.text.trim()
               : null,
           endTime: _endTimeController.text.trim().isNotEmpty
               ? _endTimeController.text.trim()
               : null,
-          courtName: _courtNameController.text,
+          courtName: _courtNameController.text.trim(),
           judgeName: _judgeNameController.text.trim().isNotEmpty
               ? _judgeNameController.text.trim()
               : null,
@@ -200,16 +195,14 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
             .read(hearingsNotifierProvider.notifier)
             .createHearing(request);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Hearing scheduled successfully')),
-          );
+          AppAlerts.showSuccess(context, 'Hearing scheduled successfully.');
           context.pop();
         }
       }
     } on ApiException catch (e) {
-      setState(() => _serverError = e.message);
+      if (mounted) AppAlerts.showError(context, e.message);
     } catch (e) {
-      setState(() => _serverError = 'An unexpected error occurred: $e');
+      if (mounted) AppAlerts.showError(context, 'An unexpected error occurred: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -221,120 +214,101 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
     final casesAsync = ref.watch(casesNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(isEdit ? 'Edit Hearing' : 'Schedule Hearing')),
+      appBar: AppBar(
+        title: Text(
+          isEdit ? 'Edit Hearing' : 'Schedule Hearing',
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (_serverError != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: LexColors.errorLight,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: LexColors.error.withAlpha(80)),
-                    ),
-                    child: Text(
-                      _serverError!,
-                      style: const TextStyle(
-                        color: LexColors.error,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-
                 LexCard(
+                  borderRadius: 20,
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                          ),
+                        ),
+                        child: Text(
+                          isEdit ? 'UPDATE HEARING' : 'HEARING AGENDA SPECIFICATION',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            color: Color(0xFF2563EB),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       Text(
                         'Hearing Details',
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: isDark
-                              ? LexColors.textPrimaryDark
-                              : LexColors.slatePrimary,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 18),
 
-                      // Associated Case Selector Dropdown
+                      // Associated Case Dropdown
                       Text(
-                        'Associated Case',
+                        'Associated Case *',
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? LexColors.textPrimaryDark
-                              : LexColors.textPrimaryLight,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
                         ),
                       ),
                       const SizedBox(height: 6),
                       casesAsync.when(
                         data: (cases) {
                           if (cases.isEmpty) {
-                            return TextButton.icon(
-                              onPressed: () =>
-                                  context.push('/app/cases/create'),
-                              icon: const Icon(Icons.add),
-                              label: const Text('Add a case first'),
-                            );
+                            return const Text('No active cases available.');
                           }
 
                           return DropdownButtonFormField<int>(
                             initialValue: _selectedCaseId,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
+                                horizontal: 14,
                                 vertical: 12,
                               ),
+                              prefixIcon: const Icon(Icons.folder_open_rounded, size: 19),
                               filled: true,
                               fillColor: isDark
-                                  ? LexColors.surfaceDark
-                                  : LexColors.canvasLight,
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFF8FAFC),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                  color: isDark
-                                      ? LexColors.borderDark
-                                      : LexColors.borderLight,
-                                ),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            hint: const Text('Select Associated Legal Case'),
+                            hint: const Text('Select Associated Case', style: TextStyle(fontSize: 13)),
                             items: cases.map((c) {
                               return DropdownMenuItem<int>(
                                 value: c.id,
                                 child: Text(
                                   '${c.caseNumber} - ${c.title}',
-                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 13),
                                 ),
                               );
                             }).toList(),
-                            onChanged: (val) {
-                              setState(() {
-                                _selectedCaseId = val;
-                                // Auto-fill court name if available
-                                if (val != null) {
-                                  final match = cases.where((c) => c.id == val);
-                                  if (match.isNotEmpty &&
-                                      _courtNameController.text.isEmpty) {
-                                    _courtNameController.text =
-                                        match.first.courtName;
-                                  }
-                                }
-                              });
-                            },
+                            onChanged: (val) =>
+                                setState(() => _selectedCaseId = val),
                             validator: (val) =>
                                 val == null ? 'Case is required' : null,
                           );
@@ -348,22 +322,21 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                       // Title
                       LexTextField(
                         controller: _titleController,
-                        label: 'Hearing Purpose / Title',
-                        hintText:
-                            'e.g. Bail Application Hearing or Evidence Stage',
+                        label: 'Hearing Purpose / Title *',
+                        hintText: 'e.g. Preliminary Hearing, Arguments',
                         prefixIcon: Icons.gavel_outlined,
                         validator: (val) =>
                             Validators.required(val, 'Hearing title'),
                       ),
                       const SizedBox(height: 16),
 
-                      // Date picker
+                      // Date Picker
                       GestureDetector(
                         onTap: _pickDate,
                         child: AbsorbPointer(
                           child: LexTextField(
                             controller: _dateController,
-                            label: 'Hearing Date',
+                            label: 'Hearing Date *',
                             hintText: 'YYYY-MM-DD',
                             prefixIcon: Icons.calendar_today_outlined,
                             validator: (val) =>
@@ -373,7 +346,7 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Time Pickers Row
+                      // Start & End Time Row
                       Row(
                         children: [
                           Expanded(
@@ -384,7 +357,7 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                                   controller: _startTimeController,
                                   label: 'Start Time',
                                   hintText: 'HH:MM:SS',
-                                  prefixIcon: Icons.schedule_outlined,
+                                  prefixIcon: Icons.access_time_rounded,
                                 ),
                               ),
                             ),
@@ -398,7 +371,7 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                                   controller: _endTimeController,
                                   label: 'End Time',
                                   hintText: 'HH:MM:SS',
-                                  prefixIcon: Icons.timelapse_outlined,
+                                  prefixIcon: Icons.access_time_rounded,
                                 ),
                               ),
                             ),
@@ -410,19 +383,19 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                       // Court Name
                       LexTextField(
                         controller: _courtNameController,
-                        label: 'Court Room / Venue',
-                        hintText: 'e.g. Court Room 3, High Court of HP',
+                        label: 'Court / Bench Name *',
+                        hintText: 'e.g. Courtroom 4, High Court of Delhi',
                         prefixIcon: Icons.account_balance_outlined,
                         validator: (val) =>
-                            Validators.required(val, 'Court room / venue'),
+                            Validators.required(val, 'Courtroom name'),
                       ),
                       const SizedBox(height: 16),
 
                       // Judge Name
                       LexTextField(
                         controller: _judgeNameController,
-                        label: 'Presiding Judge Name (Optional)',
-                        hintText: 'e.g. Hon. Justice A. K. Sharma',
+                        label: 'Judge / Presiding Officer (Optional)',
+                        hintText: 'e.g. Hon. Justice R. Sharma',
                         prefixIcon: Icons.person_pin_outlined,
                       ),
                       const SizedBox(height: 16),
@@ -431,8 +404,7 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                       LexTextField(
                         controller: _notesController,
                         label: 'Hearing Notes / Instructions (Optional)',
-                        hintText:
-                            'List required documents, orders, or arguments...',
+                        hintText: 'Add preparation steps, client instructions, or documents to bring...',
                         prefixIcon: Icons.notes_outlined,
                         maxLines: 3,
                       ),
@@ -442,14 +414,36 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                 const SizedBox(height: 24),
 
                 // Submit Button
-                LexButton(
-                  label: isEdit ? 'Save Hearing Changes' : 'Schedule Hearing',
-                  variant: LexButtonVariant.primary,
-                  isLoading: _isLoading,
-                  icon: isEdit
-                      ? Icons.save_outlined
-                      : Icons.event_available_outlined,
-                  onPressed: _submit,
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F1F38),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 3,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            isEdit ? 'Save Hearing Changes' : 'Schedule Hearing',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14.5,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                  ),
                 ),
               ],
             ),

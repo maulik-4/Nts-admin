@@ -68,6 +68,9 @@ class Hearing {
   }
 
   DateTime? get parsedDate => DateTime.tryParse(date);
+
+  String get status => 'SCHEDULED';
+  String get hearingType => 'COURT HEARING';
 }
 
 class CreateHearingRequest {

@@ -24,9 +24,15 @@ class PaymentCard extends StatelessWidget {
     final formattedAmount =
         '₹${double.tryParse(payment.amount)?.toStringAsFixed(2) ?? payment.amount}';
 
+    final accentColor = payment.isPaid
+        ? const Color(0xFF10B981)
+        : const Color(0xFFF59E0B);
+
     return LexCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(16),
+      borderRadius: 16,
+      leftAccentColor: accentColor,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -44,67 +50,59 @@ class PaymentCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: isDark
-                            ? LexColors.textPrimaryDark
-                            : LexColors.slatePrimary,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    if (payment.clientName != null &&
-                        payment.clientName!.isNotEmpty)
-                      Text(
-                        payment.clientName!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? LexColors.textSecondaryDark
-                              : LexColors.textPrimaryLight,
-                        ),
-                      )
-                    else
-                      Text(
-                        'General Client Payment',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: isDark
-                              ? LexColors.textSecondaryDark
-                              : LexColors.textSecondaryLight,
-                        ),
+                    const SizedBox(height: 3),
+                    Text(
+                      payment.clientName?.isNotEmpty == true
+                          ? payment.clientName!
+                          : 'General Client Payment',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? const Color(0xFFCBD5E1)
+                            : const Color(0xFF334155),
                       ),
+                    ),
                   ],
                 ),
               ),
-              StatusBadge(status: payment.status.displayName),
+              StatusBadge(
+                status: payment.status.displayName,
+                showDot: true,
+              ),
             ],
           ),
           const SizedBox(height: 12),
-          const Divider(height: 1),
+          Divider(
+            height: 1,
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+          ),
           const SizedBox(height: 10),
           Row(
             children: [
               // Payment Method Chip
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: isDark
                       ? const Color(0xFF1E293B)
                       : const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       _methodIcon(payment.paymentMethod),
-                      size: 11,
+                      size: 12,
                       color: isDark
-                          ? LexColors.accentGold
-                          : LexColors.slatePrimary,
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B),
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -114,8 +112,8 @@ class PaymentCard extends StatelessWidget {
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: isDark
-                            ? LexColors.accentGold
-                            : LexColors.slatePrimary,
+                            ? const Color(0xFFCBD5E1)
+                            : const Color(0xFF475569),
                       ),
                     ),
                   ],
@@ -127,9 +125,9 @@ class PaymentCard extends StatelessWidget {
               if (payment.caseTitle != null &&
                   payment.caseTitle!.isNotEmpty) ...[
                 Icon(
-                  Icons.folder_outlined,
+                  Icons.folder_open_rounded,
                   size: 13,
-                  color: isDark ? LexColors.accentGold : LexColors.slateLight,
+                  color: isDark ? LexColors.accentGold : const Color(0xFF64748B),
                 ),
                 const SizedBox(width: 4),
                 Expanded(
@@ -138,11 +136,11 @@ class PaymentCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w500,
                       color: isDark
-                          ? LexColors.textSecondaryDark
-                          : LexColors.textSecondaryLight,
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B),
                     ),
                   ),
                 ),
@@ -151,15 +149,25 @@ class PaymentCard extends StatelessWidget {
 
               // Date
               if (dateStr.isNotEmpty)
-                Text(
-                  dateStr,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isDark
-                        ? LexColors.textSecondaryDark
-                        : LexColors.textSecondaryLight,
+                Flexible(
+                  child: Text(
+                    dateStr,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark
+                          ? const Color(0xFF64748B)
+                          : const Color(0xFF94A3B8),
+                    ),
                   ),
                 ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18,
+                color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+              ),
             ],
           ),
         ],

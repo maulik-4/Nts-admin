@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/lex_button.dart';
 import '../../../../shared/widgets/lex_card.dart';
@@ -80,13 +81,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
       if (success && mounted) {
         // Show success notification and navigate to login
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Law firm registration submitted successfully! Please sign in.',
-            ),
-            backgroundColor: LexColors.success,
-          ),
+        AppAlerts.showSuccess(
+          context,
+          'Law firm registration submitted successfully! Please sign in.',
         );
         context.go('/login');
       }

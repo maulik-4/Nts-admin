@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/lex_card.dart';
@@ -485,21 +486,16 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                     .read(firmsNotifierProvider.notifier)
                     .toggleActive(firm.id);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        newStatus
-                            ? 'Firm "${firm.name}" is now Active'
-                            : 'Firm "${firm.name}" is now Deactivated',
-                      ),
-                    ),
+                  AppAlerts.showSuccess(
+                    context,
+                    newStatus
+                        ? 'Firm "${firm.name}" is now Active'
+                        : 'Firm "${firm.name}" is now Deactivated',
                   );
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update status: $e')),
-                  );
+                  AppAlerts.showError(context, 'Failed to update status: $e');
                 }
               }
             },
@@ -541,23 +537,16 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                     .read(firmsNotifierProvider.notifier)
                     .toggleBlock(firm.id);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        newStatus
-                            ? 'Firm "${firm.name}" is now Blocked'
-                            : 'Firm "${firm.name}" is now Allowed (Unblocked)',
-                      ),
-                    ),
+                  AppAlerts.showSuccess(
+                    context,
+                    newStatus
+                        ? 'Firm "${firm.name}" is now Blocked'
+                        : 'Firm "${firm.name}" is now Allowed (Unblocked)',
                   );
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to update block status: $e'),
-                    ),
-                  );
+                  AppAlerts.showError(context, 'Failed to update block status: $e');
                 }
               }
             },
@@ -900,11 +889,7 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                   : () async {
                       final userId = int.tryParse(userIdCtrl.text.trim());
                       if (userId == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please enter a valid User ID'),
-                          ),
-                        );
+                        AppAlerts.showError(context, 'Please enter a valid User ID');
                         return;
                       }
 
@@ -915,20 +900,15 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                             .changeAdmin(firm.id, userId);
                         if (context.mounted) {
                           Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Firm Admin changed successfully'),
-                            ),
+                          AppAlerts.showSuccess(
+                            context,
+                            'Firm Admin changed successfully',
                           );
                         }
                       } catch (e) {
                         setDialogState(() => isSubmitting = false);
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Failed to change admin: $e'),
-                            ),
-                          );
+                          AppAlerts.showError(context, 'Failed to change admin: $e');
                         }
                       }
                     },
@@ -1170,21 +1150,17 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                                   });
                               if (context.mounted) {
                                 Navigator.pop(ctx);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Law Firm created successfully',
-                                    ),
-                                  ),
+                                AppAlerts.showSuccess(
+                                  context,
+                                  'Law Firm created successfully',
                                 );
                               }
                             } catch (e) {
                               setModalState(() => isSubmitting = false);
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error creating firm: $e'),
-                                  ),
+                                AppAlerts.showError(
+                                  context,
+                                  'Error creating firm: $e',
                                 );
                               }
                             }
@@ -1323,18 +1299,12 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                             });
                         if (context.mounted) {
                           Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Firm updated successfully'),
-                            ),
-                          );
+                          AppAlerts.showSuccess(context, 'Firm updated successfully');
                         }
                       } catch (e) {
                         setDialogState(() => isSubmitting = false);
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Update failed: $e')),
-                          );
+                          AppAlerts.showError(context, 'Update failed: $e');
                         }
                       }
                     },
@@ -1380,15 +1350,11 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                     .read(firmsNotifierProvider.notifier)
                     .deleteFirm(firm.id);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Firm "${firm.name}" deleted')),
-                  );
+                  AppAlerts.showSuccess(context, 'Firm "${firm.name}" deleted');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+                  AppAlerts.showError(context, 'Delete failed: $e');
                 }
               }
             },

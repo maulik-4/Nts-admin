@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/capability_gate.dart';
 import '../../../../shared/widgets/lex_card.dart';
-import '../../../../shared/widgets/lex_text_field.dart';
+import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../auth/domain/models/role_capabilities.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../data/models/team_member.dart';
@@ -55,111 +57,244 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: member.badgeColor.withValues(alpha: 0.15),
-              child: Text(
-                member.username.isNotEmpty
-                    ? member.username[0].toUpperCase()
-                    : 'U',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: member.badgeColor,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Avatar & Role
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF0F1F38),
+                  border: Border.all(
+                    color: member.badgeColor,
+                    width: 2.5,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    member.username.isNotEmpty
+                        ? member.username[0].toUpperCase()
+                        : 'U',
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    member.username,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    member.displayRole,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: member.badgeColor,
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 12),
+              Text(
+                member.username,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDetailRow('Email', member.email, isDark),
-            const Divider(height: 16),
-            _buildDetailRow(
-              'Firm Organization',
-              member.firm.isNotEmpty ? member.firm : 'Current Firm',
-              isDark,
-            ),
-            const Divider(height: 16),
-            _buildDetailRow('Role Authority', member.displayRole, isDark),
-            if (member.joined != null) ...[
-              const Divider(height: 16),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: member.badgeColor.withAlpha(30),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: member.badgeColor.withAlpha(70)),
+                ),
+                child: Text(
+                  member.displayRole.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                    color: member.badgeColor,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Divider(
+                height: 1,
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              ),
+              const SizedBox(height: 16),
+
+              // Details List
               _buildDetailRow(
-                'Member Since',
-                DateFormat.yMMMMd().format(member.joined!),
+                'Email Address',
+                member.email,
+                isDark,
+                trailing: IconButton(
+                  icon: const Icon(Icons.copy_rounded, size: 16),
+                  color: const Color(0xFF2563EB),
+                  tooltip: 'Copy Email',
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: member.email));
+                    AppAlerts.showSuccess(context, 'Email copied to clipboard');
+                  },
+                ),
+              ),
+              const SizedBox(height: 10),
+              _buildDetailRow(
+                'Firm Organization',
+                member.firm.isNotEmpty ? member.firm : 'Current Firm',
                 isDark,
               ),
+              const SizedBox(height: 10),
+              _buildDetailRow(
+                'Role Authority',
+                member.displayRole,
+                isDark,
+              ),
+              if (member.joined != null) ...[
+                const SizedBox(height: 10),
+                _buildDetailRow(
+                  'Member Since',
+                  DateFormat.yMMMMd().format(member.joined!),
+                  isDark,
+                ),
+              ],
+              const SizedBox(height: 22),
+
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F1F38),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Close', style: TextStyle(fontWeight: FontWeight.w700)),
+                ),
+              ),
             ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Close'),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildDetailRow(String label, String value, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: isDark
-                  ? LexColors.textSecondaryDark
-                  : LexColors.textSecondaryLight,
-            ),
+  Widget _buildDetailRow(
+    String label,
+    String value,
+    bool isDark, {
+    Widget? trailing,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: isDark
-                  ? LexColors.textPrimaryDark
-                  : LexColors.textPrimaryLight,
-            ),
+        ),
+        ?trailing,
+      ],
+    );
+  }
+
+  Widget _buildFilterPill({
+    required BuildContext context,
+    required String label,
+    int? count,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark ? primaryColor : const Color(0xFF0F1F38))
+              : (isDark ? const Color(0xFF1E293B) : Colors.white),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? (isDark ? primaryColor : const Color(0xFF0F1F38))
+                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+            width: 1,
           ),
-        ],
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF0F1F38).withAlpha(35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected
+                    ? Colors.white
+                    : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
+              ),
+            ),
+            if (count != null) ...[
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Colors.white.withAlpha(50)
+                      : (isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '$count',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected
+                        ? Colors.white
+                        : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -167,19 +302,22 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
   @override
   Widget build(BuildContext context) {
     final filteredMembersAsync = ref.watch(filteredTeamMembersProvider);
+    final allMembers = ref.watch(teamNotifierProvider).value ?? [];
     final activeFilter = ref.watch(teamFilterProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final advocatesCount = allMembers.where((m) => m.role.toLowerCase() == 'lawyer').length;
+    final staffCount = allMembers.where((m) => m.role.toLowerCase() == 'staff').length;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          activeFilter == TeamFilter.advocates
-              ? 'Firm Advocates'
-              : 'Firm Team & Advocates',
+        title: const Text(
+          'Firm Team',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
             tooltip: 'Refresh Team',
             onPressed: () =>
                 ref.read(teamNotifierProvider.notifier).loadTeamMembers(),
@@ -189,74 +327,107 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
       floatingActionButton: CapabilityGate(
         capability: UserCapability.manageTeam,
         child: FloatingActionButton.extended(
+          heroTag: 'fab_add_member',
           onPressed: () => _showAddMemberModal(context),
-          icon: const Icon(Icons.person_add_outlined),
-          label: const Text('Add Member'),
+          backgroundColor: const Color(0xFF0F1F38),
+          foregroundColor: Colors.white,
+          elevation: 4,
+          icon: const Icon(Icons.person_add_rounded, size: 20),
+          label: const Text(
+            'Add Member',
+            style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
+          ),
         ),
       ),
       body: Column(
         children: [
           // Search & Filter Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: isDark ? LexColors.surfaceDark : LexColors.canvasLight,
-              border: Border(
-                bottom: BorderSide(
-                  color: isDark ? LexColors.borderDark : LexColors.borderLight,
-                  width: 1,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+            child: TextField(
+              controller: _searchCtrl,
+              onChanged: (val) {
+                ref.read(teamSearchQueryProvider.notifier).state = val;
+              },
+              decoration: InputDecoration(
+                hintText: 'Search by name, email, or role...',
+                hintStyle: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  size: 20,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
+                suffixIcon: _searchCtrl.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          ref.read(teamSearchQueryProvider.notifier).state = '';
+                        },
+                      )
+                    : null,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                filled: true,
+                fillColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1.5,
+                  ),
                 ),
               ),
             ),
-            child: Column(
+          ),
+
+          // Filter Tabs with Counts
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Row(
               children: [
-                // Search Input
-                TextField(
-                  controller: _searchCtrl,
-                  onChanged: (val) {
-                    ref.read(teamSearchQueryProvider.notifier).state = val;
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Search by name, email, or role...',
-                    prefixIcon: const Icon(Icons.search, size: 20),
-                    suffixIcon: _searchCtrl.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
-                            onPressed: () {
-                              _searchCtrl.clear();
-                              ref.read(teamSearchQueryProvider.notifier).state =
-                                  '';
-                            },
-                          )
-                        : null,
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                _buildFilterPill(
+                  context: context,
+                  label: 'All',
+                  count: allMembers.length,
+                  isSelected: activeFilter == TeamFilter.all,
+                  onTap: () => ref.read(teamFilterProvider.notifier).state = TeamFilter.all,
                 ),
-                const SizedBox(height: 10),
-                // Filter Tabs
-                Row(
-                  children: [
-                    _buildFilterChip('All', TeamFilter.all, activeFilter),
-                    const SizedBox(width: 8),
-                    _buildFilterChip(
-                      'Advocates',
-                      TeamFilter.advocates,
-                      activeFilter,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildFilterChip('Staff', TeamFilter.staff, activeFilter),
-                  ],
+                const SizedBox(width: 8),
+                _buildFilterPill(
+                  context: context,
+                  label: 'Advocates',
+                  count: advocatesCount,
+                  isSelected: activeFilter == TeamFilter.advocates,
+                  onTap: () => ref.read(teamFilterProvider.notifier).state = TeamFilter.advocates,
+                ),
+                const SizedBox(width: 8),
+                _buildFilterPill(
+                  context: context,
+                  label: 'Staff',
+                  count: staffCount,
+                  isSelected: activeFilter == TeamFilter.staff,
+                  onTap: () => ref.read(teamFilterProvider.notifier).state = TeamFilter.staff,
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 8),
 
           // Member List
           Expanded(
@@ -264,7 +435,12 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
               onRefresh: () =>
                   ref.read(teamNotifierProvider.notifier).loadTeamMembers(),
               child: filteredMembersAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: 5,
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
+                  itemBuilder: (_, _) => const SkeletonLoader(height: 80, borderRadius: 16),
+                ),
                 error: (err, _) => Center(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
@@ -272,7 +448,7 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(
-                          Icons.error_outline,
+                          Icons.error_outline_rounded,
                           size: 48,
                           color: LexColors.error,
                         ),
@@ -306,7 +482,7 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                                 children: [
                                   Icon(
                                     Icons.group_outlined,
-                                    size: 64,
+                                    size: 56,
                                     color: isDark
                                         ? LexColors.textSecondaryDark
                                         : LexColors.textSecondaryLight,
@@ -318,8 +494,8 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                                         : 'No team members found in your firm',
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                   const SizedBox(height: 6),
@@ -327,6 +503,7 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                                     'Add lawyers and staff to collaborate in your firm workspace.',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
+                                      fontSize: 12.5,
                                       color: isDark
                                           ? LexColors.textSecondaryDark
                                           : LexColors.textSecondaryLight,
@@ -342,7 +519,7 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                   }
 
                   return ListView.separated(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 92),
                     itemCount: members.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (ctx, idx) =>
@@ -357,34 +534,6 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
     );
   }
 
-  Widget _buildFilterChip(
-    String label,
-    TeamFilter filter,
-    TeamFilter activeFilter,
-  ) {
-    final isSelected = filter == activeFilter;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) {
-        ref.read(teamFilterProvider.notifier).state = filter;
-      },
-      selectedColor: isDark
-          ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2)
-          : Theme.of(context).colorScheme.primary,
-      labelStyle: TextStyle(
-        color: isSelected
-            ? (isDark ? LexColors.accentGold : Colors.white)
-            : (isDark
-                  ? LexColors.textSecondaryDark
-                  : LexColors.textSecondaryLight),
-        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-      ),
-    );
-  }
-
   Widget _buildMemberCard(BuildContext context, TeamMember member) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final initial = member.username.isNotEmpty
@@ -392,19 +541,27 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
         : 'U';
 
     return LexCard(
-      padding: const EdgeInsets.all(16),
+      borderRadius: 16,
+      leftAccentColor: member.badgeColor,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       onTap: () => _showMemberDetailsDialog(context, member),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: member.badgeColor.withValues(alpha: 0.15),
-            child: Text(
-              initial,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: member.badgeColor,
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isDark ? member.badgeColor.withAlpha(35) : member.badgeColor.withAlpha(20),
+            ),
+            child: Center(
+              child: Text(
+                initial,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: member.badgeColor,
+                ),
               ),
             ),
           ),
@@ -420,31 +577,29 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                         member.username,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style: TextStyle(
+                          fontSize: 15,
                           fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: member.badgeColor.withValues(alpha: 0.12),
+                        color: member.badgeColor.withAlpha(25),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: member.badgeColor.withValues(alpha: 0.4),
+                          color: member.badgeColor.withAlpha(50),
                           width: 1,
                         ),
                       ),
                       child: Text(
                         member.displayRole,
                         style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
                           color: member.badgeColor,
                         ),
                       ),
@@ -456,29 +611,29 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                   children: [
                     Icon(
                       Icons.email_outlined,
-                      size: 14,
+                      size: 13,
                       color: isDark
-                          ? LexColors.textSecondaryDark
-                          : LexColors.textSecondaryLight,
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 5),
                     Expanded(
                       child: Text(
                         member.email,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 12.5,
                           color: isDark
-                              ? LexColors.textSecondaryDark
-                              : LexColors.textSecondaryLight,
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B),
                         ),
                       ),
                     ),
                   ],
                 ),
                 if (member.joined != null) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
                     'Joined: ${DateFormat.yMMMd().format(member.joined!)}',
                     maxLines: 1,
@@ -486,8 +641,8 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                     style: TextStyle(
                       fontSize: 11,
                       color: isDark
-                          ? LexColors.textMutedDark
-                          : LexColors.textMutedLight,
+                          ? const Color(0xFF64748B)
+                          : const Color(0xFF94A3B8),
                     ),
                   ),
                 ],
@@ -496,9 +651,9 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
           ),
           const SizedBox(width: 8),
           Icon(
-            Icons.chevron_right,
+            Icons.chevron_right_rounded,
             size: 20,
-            color: isDark ? LexColors.textMutedDark : LexColors.textMutedLight,
+            color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
           ),
         ],
       ),
@@ -538,9 +693,7 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
     try {
       if (_mode == 0) {
         final currentFirmId = ref.read(authNotifierProvider).user?.firm;
-        await ref
-            .read(teamNotifierProvider.notifier)
-            .addUser(
+        await ref.read(teamNotifierProvider.notifier).addUser(
               username: _usernameCtrl.text.trim(),
               email: _emailCtrl.text.trim(),
               password: _passwordCtrl.text,
@@ -549,9 +702,7 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
             );
         if (mounted) {
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('User added to firm successfully')),
-          );
+          AppAlerts.showSuccess(context, 'Member added to firm successfully.');
         }
       } else {
         await ref
@@ -559,19 +710,12 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
             .inviteMember(email: _emailCtrl.text.trim(), role: _selectedRole);
         if (mounted) {
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invitation sent successfully')),
-          );
+          AppAlerts.showSuccess(context, 'Invitation email sent successfully.');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to add team member: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -584,11 +728,11 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? LexColors.surfaceDark : LexColors.canvasLight,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
-        top: 20,
+        top: 16,
         left: 20,
         right: 20,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
@@ -602,10 +746,10 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
             children: [
               Center(
                 child: Container(
-                  width: 40,
+                  width: 44,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.3),
+                    color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -613,44 +757,76 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
               const SizedBox(height: 16),
               Text(
                 _mode == 0
-                    ? 'Add Team Member to Firm'
-                    : 'Invite Team Member to Firm',
-                style: const TextStyle(
+                    ? 'Add Team Member'
+                    : 'Invite Team Member',
+                style: TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
 
               // Segmented mode selector
               SegmentedButton<int>(
                 segments: const [
-                  ButtonSegment(value: 0, label: Text('Add Directly')),
-                  ButtonSegment(value: 1, label: Text('Send Invite')),
+                  ButtonSegment(value: 0, label: Text('Add Directly', style: TextStyle(fontWeight: FontWeight.w600))),
+                  ButtonSegment(value: 1, label: Text('Send Invite', style: TextStyle(fontWeight: FontWeight.w600))),
                 ],
                 selected: {_mode},
                 onSelectionChanged: (set) => setState(() => _mode = set.first),
+                style: ButtonStyle(
+                  shape: WidgetStateProperty.all(
+                    RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
 
               if (_mode == 0) ...[
-                LexTextField(
+                Text(
+                  'Username *',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
                   controller: _usernameCtrl,
-                  label: 'Username *',
-                  hintText: 'e.g. advocate_smith',
-                  prefixIcon: Icons.person_outline,
+                  decoration: InputDecoration(
+                    hintText: 'e.g. advocate_smith',
+                    prefixIcon: const Icon(Icons.person_outline_rounded, size: 19),
+                    filled: true,
+                    fillColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                   validator: (v) =>
                       v?.trim().isEmpty == true ? 'Username required' : null,
                 ),
                 const SizedBox(height: 14),
               ],
 
-              LexTextField(
+              Text(
+                'Email Address *',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                ),
+              ),
+              const SizedBox(height: 6),
+              TextFormField(
                 controller: _emailCtrl,
-                label: 'Email Address *',
-                hintText: 'colleague@example.com',
-                prefixIcon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  hintText: 'colleague@example.com',
+                  prefixIcon: const Icon(Icons.email_outlined, size: 19),
+                  filled: true,
+                  fillColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
                 validator: (v) {
                   if (v?.trim().isEmpty == true) return 'Email required';
                   if (!v!.contains('@')) return 'Enter a valid email address';
@@ -660,12 +836,25 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
               const SizedBox(height: 14),
 
               if (_mode == 0) ...[
-                LexTextField(
+                Text(
+                  'Temporary Password *',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
                   controller: _passwordCtrl,
-                  label: 'Temporary Password *',
-                  hintText: 'Min. 8 characters',
-                  prefixIcon: Icons.lock_outline,
-                  isPassword: true,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: 'Min. 8 characters',
+                    prefixIcon: const Icon(Icons.lock_outline_rounded, size: 19),
+                    filled: true,
+                    fillColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                   validator: (v) => v == null || v.length < 6
                       ? 'Password must be >= 6 chars'
                       : null,
@@ -674,11 +863,22 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
               ],
 
               // Role selection dropdown
+              Text(
+                'Assigned Role',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                ),
+              ),
+              const SizedBox(height: 6),
               DropdownButtonFormField<String>(
                 initialValue: _selectedRole,
-                decoration: const InputDecoration(
-                  labelText: 'Assigned Role',
-                  prefixIcon: Icon(Icons.badge_outlined),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.badge_outlined, size: 19),
+                  filled: true,
+                  fillColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 items: const [
                   DropdownMenuItem(
@@ -691,29 +891,80 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
                   if (v != null) setState(() => _selectedRole = v);
                 },
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
 
-              ElevatedButton(
-                onPressed: _isLoading ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
+              // Information banner
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                  ),
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFF2563EB)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
                         _mode == 0
-                            ? 'Create Member Account'
-                            : 'Send Invite Email',
+                            ? 'Member will be added immediately with these credentials.'
+                            : 'An email invitation link will be dispatched to the colleague.',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF1E3A8A),
+                        ),
                       ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Action buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        backgroundColor: const Color(0xFF0F1F38),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              _mode == 0
+                                  ? 'Create Member'
+                                  : 'Send Invite',
+                              style: const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

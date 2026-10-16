@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/lex_colors.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
@@ -12,6 +11,55 @@ import '../widgets/client_card.dart';
 class ClientsListScreen extends ConsumerWidget {
   const ClientsListScreen({super.key});
 
+  Widget _buildFilterPill({
+    required BuildContext context,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark ? primaryColor : const Color(0xFF0F1F38))
+              : (isDark ? const Color(0xFF1E293B) : Colors.white),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? (isDark ? primaryColor : const Color(0xFF0F1F38))
+                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+            width: 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF0F1F38).withAlpha(35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected
+                ? Colors.white
+                : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final clientsAsync = ref.watch(filteredClientsProvider);
@@ -20,7 +68,10 @@ class ClientsListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Clients'),
+        title: const Text(
+          'Clients',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -33,86 +84,96 @@ class ClientsListScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab_add_client',
         onPressed: () => context.push('/app/clients/create'),
-        backgroundColor: isDark
-            ? Theme.of(context).colorScheme.secondary
-            : Theme.of(context).colorScheme.primary,
-        foregroundColor: isDark ? Colors.black : Colors.white,
-        icon: const Icon(Icons.person_add_outlined, size: 20),
+        backgroundColor: const Color(0xFF0F1F38),
+        foregroundColor: Colors.white,
+        elevation: 4,
+        icon: const Icon(Icons.person_add_rounded, size: 20),
         label: const Text(
           'Add Client',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
         ),
       ),
       body: Column(
         children: [
-          // Search & Filter header
+          // Search Box
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
             child: TextField(
               onChanged: (val) =>
                   ref.read(clientSearchQueryProvider.notifier).state = val,
               decoration: InputDecoration(
                 hintText: 'Search by name, phone, city...',
-                prefixIcon: const Icon(Icons.search, size: 20),
+                hintStyle: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  size: 20,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
+                  horizontal: 14,
                   vertical: 12,
                 ),
                 filled: true,
-                fillColor: isDark
-                    ? LexColors.surfaceDark
-                    : LexColors.canvasLight,
+                fillColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(
-                    color: isDark
-                        ? LexColors.borderDark
-                        : LexColors.borderLight,
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(
-                    color: isDark
-                        ? LexColors.borderDark
-                        : LexColors.borderLight,
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1.5,
                   ),
                 ),
               ),
             ),
           ),
+
+          // Filter Pills
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               children: [
-                FilterChip(
-                  label: const Text('All'),
-                  selected: activeFilter == null,
-                  onSelected: (_) =>
-                      ref.read(clientActiveFilterProvider.notifier).state =
-                          null,
+                _buildFilterPill(
+                  context: context,
+                  label: 'All Clients',
+                  isSelected: activeFilter == null,
+                  onTap: () =>
+                      ref.read(clientActiveFilterProvider.notifier).state = null,
                 ),
                 const SizedBox(width: 8),
-                FilterChip(
-                  label: const Text('Active'),
-                  selected: activeFilter == true,
-                  onSelected: (_) =>
-                      ref.read(clientActiveFilterProvider.notifier).state =
-                          true,
+                _buildFilterPill(
+                  context: context,
+                  label: 'Active',
+                  isSelected: activeFilter == true,
+                  onTap: () =>
+                      ref.read(clientActiveFilterProvider.notifier).state = true,
                 ),
                 const SizedBox(width: 8),
-                FilterChip(
-                  label: const Text('Inactive'),
-                  selected: activeFilter == false,
-                  onSelected: (_) =>
-                      ref.read(clientActiveFilterProvider.notifier).state =
-                          false,
+                _buildFilterPill(
+                  context: context,
+                  label: 'Inactive',
+                  isSelected: activeFilter == false,
+                  onTap: () =>
+                      ref.read(clientActiveFilterProvider.notifier).state = false,
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
           // Content Area
           Expanded(
@@ -122,8 +183,9 @@ class ClientsListScreen extends ConsumerWidget {
                   return EmptyStateWidget(
                     icon: Icons.people_outline,
                     title: 'No Clients Found',
-                    message: 'No client profiles match your current search criteria or have been added yet.',
-                    actionLabel: 'Add First Client',
+                    message:
+                        'No client profiles match your search criteria or active filter.',
+                    actionLabel: 'Add New Client',
                     onAction: () => context.push('/app/clients/create'),
                   );
                 }
@@ -132,7 +194,7 @@ class ClientsListScreen extends ConsumerWidget {
                   onRefresh: () =>
                       ref.read(clientsNotifierProvider.notifier).loadClients(),
                   child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 92),
                     itemCount: clients.length,
                     separatorBuilder: (context, index) =>
                         const SizedBox(height: 12),
@@ -148,11 +210,11 @@ class ClientsListScreen extends ConsumerWidget {
               },
               loading: () => ListView.separated(
                 padding: const EdgeInsets.all(16),
-                itemCount: 6,
+                itemCount: 5,
                 separatorBuilder: (context, index) =>
                     const SizedBox(height: 12),
                 itemBuilder: (context, index) =>
-                    const SkeletonLoader(height: 100, borderRadius: 12),
+                    const SkeletonLoader(height: 90, borderRadius: 16),
               ),
               error: (err, _) => ErrorStateWidget(
                 message: err.toString(),

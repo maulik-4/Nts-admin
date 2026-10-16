@@ -17,6 +17,100 @@ import '../../../tasks/presentation/providers/tasks_notifier.dart';
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
 
+  Widget _buildOperationTile(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBgColor,
+    required String badgeText,
+    required VoidCallback onTap,
+    bool isWarningBadge = false,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return LexCard(
+      onTap: onTap,
+      borderRadius: 16,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: isDark ? iconColor.withAlpha(35) : iconBgColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              size: 22,
+              color: iconColor,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? LexColors.textPrimaryDark : const Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+            decoration: BoxDecoration(
+              color: isWarningBadge
+                  ? (isDark ? const Color(0xFF78350F) : const Color(0xFFFEF3C7))
+                  : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isWarningBadge
+                    ? (isDark ? const Color(0xFFB45309) : const Color(0xFFFDE68A))
+                    : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+              ),
+            ),
+            child: Text(
+              badgeText,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: isWarningBadge
+                    ? const Color(0xFFD97706)
+                    : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 20,
+            color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
@@ -52,40 +146,245 @@ class MoreScreen extends ConsumerWidget {
       orElse: () => 0,
     );
 
+    final firmDisplayName = (user?.firmName != null && user!.firmName!.trim().isNotEmpty)
+        ? user.firmName!
+        : 'LexTech Law Practice';
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          userRole.isSuperAdmin
-              ? 'Platform Administration'
-              : 'Workspace & Operations',
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              firmDisplayName,
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+            ),
+            Text(
+              userRole.isSuperAdmin
+                  ? 'Platform Administration'
+                  : 'Workspace & Operations',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: isDark ? LexColors.textSecondaryDark : const Color(0xFF64748B),
+              ),
+            ),
+          ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Settings',
+            onPressed: () => context.push('/app/more/settings'),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // ============================================
+            // PROFILE CARD WITH SUMMARY STRIP
+            // ============================================
+            GestureDetector(
+              onTap: () => context.push('/app/more/profile'),
+              child: LexCard(
+                borderRadius: 18,
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF0F1F38),
+                            border: Border.all(
+                              color: const Color(0xFFE2E8F0),
+                              width: 2,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              user?.username.isNotEmpty == true
+                                  ? user!.username.substring(0, 1).toUpperCase()
+                                  : (userRole.isSuperAdmin ? 'S' : 'A'),
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user?.username ?? (userRole.isSuperAdmin ? 'Super Admin' : 'Advocate'),
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? LexColors.textPrimaryDark : const Color(0xFF0F172A),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                user?.email ?? '',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  RoleBadge(role: userRole),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'ID: #${user?.id ?? 1}',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 16,
+                          color: Color(0xFF94A3B8),
+                        ),
+                      ],
+                    ),
+
+                    if (!userRole.isSuperAdmin) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'FIRM',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF64748B),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  firmDisplayName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(width: 1, height: 26, color: const Color(0xFFCBD5E1)),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'ACCESS LEVEL',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF64748B),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  userRole.displayTitle,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(width: 1, height: 26, color: const Color(0xFFCBD5E1)),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'MEMBERS',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF64748B),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Active Firm',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
             // ============================================
             // SUPER ADMIN SPECIFIC OPERATIONS
             // ============================================
             if (userRole.isSuperAdmin) ...[
               Text(
-                'Platform Administration Console',
+                'PLATFORM ADMINISTRATION',
                 style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? LexColors.textPrimaryDark
-                      : LexColors.slatePrimary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               _buildOperationTile(
                 context,
                 title: 'Tenant Law Firms',
-                subtitle:
-                    'Manage registered firms, status, stats & admin transfer',
-                icon: Icons.business_outlined,
+                subtitle: 'Manage registered firms, status, stats & admin transfer',
+                icon: Icons.business_rounded,
+                iconColor: const Color(0xFF2563EB),
+                iconBgColor: const Color(0xFFEFF6FF),
                 badgeText: '$firmsCount registered',
                 onTap: () => context.push('/app/firms'),
               ),
@@ -94,7 +393,9 @@ class MoreScreen extends ConsumerWidget {
                 context,
                 title: 'Subscription Plans',
                 subtitle: 'Configure platform tiers, pricing & resource quotas',
-                icon: Icons.card_membership_outlined,
+                icon: Icons.card_membership_rounded,
+                iconColor: const Color(0xFF059669),
+                iconBgColor: const Color(0xFFECFDF5),
                 badgeText: 'Pricing',
                 onTap: () => context.push('/app/plans'),
               ),
@@ -103,7 +404,9 @@ class MoreScreen extends ConsumerWidget {
                 context,
                 title: 'Platform Team & Global Users',
                 subtitle: 'Manage platform administrators & global users',
-                icon: Icons.people_outline,
+                icon: Icons.people_alt_rounded,
+                iconColor: const Color(0xFF7C3AED),
+                iconBgColor: const Color(0xFFF5F3FF),
                 badgeText: 'Team',
                 onTap: () => context.push('/app/platform-team'),
               ),
@@ -111,9 +414,10 @@ class MoreScreen extends ConsumerWidget {
               _buildOperationTile(
                 context,
                 title: 'Support Tickets & Helpdesk',
-                subtitle:
-                    'Resolve tickets, reply to inquiries & platform assistance',
-                icon: Icons.support_agent_outlined,
+                subtitle: 'Resolve tickets, reply to inquiries & platform assistance',
+                icon: Icons.support_agent_rounded,
+                iconColor: const Color(0xFFEA580C),
+                iconBgColor: const Color(0xFFFFF7ED),
                 badgeText: 'Support',
                 onTap: () => context.push('/app/more/support'),
               ),
@@ -122,11 +426,13 @@ class MoreScreen extends ConsumerWidget {
                 context,
                 title: 'Platform Subscriptions',
                 subtitle: 'View firm subscription records, status & quotas',
-                icon: Icons.credit_card_outlined,
+                icon: Icons.credit_card_rounded,
+                iconColor: const Color(0xFF0891B2),
+                iconBgColor: const Color(0xFFECFEFF),
                 badgeText: 'Subscriptions',
                 onTap: () => context.push('/app/more/subscriptions'),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
             ],
 
             // ============================================
@@ -134,27 +440,25 @@ class MoreScreen extends ConsumerWidget {
             // ============================================
             if (!userRole.isSuperAdmin) ...[
               Text(
-                'Operations',
+                'OPERATIONS',
                 style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? LexColors.textPrimaryDark
-                      : Theme.of(context).colorScheme.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
-              // Tasks Card (Available to Firm Admin, Lawyer, Staff)
-              if (RoleCapabilities.hasCapability(
-                userRole,
-                UserCapability.viewTasks,
-              )) ...[
+              // Tasks Card
+              if (RoleCapabilities.hasCapability(userRole, UserCapability.viewTasks)) ...[
                 _buildOperationTile(
                   context,
                   title: 'Tasks & Deadlines',
                   subtitle: 'Assign work items, deadlines & progress updates',
-                  icon: Icons.task_alt_outlined,
+                  icon: Icons.task_alt_rounded,
+                  iconColor: const Color(0xFF2563EB),
+                  iconBgColor: const Color(0xFFEFF6FF),
                   badgeText: '$pendingTasksCount pending',
                   isWarningBadge: pendingTasksCount > 0,
                   onTap: () => context.push('/app/tasks'),
@@ -162,73 +466,74 @@ class MoreScreen extends ConsumerWidget {
                 const SizedBox(height: 10),
               ],
 
-              // Documents Card (Firm Admin & Lawyer only; backend 403 on Staff)
-              if (RoleCapabilities.hasCapability(
-                userRole,
-                UserCapability.viewDocuments,
-              )) ...[
+              // Documents Card
+              if (RoleCapabilities.hasCapability(userRole, UserCapability.viewDocuments)) ...[
                 _buildOperationTile(
                   context,
                   title: 'Legal Documents',
                   subtitle: 'Case files, petitions, judgments & evidence',
-                  icon: Icons.folder_shared_outlined,
+                  icon: Icons.folder_shared_rounded,
+                  iconColor: const Color(0xFF7C3AED),
+                  iconBgColor: const Color(0xFFF5F3FF),
                   badgeText: '$documentsCount files',
                   onTap: () => context.push('/app/more/documents'),
                 ),
                 const SizedBox(height: 10),
               ],
 
-              // Payments Card (Firm Admin only; backend 403 on Lawyer & Staff)
-              if (RoleCapabilities.hasCapability(
-                userRole,
-                UserCapability.viewPayments,
-              )) ...[
+              // Payments Card
+              if (RoleCapabilities.hasCapability(userRole, UserCapability.viewPayments)) ...[
                 _buildOperationTile(
                   context,
                   title: 'Payments & Billing',
                   subtitle: 'Client fees, receipts & invoice notifications',
-                  icon: Icons.payments_outlined,
+                  icon: Icons.payments_rounded,
+                  iconColor: const Color(0xFF059669),
+                  iconBgColor: const Color(0xFFECFDF5),
                   badgeText: '$paymentsCount records',
                   onTap: () => context.push('/app/more/payments'),
                 ),
                 const SizedBox(height: 10),
               ],
 
-              // Firm Messages (All firm members)
-              if (!userRole.isSuperAdmin) ...[
-                _buildOperationTile(
-                  context,
-                  title: 'Firm Messages',
-                  subtitle: 'Direct communication with firm colleagues',
-                  icon: Icons.chat_bubble_outline,
-                  badgeText: 'Chat',
-                  onTap: () => context.push('/app/more/messages'),
-                ),
-                const SizedBox(height: 10),
-              ],
+              // Firm Messages
+              _buildOperationTile(
+                context,
+                title: 'Firm Messages',
+                subtitle: 'Direct communication with firm colleagues',
+                icon: Icons.chat_bubble_outline_rounded,
+                iconColor: const Color(0xFF0891B2),
+                iconBgColor: const Color(0xFFECFEFF),
+                badgeText: 'Chat',
+                onTap: () => context.push('/app/more/messages'),
+              ),
+              const SizedBox(height: 10),
 
-              // Notifications (All users)
+              // Notifications
               _buildOperationTile(
                 context,
                 title: 'Notifications & Alerts',
                 subtitle: 'Hearing dates, case assignments & updates',
-                icon: Icons.notifications_none_outlined,
+                icon: Icons.notifications_none_rounded,
+                iconColor: const Color(0xFFD97706),
+                iconBgColor: const Color(0xFFFFFBEB),
                 badgeText: 'Alerts',
                 onTap: () => context.push('/app/more/notifications'),
               ),
               const SizedBox(height: 10),
 
-              // Help & Support (All users)
+              // Help & Support
               _buildOperationTile(
                 context,
                 title: 'Help & Support',
-                subtitle:
-                    'Submit support tickets, report issues & query status',
-                icon: Icons.support_agent_outlined,
+                subtitle: 'Submit support tickets, report issues & query status',
+                icon: Icons.support_agent_rounded,
+                iconColor: const Color(0xFFE11D48),
+                iconBgColor: const Color(0xFFFFF1F2),
                 badgeText: 'Support',
                 onTap: () => context.push('/app/more/support'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 20),
             ],
 
             // ============================================
@@ -236,21 +541,22 @@ class MoreScreen extends ConsumerWidget {
             // ============================================
             if (userRole.isFirmAdmin) ...[
               Text(
-                'Firm Administration',
+                'FIRM ADMINISTRATION',
                 style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? LexColors.textPrimaryDark
-                      : Theme.of(context).colorScheme.primary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               _buildOperationTile(
                 context,
                 title: 'Team & Advocates',
                 subtitle: 'Invite and manage firm lawyers and staff',
                 icon: Icons.group_outlined,
+                iconColor: const Color(0xFF2563EB),
+                iconBgColor: const Color(0xFFEFF6FF),
                 badgeText: 'Manage',
                 onTap: () => context.push('/app/more/team'),
               ),
@@ -258,10 +564,10 @@ class MoreScreen extends ConsumerWidget {
               _buildOperationTile(
                 context,
                 title: 'Subscription & Quotas',
-                subtitle:
-                    dashboardAsync.valueOrNull?.clientUsage?.planName ??
-                    'Professional Plan',
+                subtitle: dashboardAsync.valueOrNull?.clientUsage?.planName ?? 'Professional Plan',
                 icon: Icons.credit_card_outlined,
+                iconColor: const Color(0xFF059669),
+                iconBgColor: const Color(0xFFECFDF5),
                 badgeText: 'Active',
                 onTap: () => context.push('/app/more/subscriptions'),
               ),
@@ -271,153 +577,21 @@ class MoreScreen extends ConsumerWidget {
                 title: 'Firm Branding & Website',
                 subtitle: 'Customize public portal, tagline, colors & logo',
                 icon: Icons.palette_outlined,
+                iconColor: const Color(0xFFD97706),
+                iconBgColor: const Color(0xFFFFFBEB),
                 badgeText: 'Custom',
                 onTap: () => context.push('/app/more/branding'),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
             ],
 
             // ============================================
-            // ACCOUNT & FIRM PROFILE
+            // SIGN OUT
             // ============================================
-            Text(
-              userRole.isSuperAdmin
-                  ? 'Platform Account'
-                  : 'Account & Firm Profile',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: isDark
-                    ? LexColors.textPrimaryDark
-                    : Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // User Info Card (Tappable to view/edit profile)
-            InkWell(
-              onTap: () => context.push('/app/more/profile'),
-              borderRadius: BorderRadius.circular(16),
-              child: LexCard(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: isDark
-                          ? LexColors.surfaceDark
-                          : Theme.of(context).colorScheme.primary,
-                      child: Text(
-                        user?.username.isNotEmpty == true
-                            ? user!.username.substring(0, 1).toUpperCase()
-                            : (userRole.isSuperAdmin ? 'S' : 'U'),
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? LexColors.accentGold : Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            user?.username ??
-                                (userRole.isSuperAdmin
-                                    ? 'Super Admin'
-                                    : 'Advocate'),
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              color: isDark
-                                  ? LexColors.textPrimaryDark
-                                  : Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            user?.email ?? '',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: isDark
-                                  ? LexColors.textSecondaryDark
-                                  : LexColors.textSecondaryLight,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          RoleBadge(role: userRole),
-                        ],
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right, color: Colors.grey),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Firm Details Card (Firm Admin, Lawyer, Staff)
-            if (!userRole.isSuperAdmin) ...[
-              LexCard(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Law Firm Information',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: isDark
-                            ? LexColors.textPrimaryDark
-                            : LexColors.slatePrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildRow(
-                      context,
-                      'Firm Name',
-                      user?.firmName ?? 'Not Configured',
-                      Icons.business_outlined,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildRow(
-                      context,
-                      'Firm ID',
-                      '#${user?.firmId ?? 15}',
-                      Icons.tag_outlined,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildRow(
-                      context,
-                      'Access Level',
-                      '${userRole.displayTitle} Permissions',
-                      Icons.verified_user_outlined,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Settings Tile
-            _buildOperationTile(
-              context,
-              title: 'Settings & Notification Alerts',
-              subtitle: 'Email alerts, hearing reminders & system parameters',
-              icon: Icons.settings_outlined,
-              badgeText: 'Config',
-              onTap: () => context.push('/app/more/settings'),
-            ),
-            const SizedBox(height: 24),
-
-            // Logout Button
             LexButton(
               label: 'Sign Out Workspace',
               variant: LexButtonVariant.outline,
-              icon: Icons.logout,
+              icon: Icons.logout_rounded,
               isLoading: authState.isLoading,
               onPressed: () {
                 ref.read(authNotifierProvider.notifier).logout();
@@ -426,154 +600,6 @@ class MoreScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildOperationTile(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required String badgeText,
-    required VoidCallback onTap,
-    bool isWarningBadge = false,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return LexCard(
-      onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: isDark ? LexColors.surfaceDark : const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: isDark ? LexColors.borderDark : LexColors.borderLight,
-              ),
-            ),
-            child: Icon(
-              icon,
-              size: 22,
-              color: isDark
-                  ? LexColors.accentGold
-                  : Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? LexColors.textPrimaryDark
-                        : Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isDark
-                        ? LexColors.textSecondaryDark
-                        : LexColors.textSecondaryLight,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isWarningBadge
-                  ? LexColors.warningLight
-                  : (isDark
-                        ? const Color(0xFF1E293B)
-                        : const Color(0xFFF1F5F9)),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              badgeText,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: isWarningBadge
-                    ? LexColors.warning
-                    : (isDark
-                          ? LexColors.accentGold
-                          : LexColors.textSecondaryLight),
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
-          Icon(
-            Icons.chevron_right,
-            size: 18,
-            color: isDark
-                ? LexColors.textSecondaryDark
-                : LexColors.textSecondaryLight,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRow(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-  ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 18,
-          color: isDark
-              ? LexColors.textSecondaryDark
-              : LexColors.textSecondaryLight,
-        ),
-        const SizedBox(width: 12),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            color: isDark
-                ? LexColors.textSecondaryDark
-                : LexColors.textSecondaryLight,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: isDark
-                  ? LexColors.textPrimaryDark
-                  : LexColors.slatePrimary,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

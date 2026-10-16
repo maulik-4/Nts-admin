@@ -8,8 +8,14 @@ import '../../data/models/document_model.dart';
 class DocumentCard extends StatelessWidget {
   final Document document;
   final VoidCallback onTap;
+  final VoidCallback? onMorePressed;
 
-  const DocumentCard({super.key, required this.document, required this.onTap});
+  const DocumentCard({
+    super.key,
+    required this.document,
+    required this.onTap,
+    this.onMorePressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,11 +26,12 @@ class DocumentCard extends StatelessWidget {
 
     return LexCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(16),
+      borderRadius: 16,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // File Icon Avatar
+          // File Icon Container
           _buildFileIcon(context),
           const SizedBox(width: 14),
 
@@ -38,11 +45,9 @@ class DocumentCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.5,
                     fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? LexColors.textPrimaryDark
-                        : LexColors.slatePrimary,
+                    color: isDark ? LexColors.textPrimaryDark : const Color(0xFF0F172A),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -51,14 +56,12 @@ class DocumentCard extends StatelessWidget {
                     if (document.caseTitle != null &&
                         document.caseTitle!.isNotEmpty) ...[
                       Icon(
-                        Icons.folder_outlined,
+                        Icons.folder_open_rounded,
                         size: 13,
-                        color: isDark
-                            ? LexColors.accentGold
-                            : LexColors.slateLight,
+                        color: isDark ? LexColors.accentGold : const Color(0xFF64748B),
                       ),
                       const SizedBox(width: 4),
-                      Expanded(
+                      Flexible(
                         child: Text(
                           document.caseTitle!,
                           maxLines: 1,
@@ -67,21 +70,31 @@ class DocumentCard extends StatelessWidget {
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: isDark
-                                ? LexColors.textSecondaryDark
-                                : LexColors.textSecondaryLight,
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF475569),
                           ),
                         ),
                       ),
                     ],
                     if (dateStr.isNotEmpty) ...[
-                      const SizedBox(width: 8),
+                      if (document.caseTitle != null && document.caseTitle!.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Text(
+                            '•',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ),
                       Text(
                         dateStr,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 11.5,
                           color: isDark
-                              ? LexColors.textSecondaryDark
-                              : LexColors.textSecondaryLight,
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B),
                         ),
                       ),
                     ],
@@ -91,12 +104,12 @@ class DocumentCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Icon(
-            Icons.chevron_right,
-            size: 20,
-            color: isDark
-                ? LexColors.textSecondaryDark
-                : LexColors.textSecondaryLight,
+
+          // Action / Menu
+          IconButton(
+            icon: const Icon(Icons.more_vert_rounded, size: 20),
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            onPressed: onMorePressed ?? onTap,
           ),
         ],
       ),
@@ -110,26 +123,20 @@ class DocumentCard extends StatelessWidget {
     Color bgColor;
 
     if (document.isPdf) {
-      icon = Icons.picture_as_pdf;
-      iconColor = isDark ? const Color(0xFFF87171) : const Color(0xFFDC2626);
-      bgColor = isDark
-          ? iconColor.withValues(alpha: 0.18)
-          : const Color(0xFFFEF2F2);
+      icon = Icons.picture_as_pdf_rounded;
+      iconColor = const Color(0xFFEF4444);
+      bgColor = isDark ? iconColor.withAlpha(40) : const Color(0xFFFEF2F2);
     } else if (document.isImage) {
-      icon = Icons.image_outlined;
-      iconColor = isDark ? const Color(0xFF34D399) : const Color(0xFF059669);
-      bgColor = isDark
-          ? iconColor.withValues(alpha: 0.18)
-          : const Color(0xFFECFDF5);
+      icon = Icons.image_rounded;
+      iconColor = const Color(0xFF10B981);
+      bgColor = isDark ? iconColor.withAlpha(40) : const Color(0xFFECFDF5);
     } else if (document.isDoc) {
-      icon = Icons.description_outlined;
-      iconColor = isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB);
-      bgColor = isDark
-          ? iconColor.withValues(alpha: 0.18)
-          : const Color(0xFFEFF6FF);
+      icon = Icons.description_rounded;
+      iconColor = const Color(0xFF2563EB);
+      bgColor = isDark ? iconColor.withAlpha(40) : const Color(0xFFEFF6FF);
     } else {
-      icon = Icons.insert_drive_file_outlined;
-      iconColor = isDark ? LexColors.textSecondaryDark : LexColors.slateLight;
+      icon = Icons.insert_drive_file_rounded;
+      iconColor = const Color(0xFF64748B);
       bgColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9);
     }
 
@@ -138,10 +145,10 @@ class DocumentCard extends StatelessWidget {
       height: 44,
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: iconColor.withAlpha(40)),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: iconColor.withAlpha(60)),
       ),
-      child: Icon(icon, color: iconColor, size: 24),
+      child: Icon(icon, color: iconColor, size: 22),
     );
   }
 }

@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/firm_theme_provider.dart';
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/lex_card.dart';
+import '../../../../shared/widgets/loading_shimmer.dart';
 import '../../../auth/domain/models/role_capabilities.dart';
 import '../../data/models/subscription_models.dart';
 import '../providers/subscriptions_notifier.dart';
@@ -42,7 +44,28 @@ class SubscriptionScreen extends ConsumerWidget {
         ],
       ),
       body: subStateAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            ShimmerBox(
+              width: double.infinity,
+              height: 160,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            const SizedBox(height: 20),
+            ShimmerBox(
+              width: double.infinity,
+              height: 180,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            const SizedBox(height: 20),
+            ShimmerBox(
+              width: double.infinity,
+              height: 220,
+              borderRadius: BorderRadius.circular(18),
+            ),
+          ],
+        ),
         error: (err, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -50,7 +73,7 @@ class SubscriptionScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
-                  Icons.error_outline,
+                  Icons.error_outline_rounded,
                   size: 48,
                   color: LexColors.error,
                 ),
@@ -58,12 +81,17 @@ class SubscriptionScreen extends ConsumerWidget {
                 Text(
                   'Error loading subscription: $err',
                   textAlign: TextAlign.center,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => ref
                       .read(subscriptionNotifierProvider.notifier)
                       .loadSubscriptionData(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: LexColors.slatePrimary,
+                    foregroundColor: Colors.white,
+                  ),
                   child: const Text('Retry'),
                 ),
               ],
@@ -267,8 +295,11 @@ class SubscriptionScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -364,19 +395,19 @@ class SubscriptionScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(Icons.pie_chart_outline, size: 20, color: accentColor),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Workspace Quota & Resource Usage',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                  ),
-                ],
+              Icon(Icons.pie_chart_outline, size: 20, color: accentColor),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Workspace Quota & Resource Usage',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
+                ),
               ),
-              if (usage?.planName != null)
+              if (usage?.planName != null) ...[
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -395,6 +426,7 @@ class SubscriptionScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+              ],
             ],
           ),
           const SizedBox(height: 16),
@@ -827,24 +859,15 @@ class _BillingSelectionDialogState
 
                     if (context.mounted) {
                       Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Plan ${widget.plan.name} ($_selectedBilling) activated successfully!',
-                          ),
-                          backgroundColor: LexColors.success,
-                        ),
+                      AppAlerts.showSuccess(
+                        context,
+                        'Plan ${widget.plan.name} ($_selectedBilling) activated successfully!',
                       );
                     }
                   } catch (e) {
                     if (context.mounted) {
                       setState(() => _isSubmitting = false);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Failed to activate plan: $e'),
-                          backgroundColor: LexColors.error,
-                        ),
-                      );
+                      AppAlerts.showError(context, 'Failed to activate plan: $e');
                     }
                   }
                 },

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/lex_colors.dart';
 import '../../../../shared/widgets/lex_card.dart';
+import '../../../../shared/widgets/status_badge.dart';
 import '../../data/models/hearing_model.dart';
 
 class HearingCard extends StatelessWidget {
@@ -22,164 +23,245 @@ class HearingCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final parsedDate = hearing.parsedDate;
-    final dayStr = parsedDate != null ? DateFormat('d').format(parsedDate) : '';
-    final monthStr = parsedDate != null
-        ? DateFormat('MMM').format(parsedDate).toUpperCase()
-        : '';
-    final weekdayStr = parsedDate != null
-        ? DateFormat('EEE').format(parsedDate)
-        : '';
+    final dateFormatted = parsedDate != null
+        ? DateFormat('EEE, MMM d, yyyy').format(parsedDate)
+        : hearing.date;
 
     return LexCard(
       onTap: onTap,
+      borderRadius: 16,
+      leftAccentColor: const Color(0xFF2563EB),
       padding: const EdgeInsets.all(16),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Date Block
-          Container(
-            width: 54,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? LexColors.surfaceDark
-                  : const Color(0xFFFEF3C7).withAlpha(120),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: isDark
-                    ? LexColors.borderDark
-                    : LexColors.accentBronze.withAlpha(60),
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  monthStr,
+          // Top Row: Category + Status
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                  ),
+                ),
+                child: Text(
+                  hearing.hearingType.toUpperCase(),
                   style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    color: LexColors.accentBronze,
+                    letterSpacing: 0.5,
+                    color: Color(0xFF2563EB),
                   ),
                 ),
-                Text(
-                  dayStr,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: isDark
-                        ? LexColors.textPrimaryDark
-                        : LexColors.slatePrimary,
-                  ),
-                ),
-                Text(
-                  weekdayStr,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: isDark
-                        ? LexColors.textSecondaryDark
-                        : LexColors.textSecondaryLight,
-                  ),
-                ),
-              ],
-            ),
+              ),
+              const Spacer(),
+              StatusBadge(status: hearing.status, showDot: true),
+            ],
           ),
-          const SizedBox(width: 14),
+          const SizedBox(height: 10),
 
-          // Hearing Information
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  hearing.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? LexColors.textPrimaryDark
-                        : LexColors.textPrimaryLight,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                if (caseTitle != null && caseTitle!.isNotEmpty) ...[
-                  Text(
-                    'Case: $caseTitle',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: LexColors.accentBronze,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                ],
-                Row(
-                  children: [
-                    Icon(
-                      Icons.schedule_outlined,
-                      size: 13,
-                      color: isDark
-                          ? LexColors.textSecondaryDark
-                          : LexColors.textSecondaryLight,
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        hearing.startTime != null
-                            ? '${hearing.startTime}${hearing.endTime != null ? " - ${hearing.endTime}" : ""}'
-                            : 'Time not specified',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: isDark
-                              ? LexColors.textSecondaryDark
-                              : LexColors.textSecondaryLight,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.account_balance_outlined,
-                      size: 13,
-                      color: isDark
-                          ? LexColors.textSecondaryDark
-                          : LexColors.textSecondaryLight,
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        hearing.courtName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDark
-                              ? LexColors.textMutedDark
-                              : LexColors.textMutedLight,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          // Hearing Title
+          Text(
+            hearing.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              height: 1.25,
+              color: isDark ? LexColors.textPrimaryDark : const Color(0xFF0F172A),
             ),
           ),
-          Icon(
-            Icons.chevron_right,
-            size: 20,
-            color: isDark
-                ? LexColors.textSecondaryDark
-                : LexColors.textSecondaryLight,
+
+          // Case Association
+          if (caseTitle != null && caseTitle!.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.folder_open_rounded,
+                    size: 13,
+                    color: isDark ? LexColors.accentGold : const Color(0xFF2563EB),
+                  ),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      caseTitle!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 12),
+          Divider(
+            height: 1,
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+          ),
+          const SizedBox(height: 10),
+
+          // Schedule Details (Date, Time, Venue, Judge)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Time & Date Column
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Date
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.calendar_today_outlined,
+                          size: 13,
+                          color: Color(0xFF64748B),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            dateFormatted,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF1E293B),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+
+                    // Time
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.access_time_rounded,
+                          size: 13,
+                          color: Color(0xFF64748B),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            hearing.startTime != null
+                                ? '${hearing.startTime}${hearing.endTime != null ? " - ${hearing.endTime}" : ""}'
+                                : 'Time not specified',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Venue & Judge Column
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Court Venue
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.account_balance_outlined,
+                          size: 13,
+                          color: Color(0xFF64748B),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            hearing.courtName.isNotEmpty ? hearing.courtName : 'Courtroom',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+
+                    // Judge
+                    if (hearing.judgeName != null && hearing.judgeName!.isNotEmpty)
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.gavel_rounded,
+                            size: 13,
+                            color: Color(0xFF64748B),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              hearing.judgeName!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Bottom Action Bar
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'View Details',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.arrow_forward_rounded,
+                size: 14,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ],
           ),
         ],
       ),

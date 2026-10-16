@@ -3,9 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
-import '../../../../shared/widgets/lex_button.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../../shared/widgets/status_badge.dart';
@@ -32,18 +31,11 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
           .read(paymentsNotifierProvider.notifier)
           .notifyEmail(widget.paymentId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg), backgroundColor: LexColors.success),
-        );
+        AppAlerts.showSuccess(context, msg);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to send email invoice: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to send email invoice: $e');
       }
     } finally {
       if (mounted) setState(() => _isSendingEmail = false);
@@ -57,18 +49,11 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
           .read(paymentsNotifierProvider.notifier)
           .notifyWhatsapp(widget.paymentId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg), backgroundColor: LexColors.success),
-        );
+        AppAlerts.showSuccess(context, msg);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to send WhatsApp receipt: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to send WhatsApp receipt: $e');
       }
     } finally {
       if (mounted) setState(() => _isSendingWhatsapp = false);
@@ -79,7 +64,7 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Payment Record'),
+        title: const Text('Delete Payment Record?'),
         content: const Text(
           'Are you sure you want to delete this payment record? This action cannot be undone.',
         ),
@@ -89,7 +74,7 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: LexColors.error),
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFEF4444)),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Delete'),
           ),
@@ -104,19 +89,12 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
           .read(paymentsNotifierProvider.notifier)
           .deletePayment(widget.paymentId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment record deleted successfully.')),
-        );
+        AppAlerts.showSuccess(context, 'Payment record deleted successfully.');
         context.pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to delete payment: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to delete payment: $e');
       }
     }
   }
@@ -128,10 +106,13 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Payment Receipt'),
+        title: const Text(
+          'Payment Receipt',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: LexColors.error),
+            icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFEF4444)),
             tooltip: 'Delete Payment',
             onPressed: _handleDelete,
           ),
@@ -143,33 +124,39 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
           final formattedAmount =
               '₹${double.tryParse(payment.amount)?.toStringAsFixed(2) ?? payment.amount}';
 
+          final accentColor = payment.isPaid
+              ? const Color(0xFF10B981)
+              : const Color(0xFFF59E0B);
+
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Main Receipt Hero Card
                 LexCard(
+                  borderRadius: 20,
+                  leftAccentColor: accentColor,
                   padding: const EdgeInsets.all(24),
                   child: Column(
                     children: [
                       Container(
-                        width: 56,
-                        height: 56,
+                        width: 58,
+                        height: 58,
                         decoration: BoxDecoration(
                           color: payment.isPaid
-                              ? LexColors.successLight
-                              : LexColors.accentLight,
+                              ? const Color(0xFF10B981).withAlpha(25)
+                              : const Color(0xFFF59E0B).withAlpha(25),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           payment.isPaid
-                              ? Icons.check_circle_outline
-                              : Icons.hourglass_top_outlined,
+                              ? Icons.check_circle_rounded
+                              : Icons.hourglass_top_rounded,
                           color: payment.isPaid
-                              ? LexColors.success
-                              : LexColors.warning,
-                          size: 32,
+                              ? const Color(0xFF10B981)
+                              : const Color(0xFFF59E0B),
+                          size: 30,
                         ),
                       ),
                       const SizedBox(height: 14),
@@ -178,21 +165,21 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w900,
-                          color: isDark
-                              ? LexColors.textPrimaryDark
-                              : LexColors.slatePrimary,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      StatusBadge(status: payment.status.displayName),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 8),
+                      StatusBadge(
+                        status: payment.status.displayName,
+                        showDot: true,
+                      ),
+                      const SizedBox(height: 12),
                       Text(
                         'Receipt Reference #${payment.id}',
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark
-                              ? LexColors.textSecondaryDark
-                              : LexColors.textSecondaryLight,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                         ),
                       ),
                     ],
@@ -202,59 +189,65 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
 
                 // Transaction Information Card
                 LexCard(
+                  borderRadius: 18,
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Transaction Details',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: isDark
-                              ? LexColors.textPrimaryDark
-                              : LexColors.slatePrimary,
-                        ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.receipt_long_rounded,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Transaction Details',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
                       _buildDetailRow(
                         context,
                         'Client',
                         payment.clientName ?? 'General Client',
-                        Icons.person_outline,
+                        Icons.person_outline_rounded,
                       ),
-                      const SizedBox(height: 12),
                       if (payment.caseTitle != null &&
                           payment.caseTitle!.isNotEmpty) ...[
+                        const Divider(height: 18),
                         _buildDetailRow(
                           context,
                           'Associated Case',
                           payment.caseTitle!,
-                          Icons.folder_outlined,
+                          Icons.folder_open_rounded,
                         ),
-                        const SizedBox(height: 12),
                       ],
+                      const Divider(height: 18),
                       _buildDetailRow(
                         context,
                         'Payment Method',
                         payment.paymentMethodDisplay ??
                             payment.paymentMethod.displayName,
-                        Icons.payment_outlined,
+                        Icons.payment_rounded,
                       ),
-                      const SizedBox(height: 12),
+                      const Divider(height: 18),
                       _buildDetailRow(
                         context,
                         'Payment Date',
                         payment.paymentDate != null
                             ? dateFormat.format(payment.paymentDate!.toLocal())
                             : (payment.createdAt != null
-                                  ? dateFormat.format(
-                                      payment.createdAt!.toLocal(),
-                                    )
-                                  : 'Not recorded'),
+                                ? dateFormat.format(payment.createdAt!.toLocal())
+                                : 'Not recorded'),
                         Icons.calendar_today_outlined,
                       ),
-                      const SizedBox(height: 12),
+                      const Divider(height: 18),
                       _buildDetailRow(
                         context,
                         'Firm ID',
@@ -268,32 +261,62 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
 
                 // Receipt Dispatch Actions
                 Text(
-                  'Client Communications',
+                  'CLIENT COMMUNICATIONS',
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? LexColors.textPrimaryDark
-                        : LexColors.slatePrimary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                   ),
                 ),
                 const SizedBox(height: 12),
 
-                LexButton(
-                  label: 'Email Receipt to Client',
-                  icon: Icons.email_outlined,
-                  variant: LexButtonVariant.outline,
-                  isLoading: _isSendingEmail,
-                  onPressed: _isSendingEmail ? null : _handleEmailReceipt,
+                SizedBox(
+                  height: 46,
+                  child: OutlinedButton.icon(
+                    icon: _isSendingEmail
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.email_outlined, size: 18),
+                    label: const Text(
+                      'Email Receipt to Client',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: _isSendingEmail ? null : _handleEmailReceipt,
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 10),
 
-                LexButton(
-                  label: 'Send Receipt via WhatsApp',
-                  icon: Icons.chat_outlined,
-                  variant: LexButtonVariant.secondary,
-                  isLoading: _isSendingWhatsapp,
-                  onPressed: _isSendingWhatsapp ? null : _handleWhatsappReceipt,
+                SizedBox(
+                  height: 46,
+                  child: ElevatedButton.icon(
+                    icon: _isSendingWhatsapp
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                    label: const Text(
+                      'Send Receipt via WhatsApp',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: _isSendingWhatsapp ? null : _handleWhatsappReceipt,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F1F38),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -303,9 +326,9 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
           padding: EdgeInsets.all(16),
           child: Column(
             children: [
-              SkeletonLoader(height: 180),
+              SkeletonLoader(height: 180, borderRadius: 20),
               SizedBox(height: 16),
-              SkeletonLoader(height: 160),
+              SkeletonLoader(height: 160, borderRadius: 18),
             ],
           ),
         ),
@@ -333,9 +356,7 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
         Icon(
           icon,
           size: 16,
-          color: isDark
-              ? LexColors.textSecondaryDark
-              : LexColors.textSecondaryLight,
+          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
         ),
         const SizedBox(width: 8),
         Text(
@@ -343,24 +364,19 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: isDark
-                ? LexColors.textSecondaryDark
-                : LexColors.textSecondaryLight,
+            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
           ),
         ),
-        const Spacer(),
+        const SizedBox(width: 12),
         Expanded(
-          flex: 2,
           child: Text(
             value,
             textAlign: TextAlign.end,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: isDark
-                  ? LexColors.textPrimaryDark
-                  : LexColors.textPrimaryLight,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
             ),
           ),
         ),

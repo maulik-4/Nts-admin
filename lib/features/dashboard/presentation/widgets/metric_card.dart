@@ -10,6 +10,9 @@ class MetricCard extends StatelessWidget {
   final IconData icon;
   final Color? iconColor;
   final Color? iconBgColor;
+  final String? trendText;
+  final Color? trendColor;
+  final Color? trendBgColor;
   final VoidCallback? onTap;
 
   const MetricCard({
@@ -20,6 +23,9 @@ class MetricCard extends StatelessWidget {
     required this.icon,
     this.iconColor,
     this.iconBgColor,
+    this.trendText = '+0%',
+    this.trendColor,
+    this.trendBgColor,
     this.onTap,
   });
 
@@ -27,82 +33,170 @@ class MetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final primaryColor = iconColor ??
+        (isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB));
+    final bgColor = iconBgColor ?? primaryColor.withValues(alpha: 0.12);
+
+    final effectiveTrendColor = trendColor ??
+        (isDark ? const Color(0xFF34D399) : const Color(0xFF059669));
+    final effectiveTrendBg = trendBgColor ??
+        effectiveTrendColor.withValues(alpha: isDark ? 0.2 : 0.12);
+
     return LexCard(
       onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      borderRadius: 18,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Top Row: Icon container + Title + right 3-dots
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  size: 18,
+                  color: primaryColor,
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   title.toUpperCase(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
+                    letterSpacing: 0.3,
                     color: isDark
-                        ? LexColors.textSecondaryDark
-                        : LexColors.textSecondaryLight,
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF475569),
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                  color:
-                      iconBgColor ??
-                      (isDark
-                          ? LexColors.surfaceDark
-                          : const Color(0xFFF1F5F9)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  size: 18,
-                  color:
-                      iconColor ??
-                      (isDark ? LexColors.accentGold : LexColors.slatePrimary),
-                ),
+              Icon(
+                Icons.more_horiz_rounded,
+                size: 18,
+                color: isDark
+                    ? const Color(0xFF64748B)
+                    : const Color(0xFF94A3B8),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-              color: isDark
-                  ? LexColors.textPrimaryDark
-                  : LexColors.textPrimaryLight,
-            ),
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 3),
-            Text(
-              subtitle!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: isDark
-                    ? LexColors.textMutedDark
-                    : LexColors.textMutedLight,
+          const SizedBox(height: 10),
+
+          // Value and Trend badge
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                    color: isDark
+                        ? LexColors.textPrimaryDark
+                        : const Color(0xFF0F172A),
+                  ),
+                ),
               ),
-            ),
-          ],
+              if (trendText != null && trendText!.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: effectiveTrendBg,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.arrow_upward_rounded,
+                        size: 10,
+                        color: effectiveTrendColor,
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        trendText!,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: effectiveTrendColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Subtitle and Mini Bar Chart Graphic
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  subtitle ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? LexColors.textMutedDark
+                        : const Color(0xFF64748B),
+                  ),
+                ),
+              ),
+              _MiniBarChart(color: primaryColor),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _MiniBarChart extends StatelessWidget {
+  final Color color;
+  const _MiniBarChart({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        _bar(4),
+        const SizedBox(width: 2),
+        _bar(8),
+        const SizedBox(width: 2),
+        _bar(12),
+        const SizedBox(width: 2),
+        _bar(16),
+      ],
+    );
+  }
+
+  Widget _bar(double height) {
+    return Container(
+      width: 2.8,
+      height: height,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(1.5),
       ),
     );
   }

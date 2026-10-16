@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum TaskPriority {
   low,
   medium,
@@ -5,6 +7,19 @@ enum TaskPriority {
   urgent;
 
   String get value => name;
+
+  Color get color {
+    switch (this) {
+      case TaskPriority.low:
+        return const Color(0xFF10B981);
+      case TaskPriority.medium:
+        return const Color(0xFF3B82F6);
+      case TaskPriority.high:
+        return const Color(0xFFF59E0B);
+      case TaskPriority.urgent:
+        return const Color(0xFFEF4444);
+    }
+  }
 
   String get displayName {
     switch (this) {
@@ -191,6 +206,8 @@ class Task {
   });
 
   bool get isCompleted => status == TaskStatus.completed;
+
+  String? get assignedToName => assignedTo?.fullName;
 
   bool get isOverdue {
     if (isCompleted || dueDate == null) return false;

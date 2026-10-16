@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/lex_colors.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
@@ -13,6 +12,55 @@ import '../widgets/hearing_card.dart';
 class HearingsListScreen extends ConsumerWidget {
   const HearingsListScreen({super.key});
 
+  Widget _buildFilterPill({
+    required BuildContext context,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark ? primaryColor : const Color(0xFF0F1F38))
+              : (isDark ? const Color(0xFF1E293B) : Colors.white),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? (isDark ? primaryColor : const Color(0xFF0F1F38))
+                : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+            width: 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF0F1F38).withAlpha(35),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected
+                ? Colors.white
+                : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hearingsAsync = ref.watch(filteredHearingsProvider);
@@ -22,7 +70,10 @@ class HearingsListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hearings Agenda'),
+        title: const Text(
+          'Hearings Agenda',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -35,49 +86,57 @@ class HearingsListScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab_schedule_hearing',
         onPressed: () => context.push('/app/hearings/create'),
-        backgroundColor: isDark
-            ? Theme.of(context).colorScheme.secondary
-            : Theme.of(context).colorScheme.primary,
-        foregroundColor: isDark ? Colors.black : Colors.white,
-        icon: const Icon(Icons.event_available_outlined, size: 20),
+        backgroundColor: const Color(0xFF0F1F38),
+        foregroundColor: Colors.white,
+        elevation: 4,
+        icon: const Icon(Icons.event_available_rounded, size: 20),
         label: const Text(
           'Schedule Hearing',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
         ),
       ),
       body: Column(
         children: [
           // Search Bar
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
             child: TextField(
               onChanged: (val) =>
                   ref.read(hearingSearchQueryProvider.notifier).state = val,
               decoration: InputDecoration(
                 hintText: 'Search hearings by title, court, judge...',
-                prefixIcon: const Icon(Icons.search, size: 20),
+                hintStyle: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  size: 20,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
                 ),
                 filled: true,
-                fillColor: isDark
-                    ? LexColors.surfaceDark
-                    : LexColors.canvasLight,
+                fillColor: isDark ? const Color(0xFF1E293B) : Colors.white,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(
-                    color: isDark
-                        ? LexColors.borderDark
-                        : LexColors.borderLight,
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(
-                    color: isDark
-                        ? LexColors.borderDark
-                        : LexColors.borderLight,
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1.5,
                   ),
                 ),
               ),
@@ -90,33 +149,34 @@ class HearingsListScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               children: [
-                FilterChip(
-                  label: const Text('Upcoming Hearings'),
-                  selected: timeFilter == 'upcoming',
-                  onSelected: (_) =>
-                      ref.read(hearingTimeFilterProvider.notifier).state =
-                          'upcoming',
+                _buildFilterPill(
+                  context: context,
+                  label: 'Upcoming Hearings',
+                  isSelected: timeFilter == 'upcoming',
+                  onTap: () => ref
+                      .read(hearingTimeFilterProvider.notifier)
+                      .state = 'upcoming',
                 ),
                 const SizedBox(width: 8),
-                FilterChip(
-                  label: const Text('Past Hearings'),
-                  selected: timeFilter == 'past',
-                  onSelected: (_) =>
-                      ref.read(hearingTimeFilterProvider.notifier).state =
-                          'past',
+                _buildFilterPill(
+                  context: context,
+                  label: 'Past Hearings',
+                  isSelected: timeFilter == 'past',
+                  onTap: () =>
+                      ref.read(hearingTimeFilterProvider.notifier).state = 'past',
                 ),
                 const SizedBox(width: 8),
-                FilterChip(
-                  label: const Text('All Hearings'),
-                  selected: timeFilter == 'all',
-                  onSelected: (_) =>
-                      ref.read(hearingTimeFilterProvider.notifier).state =
-                          'all',
+                _buildFilterPill(
+                  context: context,
+                  label: 'All Hearings',
+                  isSelected: timeFilter == 'all',
+                  onTap: () =>
+                      ref.read(hearingTimeFilterProvider.notifier).state = 'all',
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
           // Content Area
           Expanded(
@@ -145,7 +205,7 @@ class HearingsListScreen extends ConsumerWidget {
                       .read(hearingsNotifierProvider.notifier)
                       .loadHearings(),
                   child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 92),
                     itemCount: hearings.length,
                     separatorBuilder: (context, index) =>
                         const SizedBox(height: 12),
@@ -167,7 +227,7 @@ class HearingsListScreen extends ConsumerWidget {
                 separatorBuilder: (context, index) =>
                     const SizedBox(height: 12),
                 itemBuilder: (context, index) =>
-                    const SkeletonLoader(height: 100, borderRadius: 12),
+                    const SkeletonLoader(height: 120, borderRadius: 16),
               ),
               error: (err, _) => ErrorStateWidget(
                 message: err.toString(),

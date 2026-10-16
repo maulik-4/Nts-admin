@@ -3,9 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/api_exception.dart';
-import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../core/utils/validators.dart';
-import '../../../../shared/widgets/lex_button.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
@@ -32,7 +31,6 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
 
   bool _isActive = true;
   bool _isLoading = false;
-  String? _serverError;
   bool _initialized = false;
 
   bool get isEdit => widget.clientId != null;
@@ -73,7 +71,6 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
   }
 
   Future<void> _submit() async {
-    setState(() => _serverError = null);
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -84,12 +81,12 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
 
       if (isEdit) {
         final request = UpdateClientRequest(
-          name: _nameController.text,
-          phone: _phoneController.text,
+          name: _nameController.text.trim(),
+          phone: _phoneController.text.trim(),
           email: _emailController.text.trim().isNotEmpty
               ? _emailController.text.trim()
               : null,
-          address: _addressController.text,
+          address: _addressController.text.trim(),
           city: _cityController.text.trim().isNotEmpty
               ? _cityController.text.trim()
               : null,
@@ -99,19 +96,17 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
             .read(clientsNotifierProvider.notifier)
             .updateClient(widget.clientId!, request);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Client updated successfully')),
-          );
+          AppAlerts.showSuccess(context, 'Client updated successfully.');
           context.pop();
         }
       } else {
         final request = CreateClientRequest(
-          name: _nameController.text,
-          phone: _phoneController.text,
+          name: _nameController.text.trim(),
+          phone: _phoneController.text.trim(),
           email: _emailController.text.trim().isNotEmpty
               ? _emailController.text.trim()
               : null,
-          address: _addressController.text,
+          address: _addressController.text.trim(),
           city: _cityController.text.trim().isNotEmpty
               ? _cityController.text.trim()
               : null,
@@ -119,16 +114,14 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
         );
         await ref.read(clientsNotifierProvider.notifier).createClient(request);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Client created successfully')),
-          );
+          AppAlerts.showSuccess(context, 'Client created successfully.');
           context.pop();
         }
       }
     } on ApiException catch (e) {
-      setState(() => _serverError = e.message);
+      if (mounted) AppAlerts.showError(context, e.message);
     } catch (e) {
-      setState(() => _serverError = 'An unexpected error occurred: $e');
+      if (mounted) AppAlerts.showError(context, 'An unexpected error occurred: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -139,48 +132,52 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: Text(isEdit ? 'Edit Client' : 'Add New Client')),
+      appBar: AppBar(
+        title: Text(
+          isEdit ? 'Edit Client' : 'Add New Client',
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (_serverError != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: LexColors.errorLight,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: LexColors.error.withAlpha(80)),
-                    ),
-                    child: Text(
-                      _serverError!,
-                      style: const TextStyle(
-                        color: LexColors.error,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-
                 LexCard(
+                  borderRadius: 20,
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                          ),
+                        ),
+                        child: Text(
+                          isEdit ? 'UPDATE CLIENT PROFILE' : 'CLIENT PROFILE SPECIFICATION',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            color: Color(0xFF2563EB),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       Text(
                         'Client Information',
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: isDark
-                              ? LexColors.textPrimaryDark
-                              : LexColors.slatePrimary,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -188,9 +185,9 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
                       // Name
                       LexTextField(
                         controller: _nameController,
-                        label: 'Client Name / Business Name',
-                        hintText: 'e.g. Acme Corporation or Jane Doe',
-                        prefixIcon: Icons.person_outline,
+                        label: 'Client Name / Business Name *',
+                        hintText: 'e.g. Acme Legal Corp or Rajesh Sharma',
+                        prefixIcon: Icons.person_outline_rounded,
                         validator: (val) =>
                             Validators.required(val, 'Client name'),
                       ),
@@ -199,8 +196,8 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
                       // Phone
                       LexTextField(
                         controller: _phoneController,
-                        label: 'Phone Number',
-                        hintText: 'e.g. 9876543210',
+                        label: 'Phone Number *',
+                        hintText: 'e.g. +91 9876543210',
                         keyboardType: TextInputType.phone,
                         prefixIcon: Icons.phone_outlined,
                         validator: Validators.phone,
@@ -226,8 +223,8 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
                       // City
                       LexTextField(
                         controller: _cityController,
-                        label: 'City (Optional)',
-                        hintText: 'e.g. Shimla',
+                        label: 'City / Jurisdiction (Optional)',
+                        hintText: 'e.g. New Delhi',
                         prefixIcon: Icons.location_city_outlined,
                       ),
                       const SizedBox(height: 16),
@@ -235,9 +232,8 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
                       // Address
                       LexTextField(
                         controller: _addressController,
-                        label: 'Full Address',
-                        hintText:
-                            'Street address, office suite, or postal address',
+                        label: 'Office / Postal Address *',
+                        hintText: 'Street address, office suite, or postal address',
                         prefixIcon: Icons.home_outlined,
                         validator: (val) => Validators.required(val, 'Address'),
                       ),
@@ -250,11 +246,11 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
                             'Active Client Status',
                             style: TextStyle(
                               fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           subtitle: const Text(
-                            'Mark as active or inactive client',
+                            'Active clients are visible in case assignment pickers.',
                             style: TextStyle(fontSize: 12),
                           ),
                           value: _isActive,
@@ -267,14 +263,36 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
                 const SizedBox(height: 24),
 
                 // Submit Button
-                LexButton(
-                  label: isEdit ? 'Save Client Changes' : 'Create Client',
-                  variant: LexButtonVariant.primary,
-                  isLoading: _isLoading,
-                  icon: isEdit
-                      ? Icons.save_outlined
-                      : Icons.check_circle_outline,
-                  onPressed: _submit,
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F1F38),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 3,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            isEdit ? 'Save Client Changes' : 'Create Client',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14.5,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                  ),
                 ),
               ],
             ),

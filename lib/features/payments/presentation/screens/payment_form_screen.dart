@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/lex_colors.dart';
-import '../../../../shared/widgets/lex_button.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
 import '../../../cases/presentation/providers/cases_notifier.dart';
@@ -71,22 +70,12 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
       await ref.read(paymentsNotifierProvider.notifier).createPayment(request);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Payment record created successfully.'),
-            backgroundColor: LexColors.success,
-          ),
-        );
+        AppAlerts.showSuccess(context, 'Payment record saved successfully.');
         context.pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to record payment: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to record payment: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -100,48 +89,73 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
     final clientsAsync = ref.watch(clientsNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Record Fee Payment')),
+      appBar: AppBar(
+        title: const Text(
+          'Record Fee Payment',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+        ),
+      ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 650),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   LexCard(
+                    borderRadius: 20,
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Payment Details',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? LexColors.textPrimaryDark
-                                : LexColors.slatePrimary,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                            ),
+                          ),
+                          child: const Text(
+                            'TRANSACTION SPECIFICATION',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                              color: Color(0xFF2563EB),
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Payment Information',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
 
-                        // Amount Field
+                        // Amount
                         LexTextField(
-                          label: 'Amount (₹) *',
+                          label: 'Payment Amount (INR) *',
                           controller: _amountController,
-                          hintText: 'e.g., 15000.00',
+                          hintText: 'e.g. 15000.00',
+                          prefixIcon: Icons.currency_rupee_rounded,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
                           validator: (val) {
                             if (val == null || val.trim().isEmpty) {
-                              return 'Payment amount is required';
+                              return 'Amount is required';
                             }
-                            final parsed = double.tryParse(val.trim());
-                            if (parsed == null || parsed <= 0) {
+                            final d = double.tryParse(val.trim());
+                            if (d == null || d <= 0) {
                               return 'Enter a valid positive amount';
                             }
                             return null;
@@ -149,23 +163,29 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Payment Method Dropdown
+                        // Method Dropdown
+                        Text(
+                          'Payment Method *',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
                         DropdownButtonFormField<PaymentMethod>(
+                          isExpanded: true,
                           initialValue: _selectedMethod,
                           decoration: InputDecoration(
-                            labelText: 'Payment Method *',
+                            prefixIcon: const Icon(Icons.payment_rounded, size: 19),
                             filled: true,
-                            fillColor: isDark
-                                ? LexColors.surfaceDark
-                                : LexColors.surfaceLight,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                            fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           items: PaymentMethod.values.map((m) {
                             return DropdownMenuItem<PaymentMethod>(
                               value: m,
-                              child: Text(m.displayName),
+                              child: Text(m.displayName, style: const TextStyle(fontSize: 13)),
                             );
                           }).toList(),
                           onChanged: (val) {
@@ -177,22 +197,41 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                         const SizedBox(height: 16),
 
                         // Status Dropdown
+                        Text(
+                          'Payment Status *',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
                         DropdownButtonFormField<PaymentStatus>(
+                          isExpanded: true,
                           initialValue: _selectedStatus,
                           decoration: InputDecoration(
-                            labelText: 'Payment Status *',
+                            prefixIcon: const Icon(Icons.verified_outlined, size: 19),
                             filled: true,
-                            fillColor: isDark
-                                ? LexColors.surfaceDark
-                                : LexColors.surfaceLight,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                            fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           items: PaymentStatus.values.map((s) {
+                            final color = s == PaymentStatus.paid
+                                ? const Color(0xFF10B981)
+                                : const Color(0xFFF59E0B);
                             return DropdownMenuItem<PaymentStatus>(
                               value: s,
-                              child: Text(s.displayName),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(s.displayName, style: const TextStyle(fontSize: 13)),
+                                ],
+                              ),
                             );
                           }).toList(),
                           onChanged: (val) {
@@ -204,25 +243,30 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                         const SizedBox(height: 16),
 
                         // Client Selector
+                        Text(
+                          'Associated Client (Optional)',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
                         clientsAsync.when(
                           data: (clients) {
                             return DropdownButtonFormField<int?>(
+                              isExpanded: true,
                               initialValue: _selectedClientId,
                               decoration: InputDecoration(
-                                labelText: 'Client (Optional)',
-                                hintText: 'Select client',
+                                prefixIcon: const Icon(Icons.person_outline_rounded, size: 19),
                                 filled: true,
-                                fillColor: isDark
-                                    ? LexColors.surfaceDark
-                                    : LexColors.surfaceLight,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
+                                fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               ),
                               items: [
                                 const DropdownMenuItem<int?>(
                                   value: null,
-                                  child: Text('None (General Payment)'),
+                                  child: Text('None (General Practice Receipt)'),
                                 ),
                                 ...clients.map((cl) {
                                   return DropdownMenuItem<int?>(
@@ -230,6 +274,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                                     child: Text(
                                       cl.name,
                                       overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 13),
                                     ),
                                   );
                                 }),
@@ -245,32 +290,38 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                         const SizedBox(height: 16),
 
                         // Case Selector
+                        Text(
+                          'Associated Case (Optional)',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
                         casesAsync.when(
                           data: (cases) {
                             return DropdownButtonFormField<int?>(
+                              isExpanded: true,
                               initialValue: _selectedCaseId,
                               decoration: InputDecoration(
-                                labelText: 'Associated Case (Optional)',
-                                hintText: 'Select case',
+                                prefixIcon: const Icon(Icons.folder_open_rounded, size: 19),
                                 filled: true,
-                                fillColor: isDark
-                                    ? LexColors.surfaceDark
-                                    : LexColors.surfaceLight,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
+                                fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               ),
                               items: [
                                 const DropdownMenuItem<int?>(
                                   value: null,
-                                  child: Text('None (General Fee)'),
+                                  child: Text('None (General Legal Fee)'),
                                 ),
                                 ...cases.map((c) {
                                   return DropdownMenuItem<int?>(
                                     value: c.id,
                                     child: Text(
-                                      '${c.title} (${c.caseNumber})',
+                                      '${c.caseNumber} - ${c.title}',
                                       overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 13),
                                     ),
                                   );
                                 }),
@@ -289,11 +340,36 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                   const SizedBox(height: 24),
 
                   // Submit Button
-                  LexButton(
-                    label: 'Record Payment',
-                    icon: Icons.check_circle_outline,
-                    isLoading: _isLoading,
-                    onPressed: _isLoading ? null : _handleSubmit,
+                  SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _handleSubmit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0F1F38),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 3,
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Record Payment Receipt',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14.5,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                    ),
                   ),
                 ],
               ),

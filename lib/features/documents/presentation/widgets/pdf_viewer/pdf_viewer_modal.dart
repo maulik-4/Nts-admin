@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import '../../../../../core/theme/lex_colors.dart';
+import '../../../../../core/utils/app_alerts.dart';
 import '../../../data/models/document_model.dart';
 import '../../../data/repositories/documents_repository.dart';
 import 'pdf_document_renderer.dart';
@@ -178,22 +179,11 @@ class _PdfViewerModalState extends ConsumerState<PdfViewerModal> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Document saved to: $savePath'),
-            backgroundColor: LexColors.success,
-            duration: const Duration(seconds: 4),
-          ),
-        );
+        AppAlerts.showSuccess(context, 'Document saved to: $savePath');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to download document: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to download document: $e');
       }
     } finally {
       if (mounted) {

@@ -4,9 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/errors/api_exception.dart';
-import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../core/utils/validators.dart';
-import '../../../../shared/widgets/lex_button.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
@@ -36,7 +35,6 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
   String _status = 'open';
   int? _selectedClientId;
   bool _isLoading = false;
-  String? _serverError;
   bool _initialized = false;
 
   bool get isEdit => widget.caseId != null;
@@ -109,18 +107,16 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
     );
     if (picked != null) {
       setState(() {
-        _nextHearingDateController.text = DateFormat('yyyy-MM-dd')
-            .format(picked);
+        _nextHearingDateController.text = DateFormat('yyyy-MM-dd').format(picked);
       });
     }
   }
 
   Future<void> _submit() async {
-    setState(() => _serverError = null);
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedClientId == null) {
-      setState(() => _serverError = 'Please select a client for this case.');
+      AppAlerts.showError(context, 'Please select a client for this case.');
       return;
     }
 
@@ -132,10 +128,10 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
 
       if (isEdit) {
         final request = UpdateCaseRequest(
-          title: _titleController.text,
-          caseNumber: _caseNumberController.text,
+          title: _titleController.text.trim(),
+          caseNumber: _caseNumberController.text.trim(),
           caseType: _caseType,
-          courtName: _courtNameController.text,
+          courtName: _courtNameController.text.trim(),
           status: _status,
           client: _selectedClientId,
           nextHearingDate: _nextHearingDateController.text.trim().isNotEmpty
@@ -146,17 +142,15 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
             .read(casesNotifierProvider.notifier)
             .updateCase(widget.caseId!, request);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Case updated successfully')),
-          );
+          AppAlerts.showSuccess(context, 'Case updated successfully.');
           context.pop();
         }
       } else {
         final request = CreateCaseRequest(
-          title: _titleController.text,
-          caseNumber: _caseNumberController.text,
+          title: _titleController.text.trim(),
+          caseNumber: _caseNumberController.text.trim(),
           caseType: _caseType,
-          courtName: _courtNameController.text,
+          courtName: _courtNameController.text.trim(),
           status: _status,
           client: _selectedClientId!,
           firm: firmId,
@@ -166,16 +160,14 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
         );
         await ref.read(casesNotifierProvider.notifier).createCase(request);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Case created successfully')),
-          );
+          AppAlerts.showSuccess(context, 'Case created successfully.');
           context.pop();
         }
       }
     } on ApiException catch (e) {
-      setState(() => _serverError = e.message);
+      if (mounted) AppAlerts.showError(context, e.message);
     } catch (e) {
-      setState(() => _serverError = 'An unexpected error occurred: $e');
+      if (mounted) AppAlerts.showError(context, 'An unexpected error occurred: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -187,48 +179,52 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
     final clientsAsync = ref.watch(clientsNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(isEdit ? 'Edit Case' : 'New Legal Case')),
+      appBar: AppBar(
+        title: Text(
+          isEdit ? 'Edit Case' : 'New Legal Case',
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (_serverError != null) ...[
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: LexColors.errorLight,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: LexColors.error.withAlpha(80)),
-                    ),
-                    child: Text(
-                      _serverError!,
-                      style: const TextStyle(
-                        color: LexColors.error,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-
                 LexCard(
+                  borderRadius: 20,
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                          ),
+                        ),
+                        child: Text(
+                          isEdit ? 'CASE METADATA UPDATE' : 'CASE SPECIFICATION',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            color: Color(0xFF2563EB),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       Text(
                         'Case Metadata',
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: isDark
-                              ? LexColors.textPrimaryDark
-                              : LexColors.slatePrimary,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -236,7 +232,7 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                       // Title
                       LexTextField(
                         controller: _titleController,
-                        label: 'Case Title / Heading',
+                        label: 'Case Title / Heading *',
                         hintText: 'e.g. State of HP vs Rajesh Kumar',
                         prefixIcon: Icons.description_outlined,
                         validator: (val) =>
@@ -247,7 +243,7 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                       // Case Number
                       LexTextField(
                         controller: _caseNumberController,
-                        label: 'Case Number / Docket ID',
+                        label: 'Case Number / Docket ID *',
                         hintText: 'e.g. CWP-2026-4401',
                         prefixIcon: Icons.numbers_outlined,
                         validator: (val) =>
@@ -257,13 +253,11 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
 
                       // Client Selector Dropdown
                       Text(
-                        'Client',
+                        'Associated Client *',
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? LexColors.textPrimaryDark
-                              : LexColors.textPrimaryLight,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -273,7 +267,7 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                             return TextButton.icon(
                               onPressed: () =>
                                   context.push('/app/clients/create'),
-                              icon: const Icon(Icons.add),
+                              icon: const Icon(Icons.add_rounded),
                               label: const Text('Add a client first'),
                             );
                           }
@@ -282,27 +276,32 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                             initialValue: _selectedClientId,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
+                                horizontal: 14,
                                 vertical: 12,
                               ),
+                              prefixIcon: const Icon(Icons.person_outline_rounded, size: 19),
                               filled: true,
                               fillColor: isDark
-                                  ? LexColors.surfaceDark
-                                  : LexColors.canvasLight,
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFF8FAFC),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
                                   color: isDark
-                                      ? LexColors.borderDark
-                                      : LexColors.borderLight,
+                                      ? const Color(0xFF334155)
+                                      : const Color(0xFFE2E8F0),
                                 ),
                               ),
                             ),
-                            hint: const Text('Select Associated Client'),
+                            hint: const Text('Select Associated Client', style: TextStyle(fontSize: 13)),
                             items: clients.map((c) {
                               return DropdownMenuItem<int>(
                                 value: c.id,
-                                child: Text('${c.name} (${c.phone})'),
+                                child: Text(
+                                  '${c.name} (${c.phone})',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 13),
+                                ),
                               );
                             }).toList(),
                             onChanged: (val) =>
@@ -319,13 +318,11 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
 
                       // Case Type Dropdown
                       Text(
-                        'Case Type',
+                        'Case Category',
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? LexColors.textPrimaryDark
-                              : LexColors.textPrimaryLight,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -333,26 +330,22 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                         initialValue: _caseType,
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
+                            horizontal: 14,
                             vertical: 12,
                           ),
+                          prefixIcon: const Icon(Icons.category_outlined, size: 19),
                           filled: true,
                           fillColor: isDark
-                              ? LexColors.surfaceDark
-                              : LexColors.canvasLight,
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFF8FAFC),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(
-                              color: isDark
-                                  ? LexColors.borderDark
-                                  : LexColors.borderLight,
-                            ),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         items: _caseTypes.map((type) {
                           return DropdownMenuItem(
                             value: type,
-                            child: Text(type),
+                            child: Text(type, style: const TextStyle(fontSize: 13)),
                           );
                         }).toList(),
                         onChanged: (val) {
@@ -364,8 +357,8 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                       // Court Name
                       LexTextField(
                         controller: _courtNameController,
-                        label: 'Court Name',
-                        hintText: 'e.g. High Court of Himachal Pradesh',
+                        label: 'Court Name *',
+                        hintText: 'e.g. High Court of Delhi',
                         prefixIcon: Icons.account_balance_outlined,
                         validator: (val) =>
                             Validators.required(val, 'Court name'),
@@ -390,11 +383,9 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                       Text(
                         'Status',
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? LexColors.textPrimaryDark
-                              : LexColors.textPrimaryLight,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -402,27 +393,37 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                         initialValue: _status,
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
+                            horizontal: 14,
                             vertical: 12,
                           ),
                           filled: true,
                           fillColor: isDark
-                              ? LexColors.surfaceDark
-                              : LexColors.canvasLight,
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFF8FAFC),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(
-                              color: isDark
-                                  ? LexColors.borderDark
-                                  : LexColors.borderLight,
-                            ),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         items: const [
-                          DropdownMenuItem(value: 'open', child: Text('Open')),
+                          DropdownMenuItem(
+                            value: 'open',
+                            child: Row(
+                              children: [
+                                Icon(Icons.circle, size: 8, color: Color(0xFF10B981)),
+                                SizedBox(width: 8),
+                                Text('Open / Active Case', style: TextStyle(fontSize: 13)),
+                              ],
+                            ),
+                          ),
                           DropdownMenuItem(
                             value: 'closed',
-                            child: Text('Closed'),
+                            child: Row(
+                              children: [
+                                Icon(Icons.circle, size: 8, color: Color(0xFF94A3B8)),
+                                SizedBox(width: 8),
+                                Text('Closed / Resolved', style: TextStyle(fontSize: 13)),
+                              ],
+                            ),
                           ),
                         ],
                         onChanged: (val) {
@@ -435,12 +436,36 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                 const SizedBox(height: 24),
 
                 // Submit Button
-                LexButton(
-                  label: isEdit ? 'Save Case Changes' : 'Create Case',
-                  variant: LexButtonVariant.primary,
-                  isLoading: _isLoading,
-                  icon: isEdit ? Icons.save_outlined : Icons.add_circle_outline,
-                  onPressed: _submit,
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F1F38),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 3,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            isEdit ? 'Save Case Changes' : 'Create Case',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14.5,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                  ),
                 ),
               ],
             ),

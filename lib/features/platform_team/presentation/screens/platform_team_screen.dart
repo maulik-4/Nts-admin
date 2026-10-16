@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/lex_card.dart';
@@ -507,19 +508,17 @@ class _PlatformTeamScreenState extends ConsumerState<PlatformTeamScreen> {
                                   );
                               if (context.mounted) {
                                 Navigator.pop(ctx);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Platform invite sent'),
-                                  ),
+                                AppAlerts.showSuccess(
+                                  context,
+                                  'Platform invite sent',
                                 );
                               }
                             } catch (e) {
                               setModalState(() => isSubmitting = false);
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error sending invite: $e'),
-                                  ),
+                                AppAlerts.showError(
+                                  context,
+                                  'Error sending invite: $e',
                                 );
                               }
                             }
@@ -699,19 +698,17 @@ class _PlatformTeamScreenState extends ConsumerState<PlatformTeamScreen> {
                                   );
                               if (context.mounted) {
                                 Navigator.pop(ctx);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('User created successfully'),
-                                  ),
+                                AppAlerts.showSuccess(
+                                  context,
+                                  'User created successfully',
                                 );
                               }
                             } catch (e) {
                               setModalState(() => isSubmitting = false);
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error adding user: $e'),
-                                  ),
+                                AppAlerts.showError(
+                                  context,
+                                  'Error adding user: $e',
                                 );
                               }
                             }

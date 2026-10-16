@@ -1,0 +1,9 @@
+1. Make popup and actions blocked for if firm is blocked or deactivated
+ it should not allow to do any operation (needs to examine the api).
+2. When user is clicking on the add client via email its sending the localhost Link.
+3. Payment integration have to be done in the firm purchasing their plans.
+4. In the super admin panel . subsription and quotas are not displying correct Ui.
+5. In the super admin panel ,direct user provisioing is not working correclty 
+while im choice its giving erorr for all roles like this that this role is not valid
+6. In the superdmin panel user is not able to create the firm.
+7. Frim message should be implemented correctly.

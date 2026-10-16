@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/dio_client.dart';
-import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/lex_card.dart';
-import '../../../../shared/widgets/lex_text_field.dart';
 import '../../../../shared/widgets/role_badge.dart';
+import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../auth/domain/models/role_capabilities.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
 
@@ -19,6 +19,7 @@ class UserProfileScreen extends ConsumerStatefulWidget {
 class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   final _firstNameCtrl = TextEditingController();
   final _lastNameCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
   bool _isLoading = true;
   bool _isSaving = false;
   Map<String, dynamic>? _profileData;
@@ -33,6 +34,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   void dispose() {
     _firstNameCtrl.dispose();
     _lastNameCtrl.dispose();
+    _phoneCtrl.dispose();
     super.dispose();
   }
 
@@ -46,12 +48,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
           _profileData = res.data as Map<String, dynamic>;
           _firstNameCtrl.text = _profileData?['first_name']?.toString() ?? '';
           _lastNameCtrl.text = _profileData?['last_name']?.toString() ?? '';
+          _phoneCtrl.text = _profileData?['phone']?.toString() ?? '';
         });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error loading profile: $e')));
+        AppAlerts.showError(context, 'Error loading profile: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -67,28 +69,88 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         data: {
           'first_name': _firstNameCtrl.text.trim(),
           'last_name': _lastNameCtrl.text.trim(),
+          if (_phoneCtrl.text.trim().isNotEmpty)
+            'phone': _phoneCtrl.text.trim(),
         },
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile updated successfully!'),
-            backgroundColor: LexColors.success,
-          ),
-        );
+        AppAlerts.showSuccess(context, 'Profile updated successfully!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to update profile: $e');
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  Widget _buildField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    String? hintText,
+    bool readOnly = false,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w700,
+            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+          ),
+        ),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          readOnly: readOnly,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: TextStyle(
+              fontSize: 13,
+              color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+            ),
+            prefixIcon: Icon(
+              icon,
+              size: 18,
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            ),
+            filled: true,
+            fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 1.5,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -98,121 +160,181 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     final user = authState.user;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final initials = user?.username.isNotEmpty == true
+        ? user!.username.substring(0, 1).toUpperCase()
+        : 'U';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: const Text(
+          'My Profile',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+        ),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadProfile),
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip: 'Refresh',
+            onPressed: _loadProfile,
+          ),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+          ? Padding(
               padding: const EdgeInsets.all(20),
+              child: Column(
+                children: const [
+                  SkeletonLoader(height: 140, borderRadius: 18),
+                  SizedBox(height: 16),
+                  SkeletonLoader(height: 220, borderRadius: 18),
+                  SizedBox(height: 16),
+                  SkeletonLoader(height: 160, borderRadius: 18),
+                ],
+              ),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Profile Header Card
-                  Center(
+                  // Profile Header Card with Camera Badge
+                  LexCard(
+                    borderRadius: 20,
+                    padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
                     child: Column(
                       children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundColor: userRole.badgeColor.withValues(
-                            alpha: 0.15,
-                          ),
-                          child: Text(
-                            user?.username.isNotEmpty == true
-                                ? user!.username[0].toUpperCase()
-                                : 'U',
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w800,
-                              color: userRole.badgeColor,
+                        Stack(
+                          children: [
+                            Container(
+                              width: 86,
+                              height: 86,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFF0F1F38),
+                                border: Border.all(
+                                  color: isDark
+                                      ? const Color(0xFF334155)
+                                      : const Color(0xFFE2E8F0),
+                                  width: 3,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  initials,
+                                  style: const TextStyle(
+                                    fontSize: 34,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 2),
+                                ),
+                                child: const Icon(
+                                  Icons.camera_alt_rounded,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 12),
                         Text(
                           user?.username ?? 'Legal User',
-                          style: const TextStyle(
-                            fontSize: 20,
+                          style: TextStyle(
+                            fontSize: 19,
                             fontWeight: FontWeight.w800,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 3),
                         Text(
                           user?.email ?? '',
                           style: TextStyle(
-                            fontSize: 14,
-                            color: isDark
-                                ? LexColors.textSecondaryDark
-                                : LexColors.textSecondaryLight,
+                            fontSize: 13,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                           ),
                         ),
                         const SizedBox(height: 10),
                         RoleBadge(
                           role: userRole,
                           fontSize: 12,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 5,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                           borderRadius: BorderRadius.circular(12),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          userRole.description,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isDark
-                                ? LexColors.textSecondaryDark
-                                : LexColors.textSecondaryLight,
-                          ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 18),
 
-                  // Personal Info Card
+                  // Personal Information Card
                   LexCard(
-                    padding: const EdgeInsets.all(20),
+                    borderRadius: 18,
+                    padding: const EdgeInsets.all(18),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Personal Information',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.person_outline_rounded,
+                              size: 19,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Personal Information',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
-                        LexTextField(
-                          controller: _firstNameCtrl,
+                        _buildField(
                           label: 'First Name',
+                          controller: _firstNameCtrl,
+                          icon: Icons.badge_outlined,
                           hintText: 'Enter first name',
-                          prefixIcon: Icons.badge_outlined,
                         ),
-                        const SizedBox(height: 14),
-                        LexTextField(
-                          controller: _lastNameCtrl,
+                        const SizedBox(height: 12),
+                        _buildField(
                           label: 'Last Name',
+                          controller: _lastNameCtrl,
+                          icon: Icons.badge_outlined,
                           hintText: 'Enter last name',
-                          prefixIcon: Icons.badge_outlined,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildField(
+                          label: 'Primary Phone',
+                          controller: _phoneCtrl,
+                          icon: Icons.phone_outlined,
+                          hintText: 'Enter phone number',
                         ),
                         const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
+                          height: 46,
                           child: ElevatedButton(
                             onPressed: _isSaving ? null : _saveProfile,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .primary,
+                              backgroundColor: const Color(0xFF0F1F38),
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 2,
                             ),
                             child: _isSaving
                                 ? const SizedBox(
@@ -223,50 +345,99 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Text('Save Profile Changes'),
+                                : const Text(
+                                    'Save Profile Changes',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                    ),
+                                  ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
-                  // Firm Context Card
+                  // Law Firm Affiliation Card
                   if (_profileData?['firm'] is Map) ...[
                     LexCard(
-                      padding: const EdgeInsets.all(20),
+                      borderRadius: 18,
+                      padding: const EdgeInsets.all(18),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Law Firm Affiliation',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.business_outlined,
+                                size: 19,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Law Firm Affiliation',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 14),
                           _buildDetailRow(
                             'Firm Name',
-                            _profileData!['firm']['name']?.toString() ??
-                                'NTS Legal',
+                            _profileData!['firm']['name']?.toString() ?? 'LexTech Legal',
                           ),
-                          const SizedBox(height: 8),
+                          const Divider(height: 18),
                           _buildDetailRow(
                             'Address',
-                            _profileData!['firm']['address']?.toString() ??
-                                'Not specified',
+                            _profileData!['firm']['address']?.toString() ?? 'Headquarters',
                           ),
-                          const SizedBox(height: 8),
+                          const Divider(height: 18),
                           _buildDetailRow(
                             'Firm Phone',
-                            _profileData!['firm']['phone']?.toString() ??
-                                'Not specified',
+                            _profileData!['firm']['phone']?.toString() ?? 'Direct line',
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: 18),
                   ],
+
+                  // Account & Security Card
+                  LexCard(
+                    borderRadius: 18,
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.security_outlined,
+                              size: 19,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Account & Security',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+                        _buildDetailRow('Account ID', '#${user?.id ?? 1}'),
+                        const Divider(height: 18),
+                        _buildDetailRow('Role Authority', userRole.displayTitle),
+                        const Divider(height: 18),
+                        _buildDetailRow('Status', 'Active Verified Account'),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -277,10 +448,20 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xFF64748B),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+          ),
         ),
       ],
     );

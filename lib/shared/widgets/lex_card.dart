@@ -1,50 +1,101 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/lex_colors.dart';
-
 class LexCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final double borderRadius;
   final VoidCallback? onTap;
   final Color? backgroundColor;
+  final Color? leftAccentColor;
+  final double leftAccentWidth;
+  final bool showShadow;
+  final Border? border;
 
   const LexCard({
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(20),
-    this.borderRadius = 10,
+    this.borderRadius = 18,
     this.onTap,
     this.backgroundColor,
+    this.leftAccentColor,
+    this.leftAccentWidth = 4.0,
+    this.showShadow = true,
+    this.border,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final card = Container(
+    final defaultBorder = Border.all(
+      color: isDark
+          ? const Color(0xFF334155).withValues(alpha: 0.6)
+          : const Color(0xFFE2E8F0).withValues(alpha: 0.8),
+      width: 1.0,
+    );
+
+    final cardContent = Container(
       padding: padding,
       decoration: BoxDecoration(
-        color:
-            backgroundColor ??
-            (isDark ? LexColors.surfaceDark : LexColors.surfaceLight),
+        color: backgroundColor ??
+            (isDark ? const Color(0xFF1E293B) : Colors.white),
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(
-          color: isDark ? LexColors.borderDark : LexColors.borderLight,
-          width: 1,
-        ),
+        border: border ?? defaultBorder,
+        boxShadow: showShadow
+            ? [
+                BoxShadow(
+                  color: isDark
+                      ? Colors.black.withValues(alpha: 0.3)
+                      : const Color(0xFF1E293B).withValues(alpha: 0.04),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: child,
     );
 
-    if (onTap != null) {
-      return InkWell(
-        onTap: onTap,
+    Widget effectiveCard = cardContent;
+
+    if (leftAccentColor != null) {
+      effectiveCard = ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
-        child: card,
+        child: Stack(
+          children: [
+            effectiveCard,
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: leftAccentWidth,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: leftAccentColor,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(borderRadius),
+                    bottomLeft: Radius.circular(borderRadius),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       );
     }
 
-    return card;
+    if (onTap != null) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(borderRadius),
+          child: effectiveCard,
+        ),
+      );
+    }
+
+    return effectiveCard;
   }
 }

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/firm_theme.dart';
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../auth/domain/models/role_capabilities.dart';
 import '../../data/models/firm_profile.dart';
@@ -115,12 +116,7 @@ class _BrandingSettingsScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not open file picker: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Could not open file picker: $e');
       }
     }
   }
@@ -160,21 +156,11 @@ class _BrandingSettingsScreenState
 
       if (mounted) {
         _syncWithProfile(updated);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Firm branding updated successfully!'),
-            backgroundColor: LexColors.success,
-          ),
-        );
+        AppAlerts.showSuccess(context, 'Firm branding updated successfully!');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to save branding: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to save branding: $e');
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -275,7 +261,11 @@ class _BrandingSettingsScreenState
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Firm Branding Studio'),
+          title: const Text(
+            'Firm Branding Studio',
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+          ),
           actions: [
             if (_hasUnsavedChanges && !_isSaving)
               TextButton(onPressed: _resetDraft, child: const Text('Reset')),
@@ -283,23 +273,23 @@ class _BrandingSettingsScreenState
               padding: const EdgeInsets.only(right: 12),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(120, 38),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  minimumSize: const Size(70, 36),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   backgroundColor: _draftPrimaryColor,
                   foregroundColor: Colors.white,
                 ),
                 onPressed: _isSaving ? null : _saveChanges,
                 child: _isSaving
                     ? const SizedBox(
-                        width: 18,
-                        height: 18,
+                        width: 16,
+                        height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           color: Colors.white,
                         ),
                       )
                     : const Text(
-                        'Save Changes',
+                        'Save',
                         style: TextStyle(fontWeight: FontWeight.w700),
                       ),
               ),
@@ -786,22 +776,25 @@ class _BrandingSettingsScreenState
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-                Text(
-                  subtitle,
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
-                ),
-              ],
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
+                ],
+              ),
             ),
+            const SizedBox(width: 12),
             Container(
               width: 32,
               height: 32,

@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/lex_card.dart';
+import '../../../../shared/widgets/skeleton_loader.dart';
+import '../../../../shared/widgets/status_badge.dart';
 import '../../../cases/presentation/providers/cases_notifier.dart';
 import '../../data/repositories/hearings_repository.dart';
 import '../providers/hearings_notifier.dart';
@@ -36,7 +38,10 @@ class HearingDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hearing Details'),
+        title: const Text(
+          'Hearing Details',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
@@ -44,7 +49,7 @@ class HearingDetailScreen extends ConsumerWidget {
             onPressed: () => context.push('/app/hearings/$hearingId/edit'),
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline, color: LexColors.error),
+            icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFEF4444)),
             tooltip: 'Delete Hearing',
             onPressed: () => _confirmDelete(context, ref),
           ),
@@ -56,40 +61,45 @@ class HearingDetailScreen extends ConsumerWidget {
               ?.where((c) => c.id == hearing.caseId)
               .firstOrNull;
 
+          String weekdayFormatted = 'UPCOMING HEARING';
           String dateFormatted = hearing.date;
           if (hearing.parsedDate != null) {
-            dateFormatted = DateFormat('EEEE, MMMM d, yyyy')
-                .format(hearing.parsedDate!);
+            weekdayFormatted = DateFormat('EEEE, MMMM d, yyyy')
+                .format(hearing.parsedDate!)
+                .toUpperCase();
+            dateFormatted = DateFormat('MMMM d, yyyy').format(hearing.parsedDate!);
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Header Card
                 LexCard(
+                  borderRadius: 20,
+                  leftAccentColor: const Color(0xFF2563EB),
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(10),
+                            width: 50,
+                            height: 50,
                             decoration: BoxDecoration(
-                              color: isDark
-                                  ? LexColors.surfaceDark
-                                  : const Color(0xFFFEF3C7).withAlpha(140),
-                              borderRadius: BorderRadius.circular(10),
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: LexColors.accentBronze.withAlpha(60),
+                                color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
                               ),
                             ),
                             child: const Icon(
-                              Icons.gavel_outlined,
-                              size: 24,
-                              color: LexColors.accentBronze,
+                              Icons.gavel_rounded,
+                              size: 26,
+                              color: Color(0xFF2563EB),
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -98,25 +108,47 @@ class HearingDetailScreen extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  hearing.title,
-                                  style: TextStyle(
-                                    fontSize: 17,
+                                  weekdayFormatted,
+                                  style: const TextStyle(
+                                    fontSize: 11,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark
-                                        ? LexColors.textPrimaryDark
-                                        : LexColors.slatePrimary,
+                                    letterSpacing: 0.6,
+                                    color: Color(0xFF2563EB),
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  dateFormatted,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: LexColors.accentBronze,
+                                  hearing.title,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   ),
                                 ),
                               ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          StatusBadge(status: hearing.status, showDot: true),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              hearing.hearingType.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.4,
+                                color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                              ),
                             ),
                           ),
                         ],
@@ -126,47 +158,62 @@ class HearingDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Schedule and Venue Details
+                // Session and Venue Details
                 LexCard(
+                  borderRadius: 18,
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Session & Venue',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: isDark
-                              ? LexColors.textPrimaryDark
-                              : LexColors.slatePrimary,
-                        ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today_rounded,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Session & Venue',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
                       _buildInfoRow(
                         context,
+                        'Date',
+                        dateFormatted,
+                        Icons.event_outlined,
+                      ),
+                      const Divider(height: 18),
+                      _buildInfoRow(
+                        context,
                         'Time',
                         hearing.startTime != null
-                            ? '${hearing.startTime}${hearing.endTime != null ? " to ${hearing.endTime}" : ""}'
+                            ? '${hearing.startTime}${hearing.endTime != null ? " - ${hearing.endTime}" : ""}'
                             : 'Time not specified',
-                        Icons.schedule_outlined,
+                        Icons.access_time_rounded,
                       ),
-                      const SizedBox(height: 12),
+                      const Divider(height: 18),
                       _buildInfoRow(
                         context,
-                        'Court',
-                        hearing.courtName,
-                        Icons.account_balance_outlined,
+                        'Courtroom',
+                        hearing.courtName.isNotEmpty ? hearing.courtName : 'Court Unspecified',
+                        Icons.account_balance_rounded,
                       ),
-                      const SizedBox(height: 12),
-                      _buildInfoRow(
-                        context,
-                        'Judge',
-                        hearing.judgeName?.isNotEmpty == true
-                            ? hearing.judgeName!
-                            : 'Not specified',
-                        Icons.person_pin_outlined,
-                      ),
+                      if (hearing.judgeName?.isNotEmpty == true) ...[
+                        const Divider(height: 18),
+                        _buildInfoRow(
+                          context,
+                          'Judge',
+                          hearing.judgeName!,
+                          Icons.person_pin_rounded,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -174,59 +221,72 @@ class HearingDetailScreen extends ConsumerWidget {
 
                 // Associated Case
                 LexCard(
+                  borderRadius: 18,
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Associated Legal Case',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: isDark
-                              ? LexColors.textPrimaryDark
-                              : LexColors.slatePrimary,
-                        ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.folder_open_rounded,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Associated Legal Case',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 14),
                       if (associatedCase != null)
                         InkWell(
                           onTap: () =>
                               context.push('/app/cases/${associatedCase.id}'),
-                          borderRadius: BorderRadius.circular(8),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                              ),
+                            ),
                             child: Row(
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         associatedCase.title,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 14,
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight: FontWeight.w700,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                                         ),
                                       ),
-                                      const SizedBox(height: 2),
+                                      const SizedBox(height: 3),
                                       Text(
-                                        '${associatedCase.caseNumber} • ${associatedCase.clientName ?? "Client"}',
+                                        '${associatedCase.caseNumber} • ${associatedCase.clientName ?? "Client #${associatedCase.client}"}',
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: isDark
-                                              ? LexColors.textSecondaryDark
-                                              : LexColors.textSecondaryLight,
+                                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
                                 const Icon(
-                                  Icons.chevron_right,
-                                  size: 18,
-                                  color: LexColors.textSecondaryLight,
+                                  Icons.chevron_right_rounded,
+                                  size: 20,
+                                  color: Color(0xFF94A3B8),
                                 ),
                               ],
                             ),
@@ -237,9 +297,7 @@ class HearingDetailScreen extends ConsumerWidget {
                           'Case #${hearing.caseId}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: isDark
-                                ? LexColors.textSecondaryDark
-                                : LexColors.textSecondaryLight,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                           ),
                         ),
                     ],
@@ -249,29 +307,37 @@ class HearingDetailScreen extends ConsumerWidget {
 
                 // Notes / Instructions
                 LexCard(
+                  borderRadius: 18,
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Hearing Notes & Instructions',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: isDark
-                              ? LexColors.textPrimaryDark
-                              : LexColors.slatePrimary,
-                        ),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.notes_rounded,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Hearing Notes & Instructions',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        hearing.notes?.isNotEmpty == true ? hearing.notes! : 'No specific notes recorded for this hearing session.',
+                        hearing.notes?.isNotEmpty == true
+                            ? hearing.notes!
+                            : 'No specific preparation notes recorded for this hearing session.',
                         style: TextStyle(
                           fontSize: 13,
-                          height: 1.4,
-                          color: isDark
-                              ? LexColors.textSecondaryDark
-                              : LexColors.textSecondaryLight,
+                          height: 1.45,
+                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                         ),
                       ),
                     ],
@@ -281,7 +347,18 @@ class HearingDetailScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: const [
+              SkeletonLoader(height: 120, borderRadius: 18),
+              SizedBox(height: 16),
+              SkeletonLoader(height: 180, borderRadius: 18),
+              SizedBox(height: 16),
+              SkeletonLoader(height: 120, borderRadius: 18),
+            ],
+          ),
+        ),
         error: (err, _) => ErrorStateWidget(
           message: 'Unable to load hearing details: $err',
           onRetry: () => ref.refresh(hearingDetailProvider(hearingId)),
@@ -304,21 +381,17 @@ class HearingDetailScreen extends ConsumerWidget {
         Icon(
           icon,
           size: 18,
-          color: isDark
-              ? LexColors.textSecondaryDark
-              : LexColors.textSecondaryLight,
+          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
         ),
         const SizedBox(width: 12),
         SizedBox(
-          width: 70,
+          width: 80,
           child: Text(
             label,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: isDark
-                  ? LexColors.textSecondaryDark
-                  : LexColors.textSecondaryLight,
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
             ),
           ),
         ),
@@ -326,11 +399,9 @@ class HearingDetailScreen extends ConsumerWidget {
           child: Text(
             value,
             style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: isDark
-                  ? LexColors.textPrimaryDark
-                  : LexColors.textPrimaryLight,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
             ),
           ),
         ),
@@ -342,7 +413,7 @@ class HearingDetailScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        title: const Text('Delete Hearing?'),
+        title: const Text('Delete Scheduled Hearing?'),
         content: const Text(
           'Are you sure you want to remove this scheduled hearing from the agenda?',
         ),
@@ -353,7 +424,7 @@ class HearingDetailScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(true),
-            style: TextButton.styleFrom(foregroundColor: LexColors.error),
+            style: TextButton.styleFrom(foregroundColor: const Color(0xFFEF4444)),
             child: const Text('Delete'),
           ),
         ],
@@ -366,16 +437,12 @@ class HearingDetailScreen extends ConsumerWidget {
             .read(hearingsNotifierProvider.notifier)
             .deleteHearing(hearingId);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Hearing deleted successfully')),
-          );
+          AppAlerts.showSuccess(context, 'Hearing removed from agenda.');
           context.pop();
         }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to delete hearing: $e')),
-          );
+          AppAlerts.showError(context, 'Failed to delete hearing: $e');
         }
       }
     }

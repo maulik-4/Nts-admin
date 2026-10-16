@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/lex_card.dart';
+import '../../../../shared/widgets/loading_shimmer.dart';
 import '../../data/models/notification_models.dart';
 import '../providers/notifications_notifier.dart';
 
@@ -17,19 +19,57 @@ class NotificationsListScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? LexColors.canvasDark : const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Row(
+          children: [
+            const Text('Notifications'),
+            if (unreadCount > 0) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: LexColors.accentGold,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$unreadCount new',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
         actions: [
           if (unreadCount > 0)
             TextButton.icon(
-              icon: const Icon(Icons.done_all, size: 18),
+              icon: const Icon(Icons.done_all_rounded, size: 18),
               label: const Text('Mark Read'),
-              onPressed: () => ref
-                  .read(notificationsNotifierProvider.notifier)
-                  .markAllAsRead(),
+              style: TextButton.styleFrom(
+                foregroundColor: LexColors.accentGold,
+                textStyle: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              onPressed: () async {
+                try {
+                  await ref
+                      .read(notificationsNotifierProvider.notifier)
+                      .markAllAsRead();
+                  if (context.mounted) {
+                    AppAlerts.showSuccess(context, 'All notifications marked as read');
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    AppAlerts.showError(context, 'Failed to update: $e');
+                  }
+                }
+              },
             ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
             onPressed: () => ref
                 .read(notificationsNotifierProvider.notifier)
                 .loadNotifications(),
@@ -37,7 +77,16 @@ class NotificationsListScreen extends ConsumerWidget {
         ],
       ),
       body: notificationsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: 6,
+          separatorBuilder: (_, _) => const SizedBox(height: 12),
+          itemBuilder: (ctx, idx) => ShimmerBox(
+            width: double.infinity,
+            height: 90,
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
         error: (err, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -45,7 +94,7 @@ class NotificationsListScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(
-                  Icons.error_outline,
+                  Icons.error_outline_rounded,
                   size: 48,
                   color: LexColors.error,
                 ),
@@ -53,12 +102,17 @@ class NotificationsListScreen extends ConsumerWidget {
                 Text(
                   'Error loading notifications: $err',
                   textAlign: TextAlign.center,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => ref
                       .read(notificationsNotifierProvider.notifier)
                       .loadNotifications(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: LexColors.slatePrimary,
+                    foregroundColor: Colors.white,
+                  ),
                   child: const Text('Retry'),
                 ),
               ],
@@ -73,22 +127,35 @@ class NotificationsListScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.notifications_none_outlined,
-                      size: 64,
-                      color: isDark
-                          ? LexColors.textSecondaryDark
-                          : LexColors.textSecondaryLight,
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: isDark ? LexColors.surfaceDark : Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 16,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.notifications_none_rounded,
+                        size: 54,
+                        color: isDark
+                            ? LexColors.textSecondaryDark
+                            : LexColors.textSecondaryLight,
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     const Text(
                       'No notifications yet',
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     Text(
                       'Case updates, hearing reminders, and task alerts will appear here.',
                       textAlign: TextAlign.center,
@@ -96,6 +163,7 @@ class NotificationsListScreen extends ConsumerWidget {
                         color: isDark
                             ? LexColors.textSecondaryDark
                             : LexColors.textSecondaryLight,
+                        fontSize: 14,
                       ),
                     ),
                   ],
@@ -107,7 +175,7 @@ class NotificationsListScreen extends ConsumerWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: notifications.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 10),
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
             itemBuilder: (ctx, idx) => _buildNotificationCard(
               context,
               ref,
@@ -126,48 +194,76 @@ class NotificationsListScreen extends ConsumerWidget {
     NotificationItem item,
     bool isDark,
   ) {
+    final isUnread = !item.isRead;
+
     return InkWell(
       onTap: () {
-        if (!item.isRead) {
+        if (isUnread) {
           ref.read(notificationsNotifierProvider.notifier).markAsRead(item.id);
         }
       },
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       child: LexCard(
+        borderRadius: 16,
+        leftAccentColor: isUnread ? LexColors.accentGold : null,
+        backgroundColor: isDark
+            ? (isUnread ? const Color(0xFF1E293B) : LexColors.surfaceDark)
+            : (isUnread ? const Color(0xFFFBF8F1) : Colors.white),
         padding: const EdgeInsets.all(16),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              margin: const EdgeInsets.only(top: 2),
-              width: 10,
-              height: 10,
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: item.isRead
-                    ? Colors.transparent
-                    : (isDark ? LexColors.accentGold : LexColors.accentBronze),
+                color: isUnread
+                    ? LexColors.accentGold.withValues(alpha: 0.15)
+                    : (isDark ? Colors.white10 : const Color(0xFFF1F5F9)),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                isUnread ? Icons.notifications_active_rounded : Icons.notifications_outlined,
+                size: 20,
+                color: isUnread
+                    ? LexColors.accentGold
+                    : (isDark ? Colors.white60 : Colors.grey[600]),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.title,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: item.isRead
-                          ? FontWeight.w600
-                          : FontWeight.w700,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.title,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: isUnread ? FontWeight.w800 : FontWeight.w600,
+                            color: isDark ? Colors.white : LexColors.slatePrimary,
+                          ),
+                        ),
+                      ),
+                      if (isUnread)
+                        Container(
+                          width: 8,
+                          height: 8,
+                          margin: const EdgeInsets.only(left: 6),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: LexColors.accentGold,
+                          ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 5),
                   Text(
                     item.message,
                     style: TextStyle(
                       fontSize: 13,
+                      height: 1.35,
                       color: isDark
                           ? LexColors.textSecondaryDark
                           : LexColors.textSecondaryLight,
@@ -175,9 +271,23 @@ class NotificationsListScreen extends ConsumerWidget {
                   ),
                   if (item.createdAt != null) ...[
                     const SizedBox(height: 8),
-                    Text(
-                      DateFormat.yMMMd().add_jm().format(item.createdAt!),
-                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 12,
+                          color: Colors.grey[500],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          DateFormat.yMMMd().add_jm().format(item.createdAt!),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[500],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ],

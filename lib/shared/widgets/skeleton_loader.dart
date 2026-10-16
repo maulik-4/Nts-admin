@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 class SkeletonLoader extends StatefulWidget {
   final double? width;
   final double height;
-  final double borderRadius;
+  final dynamic borderRadius;
 
   const SkeletonLoader({
     super.key,
     this.width,
     this.height = 16,
-    this.borderRadius = 6,
+    this.borderRadius = 6.0,
   });
 
   @override
@@ -29,7 +29,7 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
       duration: const Duration(milliseconds: 1400),
     )..repeat(reverse: true);
 
-    _animation = Tween<double>(
+  _animation = Tween<double>(
       begin: 0.35,
       end: 0.85,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
@@ -48,6 +48,17 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
         ? const Color(0xFF1E293B)
         : const Color(0xFFE2E8F0);
 
+    final BorderRadius calculatedRadius;
+    if (widget.borderRadius is BorderRadius) {
+      calculatedRadius = widget.borderRadius as BorderRadius;
+    } else if (widget.borderRadius is num) {
+      calculatedRadius = BorderRadius.circular(
+        (widget.borderRadius as num).toDouble(),
+      );
+    } else {
+      calculatedRadius = BorderRadius.circular(6.0);
+    }
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -56,10 +67,12 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
           height: widget.height,
           decoration: BoxDecoration(
             color: baseColor.withValues(alpha: _animation.value),
-            borderRadius: BorderRadius.circular(widget.borderRadius),
+            borderRadius: calculatedRadius,
           ),
         );
       },
     );
   }
 }
+
+typedef ShimmerBox = SkeletonLoader;

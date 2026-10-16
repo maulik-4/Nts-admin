@@ -9,7 +9,6 @@ import '../../../../shared/widgets/app_brand_logo.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/lex_card.dart';
-import '../../../../shared/widgets/role_badge.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../../shared/widgets/status_badge.dart';
 import '../../../auth/domain/models/role_capabilities.dart';
@@ -78,39 +77,51 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userRole = ref.watch(currentUserRoleProvider);
     final user = ref.watch(authNotifierProvider).user;
+    final firmTheme = ref.watch(firmThemeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final todayFormatted = DateFormat('EEEE, MMMM d, yyyy')
         .format(DateTime.now());
 
     return Scaffold(
       appBar: AppBar(
+        titleSpacing: 12,
         title: Row(
           children: [
             const AppBrandLogo(size: 34),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     userRole.isSuperAdmin
                         ? 'Platform Overview'
-                        : (user?.firmName ?? 'Vidhanta'),
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
+                        : (firmTheme.firmName ?? user?.firmName ?? 'apex'),
+                    style: TextStyle(
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.2,
+                      color: isDark
+                          ? LexColors.textPrimaryDark
+                          : const Color(0xFF0F172A),
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 1),
                   Text(
-                    todayFormatted,
+                    userRole.isSuperAdmin
+                        ? 'Platform Administration • $todayFormatted'
+                        : 'Executive Committee • $todayFormatted',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w500,
                       color: isDark
                           ? LexColors.textSecondaryDark
-                          : LexColors.textSecondaryLight,
+                          : const Color(0xFF64748B),
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -119,9 +130,87 @@ class DashboardScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            icon: Stack(
+              children: [
+                Icon(
+                  Icons.notifications_none_rounded,
+                  size: 22,
+                  color: isDark
+                      ? LexColors.textPrimaryDark
+                      : const Color(0xFF0F172A),
+                ),
+                Positioned(
+                  right: 1,
+                  top: 1,
+                  child: Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFEF4444),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            tooltip: 'Notifications',
+            onPressed: () => context.push('/app/more/notifications'),
+          ),
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            icon: Icon(
+              Icons.refresh_rounded,
+              size: 21,
+              color: isDark
+                  ? LexColors.textPrimaryDark
+                  : const Color(0xFF0F172A),
+            ),
             tooltip: 'Refresh Workspace',
             onPressed: () => _refreshAll(ref, userRole),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 12, left: 4),
+            child: InkWell(
+              onTap: () => context.push('/app/more/profile'),
+              borderRadius: BorderRadius.circular(18),
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 17,
+                    backgroundColor: const Color(0xFF0F1F38),
+                    child: Text(
+                      user?.username.isNotEmpty == true
+                          ? user!.username[0].toUpperCase()
+                          : 'A',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 9,
+                      height: 9,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -133,8 +222,13 @@ class DashboardScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Role-Specific Welcome Banner
-              _buildRoleBanner(context, userRole, user),
+              // Role-Specific Welcome Banner matching UI image
+              _buildRoleBanner(
+                context,
+                userRole,
+                user,
+                firmTheme.firmName,
+              ),
               const SizedBox(height: 18),
 
               // Role-Specific Dashboard View
@@ -159,82 +253,238 @@ class DashboardScreen extends ConsumerWidget {
     BuildContext context,
     UserRole userRole,
     dynamic user,
+    String? firmName,
   ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     IconData icon;
     String subtitle;
 
     switch (userRole) {
       case UserRole.superAdmin:
-        icon = Icons.admin_panel_settings;
+        icon = Icons.admin_panel_settings_rounded;
         subtitle = 'Platform Administrator • Full Registry Control';
         break;
       case UserRole.firmAdmin:
-        icon = Icons.business_center_outlined;
-        subtitle = '${user?.firmName ?? "Law Firm"} • Executive Command';
+        icon = Icons.business_center_rounded;
+        subtitle = 'Executive Committee';
         break;
       case UserRole.lawyer:
-        icon = Icons.balance;
-        subtitle = 'Advocate Workspace • Cases & Hearings Agenda';
+        icon = Icons.balance_rounded;
+        subtitle = 'Advocate Workspace • Cases & Hearings';
         break;
       case UserRole.staff:
-        icon = Icons.task_alt;
-        subtitle = 'Operations & Tasks Queue • Client Services';
+        icon = Icons.task_alt_rounded;
+        subtitle = 'Operations & Tasks Queue • Client Intake';
         break;
       case UserRole.unknown:
-        icon = Icons.person;
+        icon = Icons.person_rounded;
         subtitle = 'Workspace Member';
         break;
     }
 
-    return LexCard(
-      padding: const EdgeInsets.all(18),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: isDark
-                ? LexColors.surfaceDark
-                : Theme.of(context).colorScheme.primary,
-            child: Icon(
-              icon,
-              color: isDark ? LexColors.accentGold : Colors.white,
-              size: 24,
-            ),
+    final displayName = firmName ?? user?.firmName ?? (user?.username ?? 'apex');
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0B192C).withValues(alpha: 0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Welcome, ${user?.username ?? (userRole.isSuperAdmin ? "Super Admin" : "Advocate")}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? LexColors.textPrimaryDark
-                        : Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark
-                        ? LexColors.textSecondaryDark
-                        : LexColors.textSecondaryLight,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          RoleBadge(role: userRole),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: Stack(
+          children: [
+            // Background Image bg.png
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/bg.png',
+                fit: BoxFit.cover,
+                alignment: Alignment.centerRight,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF071224), Color(0xFF1E3A8A)],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Gradient Overlay for text contrast on left
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      const Color(0xFF061428).withValues(alpha: 0.90),
+                      const Color(0xFF0A1E3C).withValues(alpha: 0.70),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.60, 1.0],
+                  ),
+                ),
+              ),
+            ),
+            // Foreground Banner Content
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+              child: Row(
+                children: [
+                  // Outer & Inner Gold/Navy Ring with icon
+                  Container(
+                    width: 44,
+                    height: 44,
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFC9A84C).withValues(alpha: 0.45),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF0B1B33),
+                        border: Border.all(
+                          color: const Color(0xFFC9A84C),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Icon(
+                        icon,
+                        color: const Color(0xFFFDE68A),
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  // Welcome texts
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Welcome back,',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withValues(alpha: 0.85),
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withValues(alpha: 0.72),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  // Role Badge Pill ("FIRM ADMIN →")
+                  _buildBannerRolePill(context, userRole),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBannerRolePill(BuildContext context, UserRole role) {
+    String label;
+    switch (role) {
+      case UserRole.superAdmin:
+        label = 'SUPER ADMIN';
+        break;
+      case UserRole.firmAdmin:
+        label = 'FIRM ADMIN';
+        break;
+      case UserRole.lawyer:
+        label = 'LAWYER';
+        break;
+      case UserRole.staff:
+        label = 'STAFF';
+        break;
+      case UserRole.unknown:
+        label = 'MEMBER';
+        break;
+    }
+
+    return InkWell(
+      onTap: () {
+        if (role.isSuperAdmin) {
+          context.push('/app/firms');
+        } else {
+          context.push('/app/more');
+        }
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFEF3C7),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF78350F),
+                letterSpacing: 0.4,
+              ),
+            ),
+            const SizedBox(width: 3),
+            const Icon(
+              Icons.arrow_forward_rounded,
+              size: 11,
+              color: Color(0xFF78350F),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -640,100 +890,105 @@ class DashboardScreen extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Firm Admin Quick Actions (Full Suite including Payment and Task)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildQuickActionButton(
+            // Firm Admin Quick Actions matching UI/image.png
+            Row(
+              children: [
+                Expanded(
+                  child: _buildQuickActionButton(
                     context,
-                    minWidth: 78,
-                    icon: Icons.add_circle_outline,
+                    icon: Icons.note_add_outlined,
                     label: 'New Case',
+                    iconColor: const Color(0xFF2563EB),
+                    iconBgColor: const Color(0xFFEFF6FF),
                     onTap: () => context.push('/app/cases/create'),
                   ),
-                  const SizedBox(width: 8),
-                  _buildQuickActionButton(
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildQuickActionButton(
                     context,
-                    minWidth: 78,
-                    icon: Icons.person_add_outlined,
+                    icon: Icons.people_alt_rounded,
                     label: 'New Client',
+                    iconColor: const Color(0xFF10B981),
+                    iconBgColor: const Color(0xFFECFDF5),
                     onTap: () => context.push('/app/clients/create'),
                   ),
-                  const SizedBox(width: 8),
-                  _buildQuickActionButton(
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildQuickActionButton(
                     context,
-                    minWidth: 78,
-                    icon: Icons.event_available_outlined,
+                    icon: Icons.event_available_rounded,
                     label: 'Hearing',
+                    iconColor: const Color(0xFFF59E0B),
+                    iconBgColor: const Color(0xFFFFFBEB),
                     onTap: () => context.push('/app/hearings/create'),
                   ),
-                  const SizedBox(width: 8),
-                  _buildQuickActionButton(
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildQuickActionButton(
                     context,
-                    minWidth: 78,
-                    icon: Icons.payments_outlined,
+                    icon: Icons.credit_card_rounded,
                     label: 'Payment',
+                    iconColor: const Color(0xFF8B5CF6),
+                    iconBgColor: const Color(0xFFF5F3FF),
                     onTap: () => context.push('/app/more/payments/create'),
                   ),
-                  const SizedBox(width: 8),
-                  _buildQuickActionButton(
-                    context,
-                    minWidth: 78,
-                    icon: Icons.task_alt_outlined,
-                    label: 'New Task',
-                    onTap: () => context.push('/app/tasks/create'),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 18),
 
-            // Metrics: Clients, Cases, Hearings & Collections
+            // Metrics: Clients, Cases, Hearings & Collections in 2x2 Grid
             ResponsiveMetricGrid(
               children: [
                 MetricCard(
-                  title: 'Active Clients',
+                  title: 'ACTIVE CLIENTS',
                   value: '${data.totalClients}',
                   subtitle: data.clientUsage?.unlimited == true
                       ? 'Unlimited quota'
-                      : '${data.clientUsage?.used ?? data.totalClients} registered',
-                  icon: Icons.people_outline,
-                  iconColor: LexColors.accentWarm,
-                  iconBgColor: LexColors.accentLight.withAlpha(120),
+                      : '${data.clientUsage?.used ?? data.totalClients} registered clients',
+                  icon: Icons.people_alt_rounded,
+                  iconColor: const Color(0xFF10B981),
+                  iconBgColor: const Color(0xFFECFDF5),
+                  trendText: '+0%',
                   onTap: () => context.push('/app/clients'),
                 ),
                 MetricCard(
-                  title: 'Total Cases',
+                  title: 'TOTAL CASES',
                   value: '${data.totalCases}',
                   subtitle:
                       '${data.openCases} open • ${data.closedCases} closed',
                   icon: Icons.folder_outlined,
-                  iconColor: LexColors.success,
-                  iconBgColor: LexColors.successLight,
+                  iconColor: const Color(0xFF2563EB),
+                  iconBgColor: const Color(0xFFEFF6FF),
+                  trendText: '+0%',
                   onTap: () => context.push('/app/cases'),
                 ),
                 MetricCard(
-                  title: 'Hearings',
+                  title: 'HEARINGS',
                   value: '${data.upcomingHearingsCount}',
                   subtitle: 'Courtroom calendar',
-                  icon: Icons.gavel_outlined,
-                  iconColor: LexColors.accentBronze,
-                  iconBgColor: LexColors.accentLight.withAlpha(120),
+                  icon: Icons.gavel_rounded,
+                  iconColor: const Color(0xFFF59E0B),
+                  iconBgColor: const Color(0xFFFFFBEB),
+                  trendText: '+0%',
                   onTap: () => context.push('/app/hearings'),
                 ),
                 MetricCard(
-                  title: 'Firm Collections',
+                  title: 'FIRM COLLECTIONS',
                   value: formattedCollections,
                   subtitle: '$paymentsCount billing receipts',
-                  icon: Icons.payments_outlined,
-                  iconColor: const Color(0xFF10B981),
-                  iconBgColor: const Color(0xFFECFDF5),
+                  icon: Icons.currency_rupee_rounded,
+                  iconColor: const Color(0xFF0D9488),
+                  iconBgColor: const Color(0xFFF0FDFA),
+                  trendText: '+0%',
                   onTap: () => context.push('/app/more/payments'),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // Upcoming Hearings Agenda Section
             _buildUpcomingHearingsCard(context, data, isDark),
@@ -741,6 +996,7 @@ class DashboardScreen extends ConsumerWidget {
 
             // Recent Cases Section
             _buildRecentCasesCard(context, data, isDark),
+            const SizedBox(height: 20),
           ],
         );
       },
@@ -1222,39 +1478,123 @@ class DashboardScreen extends ConsumerWidget {
   ) {
     return LexCard(
       padding: const EdgeInsets.all(18),
+      borderRadius: 20,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Upcoming Hearings',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
                   color: isDark
-                      ? LexColors.textPrimaryDark
-                      : Theme.of(context).colorScheme.primary,
+                      ? const Color(0xFF1E3A8A).withValues(alpha: 0.3)
+                      : const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.calendar_month_outlined,
+                  size: 20,
+                  color: Color(0xFF2563EB),
                 ),
               ),
-              TextButton(
-                onPressed: () => context.push('/app/hearings'),
-                child: const Text('View Agenda'),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Upcoming Hearings',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: isDark
+                            ? LexColors.textPrimaryDark
+                            : const Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      'Your scheduled court appearances',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: isDark
+                            ? LexColors.textSecondaryDark
+                            : const Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: () => context.push('/app/hearings'),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'View Agenda',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? const Color(0xFF60A5FA)
+                              : const Color(0xFF2563EB),
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 16,
+                        color: isDark
+                            ? const Color(0xFF60A5FA)
+                            : const Color(0xFF2563EB),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           if (data.upcomingHearings.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                'No hearings scheduled in the immediate future.',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: isDark
-                      ? LexColors.textSecondaryDark
-                      : LexColors.textSecondaryLight,
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: Column(
+                  children: [
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF1E293B)
+                            : const Color(0xFFEFF6FF),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: const Color(0xFFBFDBFE).withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.calendar_month_outlined,
+                        size: 26,
+                        color: Color(0xFF3B82F6),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'No hearings scheduled in the immediate future.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: isDark
+                            ? LexColors.textSecondaryDark
+                            : const Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             )
@@ -1268,20 +1608,21 @@ class DashboardScreen extends ConsumerWidget {
                 final h = data.upcomingHearings[index];
                 return InkWell(
                   onTap: () => context.push('/app/hearings/${h.id}'),
+                  borderRadius: BorderRadius.circular(10),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    padding: const EdgeInsets.symmetric(vertical: 6),
                     child: Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
+                            horizontal: 9,
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
                             color: isDark
-                                ? LexColors.surfaceDark
-                                : const Color(0xFFFEF3C7).withAlpha(120),
-                            borderRadius: BorderRadius.circular(6),
+                                ? const Color(0xFF334155).withValues(alpha: 0.5)
+                                : const Color(0xFFFEF3C7).withValues(alpha: 0.8),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             h.date,
@@ -1301,29 +1642,35 @@ class DashboardScreen extends ConsumerWidget {
                                 h.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark
+                                      ? LexColors.textPrimaryDark
+                                      : const Color(0xFF0F172A),
                                 ),
                               ),
+                              const SizedBox(height: 1),
                               Text(
                                 h.courtName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 11.5,
                                   color: isDark
                                       ? LexColors.textSecondaryDark
-                                      : LexColors.textSecondaryLight,
+                                      : const Color(0xFF64748B),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const Icon(
-                          Icons.chevron_right,
+                        Icon(
+                          Icons.chevron_right_rounded,
                           size: 18,
-                          color: LexColors.textSecondaryLight,
+                          color: isDark
+                              ? const Color(0xFF64748B)
+                              : const Color(0xFF94A3B8),
                         ),
                       ],
                     ),
@@ -1343,39 +1690,99 @@ class DashboardScreen extends ConsumerWidget {
   ) {
     return LexCard(
       padding: const EdgeInsets.all(18),
+      borderRadius: 20,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Recent Cases',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
                   color: isDark
-                      ? LexColors.textPrimaryDark
-                      : Theme.of(context).colorScheme.primary,
+                      ? const Color(0xFF1E3A8A).withValues(alpha: 0.3)
+                      : const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.description_outlined,
+                  size: 20,
+                  color: Color(0xFF2563EB),
                 ),
               ),
-              TextButton(
-                onPressed: () => context.push('/app/cases'),
-                child: const Text('All Cases'),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Recent Cases',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: isDark
+                            ? LexColors.textPrimaryDark
+                            : const Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      'Latest case updates',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: isDark
+                            ? LexColors.textSecondaryDark
+                            : const Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: () => context.push('/app/cases'),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'All Cases',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: isDark
+                              ? const Color(0xFF60A5FA)
+                              : const Color(0xFF2563EB),
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: 16,
+                        color: isDark
+                            ? const Color(0xFF60A5FA)
+                            : const Color(0xFF2563EB),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           if (data.recentCases.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                'No cases added to this workspace yet.',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: isDark
-                      ? LexColors.textSecondaryDark
-                      : LexColors.textSecondaryLight,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: Text(
+                  'No cases added to this workspace yet.',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: isDark
+                        ? LexColors.textSecondaryDark
+                        : const Color(0xFF64748B),
+                  ),
                 ),
               ),
             )
@@ -1387,12 +1794,33 @@ class DashboardScreen extends ConsumerWidget {
               separatorBuilder: (context, index) => const Divider(height: 14),
               itemBuilder: (context, index) {
                 final c = data.recentCases[index];
+                final isOpen = c.status.toLowerCase() == 'open';
+
                 return InkWell(
                   onTap: () => context.push('/app/cases/${c.id}'),
+                  borderRadius: BorderRadius.circular(10),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
                       children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: isOpen
+                                ? const Color(0xFFECFDF5)
+                                : const Color(0xFFEFF6FF),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            Icons.description_outlined,
+                            size: 18,
+                            color: isOpen
+                                ? const Color(0xFF059669)
+                                : const Color(0xFF2563EB),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1401,31 +1829,37 @@ class DashboardScreen extends ConsumerWidget {
                                 c.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark
+                                      ? LexColors.textPrimaryDark
+                                      : const Color(0xFF0F172A),
                                 ),
                               ),
+                              const SizedBox(height: 2),
                               Text(
                                 '${c.caseNumber} • ${c.clientName ?? "Client"}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 11.5,
                                   color: isDark
                                       ? LexColors.textSecondaryDark
-                                      : LexColors.textSecondaryLight,
+                                      : const Color(0xFF64748B),
                                 ),
                               ),
                             ],
                           ),
                         ),
                         StatusBadge(status: c.status),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.chevron_right,
+                        const SizedBox(width: 6),
+                        Icon(
+                          Icons.chevron_right_rounded,
                           size: 18,
-                          color: LexColors.textSecondaryLight,
+                          color: isDark
+                              ? const Color(0xFF64748B)
+                              : const Color(0xFF94A3B8),
                         ),
                       ],
                     ),
@@ -1443,21 +1877,21 @@ class DashboardScreen extends ConsumerWidget {
       children: const [
         Row(
           children: [
-            Expanded(child: SkeletonLoader(height: 105)),
+            Expanded(child: SkeletonLoader(height: 115)),
             SizedBox(width: 12),
-            Expanded(child: SkeletonLoader(height: 105)),
+            Expanded(child: SkeletonLoader(height: 115)),
           ],
         ),
         SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: SkeletonLoader(height: 105)),
+            Expanded(child: SkeletonLoader(height: 115)),
             SizedBox(width: 12),
-            Expanded(child: SkeletonLoader(height: 105)),
+            Expanded(child: SkeletonLoader(height: 115)),
           ],
         ),
         SizedBox(height: 20),
-        SkeletonLoader(height: 160),
+        SkeletonLoader(height: 170),
       ],
     );
   }
@@ -1467,49 +1901,77 @@ class DashboardScreen extends ConsumerWidget {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    Color? iconColor,
+    Color? iconBgColor,
     double? minWidth,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final effIconColor = iconColor ??
+        (isDark ? theme.colorScheme.secondary : theme.colorScheme.primary);
+    final effBgColor = iconBgColor ?? effIconColor.withValues(alpha: 0.12);
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        constraints: minWidth != null
-            ? BoxConstraints(minWidth: minWidth)
-            : null,
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+        constraints: BoxConstraints(minWidth: minWidth ?? 72),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 9),
         decoration: BoxDecoration(
-          color: isDark ? LexColors.surfaceDark : LexColors.surfaceLight,
-          borderRadius: BorderRadius.circular(10),
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF1E3A8A).withValues(alpha: isDark ? 0.2 : 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
           border: Border.all(
-            color: isDark ? LexColors.borderDark : LexColors.borderLight,
+            color: isDark
+                ? const Color(0xFF334155).withValues(alpha: 0.6)
+                : const Color(0xFFE2E8F0),
+            width: 1.0,
           ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isDark
-                  ? theme.colorScheme.secondary
-                  : theme.colorScheme.primary,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6.5),
+                  decoration: BoxDecoration(
+                    color: effBgColor,
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: effIconColor,
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 16,
+                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                ),
+              ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 10),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.left,
               style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
                 color: isDark
                     ? LexColors.textPrimaryDark
-                    : LexColors.textPrimaryLight,
+                    : const Color(0xFF0F172A),
               ),
             ),
           ],

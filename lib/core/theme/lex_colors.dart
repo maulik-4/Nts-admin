@@ -19,6 +19,8 @@ class LexColors {
   static const Color canvasDark = Color(0xFF0A0F1D);
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color surfaceDark = Color(0xFF111827);
+  static const Color cardBackgroundDark = Color(0xFF1E293B);
+  static const Color cardBackgroundLight = Color(0xFFFFFFFF);
 
   // Borders and dividers
   static const Color borderLight = Color(0xFFE2E8F0);

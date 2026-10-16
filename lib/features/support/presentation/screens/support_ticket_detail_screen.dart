@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
+import '../../../../shared/widgets/loading_shimmer.dart';
 import '../../data/models/support_ticket.dart';
 import '../../data/repositories/support_repository.dart';
 import '../providers/support_notifier.dart';
@@ -42,14 +44,12 @@ class _SupportTicketDetailScreenState
           .replyTicket(widget.ticketId, text);
       _replyCtrl.clear();
       ref.invalidate(supportDetailProvider(widget.ticketId));
+      if (mounted) {
+        AppAlerts.showSuccess(context, 'Reply posted successfully');
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to reply: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to post reply: $e');
       }
     } finally {
       if (mounted) setState(() => _isReplying = false);
@@ -65,21 +65,11 @@ class _SupportTicketDetailScreenState
       ref.invalidate(supportDetailProvider(widget.ticketId));
       ref.invalidate(supportStatsProvider);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Ticket marked as resolved'),
-            backgroundColor: LexColors.success,
-          ),
-        );
+        AppAlerts.showSuccess(context, 'Ticket marked as resolved');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to resolve ticket: $e');
       }
     } finally {
       if (mounted) setState(() => _isResolving = false);
@@ -92,22 +82,69 @@ class _SupportTicketDetailScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? LexColors.canvasDark : const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text('Ticket #${widget.ticketId}'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
             onPressed: () =>
                 ref.invalidate(supportDetailProvider(widget.ticketId)),
           ),
         ],
       ),
       body: ticketAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            ShimmerBox(
+              width: double.infinity,
+              height: 180,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            const SizedBox(height: 16),
+            ShimmerBox(
+              width: 140,
+              height: 24,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            const SizedBox(height: 12),
+            ShimmerBox(
+              width: double.infinity,
+              height: 80,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ],
+        ),
         error: (err, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text('Error loading ticket: $err'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline_rounded,
+                  size: 48,
+                  color: LexColors.error,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Error loading ticket: $err',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () =>
+                      ref.invalidate(supportDetailProvider(widget.ticketId)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: LexColors.slatePrimary,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
           ),
         ),
         data: (ticket) {
@@ -121,20 +158,27 @@ class _SupportTicketDetailScreenState
                     children: [
                       // Header card with badges
                       LexCard(
-                        padding: const EdgeInsets.all(16),
+                        borderRadius: 18,
+                        leftAccentColor: ticket.statusColor,
+                        padding: const EdgeInsets.all(18),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
-                                Text(
-                                  ticket.ticketNumber,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: isDark
-                                        ? LexColors.accentGold
-                                        : LexColors.accentBronze,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? Colors.white10 : const Color(0xFFF1F5F9),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    ticket.ticketNumber,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: isDark ? Colors.white70 : LexColors.slatePrimary,
+                                    ),
                                   ),
                                 ),
                                 const Spacer(),
@@ -147,20 +191,53 @@ class _SupportTicketDetailScreenState
                                     color: ticket.statusColor.withValues(
                                       alpha: 0.15,
                                     ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 6,
+                                        height: 6,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: ticket.statusColor,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        ticket.status.toUpperCase(),
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                          color: ticket.statusColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: ticket.priorityColor.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
-                                    ticket.status.toUpperCase(),
+                                    ticket.priority.toUpperCase(),
                                     style: TextStyle(
                                       fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      color: ticket.statusColor,
+                                      fontWeight: FontWeight.w600,
+                                      color: ticket.priorityColor,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 12),
                             Text(
                               ticket.subject,
                               style: const TextStyle(
@@ -168,44 +245,56 @@ class _SupportTicketDetailScreenState
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 8),
                             Text(
                               ticket.description,
                               style: TextStyle(
                                 fontSize: 14,
+                                height: 1.4,
                                 color: isDark
                                     ? LexColors.textSecondaryDark
                                     : LexColors.textSecondaryLight,
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            const Divider(),
+                            const SizedBox(height: 14),
+                            Divider(
+                              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                            ),
                             const SizedBox(height: 8),
                             Wrap(
                               spacing: 16,
                               runSpacing: 6,
                               children: [
-                                Text(
-                                  'Category: ${ticket.category}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                Text(
-                                  'Priority: ${ticket.priority}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.category_outlined, size: 13, color: Colors.grey),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Category: ${ticket.category.toUpperCase()}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 if (ticket.createdAt != null)
-                                  Text(
-                                    'Opened: ${DateFormat.yMMMd().format(ticket.createdAt!)}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.calendar_today_outlined, size: 13, color: Colors.grey),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Opened: ${DateFormat.yMMMd().format(ticket.createdAt!)}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                               ],
                             ),
@@ -216,32 +305,65 @@ class _SupportTicketDetailScreenState
 
                       // Resolve action button
                       if (!ticket.isResolved)
-                        OutlinedButton.icon(
-                          onPressed: _isResolving ? null : _resolve,
-                          icon: const Icon(
-                            Icons.check_circle_outline,
-                            color: LexColors.success,
-                          ),
-                          label: _isResolving
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                        SizedBox(
+                          height: 46,
+                          child: OutlinedButton.icon(
+                            onPressed: _isResolving ? null : _resolve,
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: LexColors.success),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.check_circle_outline_rounded,
+                              color: LexColors.success,
+                            ),
+                            label: _isResolving
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: LexColors.success,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Mark Ticket as Resolved',
+                                    style: TextStyle(
+                                      color: LexColors.success,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
-                                )
-                              : const Text('Mark Ticket as Resolved'),
+                          ),
                         ),
 
                       const SizedBox(height: 20),
-                      const Text(
-                        'Discussion & Replies',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: LexColors.slatePrimary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.forum_outlined,
+                              size: 16,
+                              color: LexColors.slatePrimary,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Discussion & Replies',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
 
                       if (ticket.replies.isEmpty)
                         Padding(
@@ -269,16 +391,16 @@ class _SupportTicketDetailScreenState
               // Bottom Reply Box
               if (!ticket.isResolved)
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: isDark
                         ? LexColors.surfaceDark
-                        : LexColors.canvasLight,
+                        : Colors.white,
                     border: Border(
                       top: BorderSide(
                         color: isDark
-                            ? LexColors.borderDark
-                            : LexColors.borderLight,
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFE2E8F0),
                         width: 1,
                       ),
                     ),
@@ -290,23 +412,30 @@ class _SupportTicketDetailScreenState
                           child: LexTextField(
                             controller: _replyCtrl,
                             hintText: 'Type your reply...',
+                            prefixIcon: Icons.edit_note_rounded,
                             textInputAction: TextInputAction.send,
                             onSubmitted: (_) => _sendReply(),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        IconButton.filled(
-                          onPressed: _isReplying ? null : _sendReply,
-                          icon: _isReplying
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Icon(Icons.send),
+                        const SizedBox(width: 10),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: LexColors.slatePrimary,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: IconButton(
+                            onPressed: _isReplying ? null : _sendReply,
+                            icon: _isReplying
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(Icons.send_rounded, color: Colors.white),
+                          ),
                         ),
                       ],
                     ),
@@ -321,8 +450,10 @@ class _SupportTicketDetailScreenState
 
   Widget _buildReplyCard(TicketReply reply, bool isDark) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 12),
       child: LexCard(
+        borderRadius: 16,
+        leftAccentColor: reply.isStaffReply ? Colors.blue : null,
         padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,7 +514,10 @@ class _SupportTicketDetailScreenState
               ],
             ),
             const SizedBox(height: 8),
-            Text(reply.message, style: const TextStyle(fontSize: 14)),
+            Text(
+              reply.message,
+              style: const TextStyle(fontSize: 14, height: 1.35),
+            ),
           ],
         ),
       ),

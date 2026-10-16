@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/lex_colors.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/status_badge.dart';
 import '../../data/models/client_model.dart';
@@ -14,31 +13,41 @@ class ClientCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accentColor = client.isActive
+        ? const Color(0xFF10B981)
+        : const Color(0xFF94A3B8);
 
     return LexCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(16),
+      borderRadius: 16,
+      leftAccentColor: accentColor,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: isDark
-                    ? LexColors.surfaceDark
-                    : const Color(0xFFEEF2F6),
-                child: Text(
-                  client.name.isNotEmpty
-                      ? client.name.substring(0, 1).toUpperCase()
-                      : 'C',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? LexColors.accentGold
-                        : Theme.of(context).colorScheme.primary,
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    client.name.isNotEmpty
+                        ? client.name.substring(0, 1).toUpperCase()
+                        : 'C',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF2563EB),
+                    ),
                   ),
                 ),
               ),
@@ -49,12 +58,12 @@ class ClientCard extends StatelessWidget {
                   children: [
                     Text(
                       client.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: isDark
-                            ? LexColors.textPrimaryDark
-                            : LexColors.textPrimaryLight,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
                       ),
                     ),
                     if (client.city != null && client.city!.isNotEmpty) ...[
@@ -64,9 +73,7 @@ class ClientCard extends StatelessWidget {
                           Icon(
                             Icons.location_on_outlined,
                             size: 13,
-                            color: isDark
-                                ? LexColors.textSecondaryDark
-                                : LexColors.textSecondaryLight,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                           ),
                           const SizedBox(width: 4),
                           Expanded(
@@ -76,9 +83,7 @@ class ClientCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: isDark
-                                    ? LexColors.textSecondaryDark
-                                    : LexColors.textSecondaryLight,
+                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                               ),
                             ),
                           ),
@@ -88,20 +93,25 @@ class ClientCard extends StatelessWidget {
                   ],
                 ),
               ),
-              StatusBadge(status: client.isActive ? 'Active' : 'Inactive'),
+              const SizedBox(width: 8),
+              StatusBadge(
+                status: client.isActive ? 'Active' : 'Inactive',
+                showDot: true,
+              ),
             ],
           ),
-          const SizedBox(height: 14),
-          const Divider(height: 1),
           const SizedBox(height: 12),
+          Divider(
+            height: 1,
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+          ),
+          const SizedBox(height: 10),
           Row(
             children: [
               Icon(
                 Icons.phone_outlined,
                 size: 14,
-                color: isDark
-                    ? LexColors.textSecondaryDark
-                    : LexColors.textSecondaryLight,
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
               ),
               const SizedBox(width: 6),
               Flexible(
@@ -111,21 +121,17 @@ class ClientCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: isDark
-                        ? LexColors.textPrimaryDark
-                        : LexColors.slatePrimary,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
                   ),
                 ),
               ),
               if (client.email != null && client.email!.isNotEmpty) ...[
-                const SizedBox(width: 12),
+                const SizedBox(width: 14),
                 Icon(
                   Icons.email_outlined,
                   size: 14,
-                  color: isDark
-                      ? LexColors.textSecondaryDark
-                      : LexColors.textSecondaryLight,
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                 ),
                 const SizedBox(width: 6),
                 Expanded(
@@ -135,13 +141,16 @@ class ClientCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDark
-                          ? LexColors.textSecondaryDark
-                          : LexColors.textSecondaryLight,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                     ),
                   ),
                 ),
               ],
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18,
+                color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+              ),
             ],
           ),
         ],

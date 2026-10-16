@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/lex_button.dart';
 import '../../../../shared/widgets/lex_card.dart';
@@ -60,24 +61,14 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
 
       if (mounted) {
         setState(() => _downloadedFilePath = savePath);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Downloaded ${doc.fileName} ($sizeBytes bytes) to: $savePath',
-            ),
-            backgroundColor: LexColors.success,
-            duration: const Duration(seconds: 4),
-          ),
+        AppAlerts.showSuccess(
+          context,
+          'Downloaded ${doc.fileName} ($sizeBytes bytes) to: $savePath',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to download document: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to download document: $e');
       }
     } finally {
       if (mounted) {
@@ -115,19 +106,12 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
           .read(documentsNotifierProvider.notifier)
           .deleteDocument(widget.documentId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Document deleted successfully.')),
-        );
+        AppAlerts.showSuccess(context, 'Document deleted successfully.');
         context.pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to delete document: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to delete document: $e');
       }
     }
   }

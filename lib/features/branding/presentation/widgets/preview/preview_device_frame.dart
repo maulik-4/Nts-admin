@@ -30,10 +30,14 @@ class PreviewDeviceFrame extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Top Frame Controls & Badges
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 10,
+          runSpacing: 8,
           children: [
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
                   'LIVE APP PREVIEW',
@@ -77,6 +81,7 @@ class PreviewDeviceFrame extends StatelessWidget {
 
             // Mode controls (Desktop / Mobile + Light / Dark)
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // Viewport Switcher
                 Container(

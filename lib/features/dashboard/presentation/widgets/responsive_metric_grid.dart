@@ -25,8 +25,8 @@ class ResponsiveMetricGrid extends StatelessWidget {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
 
-        // Mobile (< 400px): Stack as single column with natural intrinsic heights
-        if (width < 400) {
+        // Stack as single column only on extremely narrow viewports (< 280px)
+        if (width < 280) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -38,7 +38,7 @@ class ResponsiveMetricGrid extends StatelessWidget {
           );
         }
 
-        // Multi-column row grouping based on available width
+        // Multi-column row grouping based on available width (2 columns on mobile phones)
         final int columns = width >= 1100
             ? 4
             : width >= 720

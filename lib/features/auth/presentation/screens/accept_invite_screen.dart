@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/lex_button.dart';
 import '../../../../shared/widgets/lex_card.dart';
@@ -57,13 +58,9 @@ class _AcceptInviteScreenState extends ConsumerState<AcceptInviteScreen> {
           .acceptInvite(request);
 
       if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Invitation accepted successfully! You may now sign in with your credentials.',
-            ),
-            backgroundColor: LexColors.success,
-          ),
+        AppAlerts.showSuccess(
+          context,
+          'Invitation accepted successfully! You may now sign in with your credentials.',
         );
         context.go('/login');
       }

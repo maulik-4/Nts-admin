@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/app_update_provider.dart';
 import '../../../../core/theme/lex_colors.dart';
 import '../../../../core/theme/theme_mode_provider.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/force_update_dialog.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../notifications/data/repositories/notifications_repository.dart';
@@ -54,9 +55,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to update setting: $e')));
+        AppAlerts.showError(context, 'Failed to update setting: $e');
       }
     }
   }
@@ -253,7 +252,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         ),
                         trailing: OutlinedButton(
                           onPressed: () async {
-                            final scaffold = ScaffoldMessenger.of(context);
                             final info = await ref
                                 .read(appUpdateNotifierProvider.notifier)
                                 .checkAppVersion();
@@ -261,11 +259,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             if (info.isForceUpdate) {
                               ForceUpdateDialog.show(context, info);
                             } else {
-                              scaffold.showSnackBar(
-                                const SnackBar(
-                                  content: Text('Vidhanta is currently up to date (v1.0.1).'),
-                                  backgroundColor: LexColors.success,
-                                ),
+                              AppAlerts.showSuccess(
+                                context,
+                                'Vidhanta is currently up to date (v1.0.1).',
                               );
                             }
                           },

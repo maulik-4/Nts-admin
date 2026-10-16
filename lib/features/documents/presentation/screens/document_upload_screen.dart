@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/lex_colors.dart';
-import '../../../../shared/widgets/lex_button.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../cases/presentation/providers/cases_notifier.dart';
 import '../providers/documents_notifier.dart';
@@ -48,34 +48,19 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not open file picker: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Could not open file picker: $e');
       }
     }
   }
 
   Future<void> _handleUpload() async {
     if (_selectedCaseId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select an associated case.'),
-          backgroundColor: LexColors.error,
-        ),
-      );
+      AppAlerts.showError(context, 'Please select an associated case.');
       return;
     }
 
     if (_pickedFile == null || _pickedFile!.path == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a file to upload.'),
-          backgroundColor: LexColors.error,
-        ),
-      );
+      AppAlerts.showError(context, 'Please select a file to upload.');
       return;
     }
 
@@ -85,9 +70,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     });
 
     try {
-      await ref
-          .read(documentsNotifierProvider.notifier)
-          .uploadDocument(
+      await ref.read(documentsNotifierProvider.notifier).uploadDocument(
             caseId: _selectedCaseId!,
             filePath: _pickedFile!.path!,
             fileName: _pickedFile!.name,
@@ -99,22 +82,12 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
           );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Document uploaded successfully.'),
-            backgroundColor: LexColors.success,
-          ),
-        );
+        AppAlerts.showSuccess(context, 'Document uploaded successfully.');
         context.pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to upload document: $e'),
-            backgroundColor: LexColors.error,
-          ),
-        );
+        AppAlerts.showError(context, 'Failed to upload document: $e');
       }
     } finally {
       if (mounted) {
@@ -129,66 +102,119 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     final casesAsync = ref.watch(casesNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Upload Document')),
+      appBar: AppBar(
+        title: const Text(
+          'Upload Document',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+        ),
+      ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 650),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   LexCard(
+                    borderRadius: 20,
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Badge & Title
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                                ),
+                              ),
+                              child: const Text(
+                                'FILE SPECIFICATION',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.5,
+                                  color: Color(0xFF2563EB),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
                         Text(
                           'Upload Legal File',
                           style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? LexColors.textPrimaryDark
-                                : LexColors.slatePrimary,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         Text(
-                          'Upload petitions, evidences, judgments, or affidavits to your firm workspace.',
+                          'Attach petitions, evidence, contracts, or court transcripts to an active case.',
                           style: TextStyle(
-                            fontSize: 12,
-                            color: isDark
-                                ? LexColors.textSecondaryDark
-                                : LexColors.textSecondaryLight,
+                            fontSize: 12.5,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                           ),
                         ),
                         const SizedBox(height: 20),
 
-                        // Case Selector (Required)
+                        // Case Selector
+                        Text(
+                          'Associated Case *',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
                         casesAsync.when(
                           data: (cases) {
                             return DropdownButtonFormField<int>(
                               initialValue: _selectedCaseId,
                               decoration: InputDecoration(
-                                labelText: 'Associated Case *',
                                 hintText: 'Select case',
+                                hintStyle: TextStyle(
+                                  fontSize: 13,
+                                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.balance_rounded,
+                                  size: 19,
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                ),
                                 filled: true,
-                                fillColor: isDark
-                                    ? LexColors.surfaceDark
-                                    : LexColors.surfaceLight,
+                                fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                  ),
                                 ),
                               ),
                               items: cases.map((c) {
                                 return DropdownMenuItem<int>(
                                   value: c.id,
                                   child: Text(
-                                    '${c.title} (${c.caseNumber})',
+                                    '${c.caseNumber} - ${c.title}',
                                     overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 13),
                                   ),
                                 );
                               }).toList(),
@@ -211,72 +237,129 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                         ),
                         const SizedBox(height: 20),
 
-                        // File Picker Area
-                        InkWell(
+                        // Dropzone Area
+                        Text(
+                          'Document File *',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        GestureDetector(
                           onTap: _isUploading ? null : _pickFile,
-                          borderRadius: BorderRadius.circular(10),
                           child: Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 24,
-                              horizontal: 16,
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
                             decoration: BoxDecoration(
-                              color: isDark
-                                  ? LexColors.surfaceDark
-                                  : const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(10),
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: _pickedFile != null
-                                    ? (isDark
-                                          ? LexColors.accentGold
-                                          : LexColors.slatePrimary)
-                                    : (isDark
-                                          ? LexColors.borderDark
-                                          : LexColors.borderLight),
-                                width: _pickedFile != null ? 1.5 : 1.0,
+                                    ? const Color(0xFF10B981)
+                                    : (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
+                                width: 1.5,
                               ),
                             ),
                             child: Column(
                               children: [
-                                Icon(
-                                  _pickedFile != null
-                                      ? Icons.check_circle_outline
-                                      : Icons.cloud_upload_outlined,
-                                  size: 40,
-                                  color: _pickedFile != null
-                                      ? LexColors.success
-                                      : (isDark
-                                            ? LexColors.accentGold
-                                            : LexColors.slatePrimary),
+                                Container(
+                                  width: 52,
+                                  height: 52,
+                                  decoration: BoxDecoration(
+                                    color: _pickedFile != null
+                                        ? const Color(0xFFECFDF5)
+                                        : const Color(0xFFEFF6FF),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    _pickedFile != null
+                                        ? Icons.check_circle_rounded
+                                        : Icons.cloud_upload_outlined,
+                                    size: 28,
+                                    color: _pickedFile != null
+                                        ? const Color(0xFF10B981)
+                                        : const Color(0xFF2563EB),
+                                  ),
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
                                   _pickedFile != null
                                       ? _pickedFile!.name
-                                      : 'Tap to browse device files',
+                                      : 'Tap to browse files or drop document here',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark
-                                        ? LexColors.textPrimaryDark
-                                        : LexColors.textPrimaryLight,
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   _pickedFile != null
                                       ? '${(_pickedFile!.size / 1024).toStringAsFixed(1)} KB'
-                                      : 'Supported: PDF, DOC, DOCX, TXT, JPG, PNG',
+                                      : 'Supports PDF, DOC, DOCX, TXT, JPG, PNG up to 25MB',
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: isDark
-                                        ? LexColors.textSecondaryDark
-                                        : LexColors.textSecondaryLight,
+                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                ElevatedButton.icon(
+                                  onPressed: _isUploading ? null : _pickFile,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isDark ? const Color(0xFF334155) : Colors.white,
+                                    foregroundColor: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    side: BorderSide(
+                                      color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
+                                    ),
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  ),
+                                  icon: const Icon(Icons.folder_open_rounded, size: 16),
+                                  label: Text(
+                                    _pickedFile != null ? 'Change File' : 'Browse Files',
+                                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5),
                                   ),
                                 ),
                               ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Security Assurance Box
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.verified_user_rounded,
+                          size: 18,
+                          color: Color(0xFF10B981),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'End-to-end encrypted legal document storage adhering to Bar compliance.',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
                             ),
                           ),
                         ),
@@ -289,9 +372,8 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                   if (_isUploading) ...[
                     LinearProgressIndicator(
                       value: _uploadProgress > 0 ? _uploadProgress : null,
-                      color: isDark
-                          ? LexColors.accentGold
-                          : LexColors.slatePrimary,
+                      backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      color: const Color(0xFF0F1F38),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -299,20 +381,43 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark
-                            ? LexColors.textSecondaryDark
-                            : LexColors.textSecondaryLight,
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                       ),
                     ),
                     const SizedBox(height: 16),
                   ],
 
                   // Submit Button
-                  LexButton(
-                    label: _isUploading ? 'Uploading...' : 'Start Upload',
-                    icon: Icons.upload_file,
-                    isLoading: _isUploading,
-                    onPressed: _isUploading ? null : _handleUpload,
+                  SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _isUploading ? null : _handleUpload,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0F1F38),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 3,
+                      ),
+                      child: _isUploading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Upload Document',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14.5,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                    ),
                   ),
                 ],
               ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/lex_colors.dart';
+import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/lex_card.dart';
@@ -110,26 +111,30 @@ class _PlatformPlansScreenState extends ConsumerState<PlatformPlansScreen> {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: _superAdminGold.withAlpha(40),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: _superAdminGold.withAlpha(90)),
-                ),
-                child: Text(
-                  plan.name.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: _superAdminGold,
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _superAdminGold.withAlpha(40),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: _superAdminGold.withAlpha(90)),
+                  ),
+                  child: Text(
+                    plan.name.toUpperCase(),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: _superAdminGold,
+                    ),
                   ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               StatusBadge(
                 status: plan.isActive ? 'Active' : 'Inactive',
                 color: plan.isActive ? LexColors.success : LexColors.warning,
@@ -181,9 +186,10 @@ class _PlatformPlansScreenState extends ConsumerState<PlatformPlansScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
             children: [
               Text(
                 '₹${plan.monthlyPrice.toStringAsFixed(0)}',
@@ -195,7 +201,6 @@ class _PlatformPlansScreenState extends ConsumerState<PlatformPlansScreen> {
                       : LexColors.textPrimaryLight,
                 ),
               ),
-              const SizedBox(width: 4),
               Text(
                 '/ month',
                 style: TextStyle(
@@ -205,7 +210,6 @@ class _PlatformPlansScreenState extends ConsumerState<PlatformPlansScreen> {
                       : LexColors.textSecondaryLight,
                 ),
               ),
-              const SizedBox(width: 14),
               Text(
                 '(₹${plan.yearlyPrice.toStringAsFixed(0)} / year)',
                 style: TextStyle(
@@ -343,16 +347,18 @@ class _PlatformPlansScreenState extends ConsumerState<PlatformPlansScreen> {
                         color: _superAdminGold,
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        isEditing
-                            ? 'Edit Subscription Tier'
-                            : 'Create Subscription Tier',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                      Expanded(
+                        child: Text(
+                          isEditing
+                              ? 'Edit Subscription Tier'
+                              : 'Create Subscription Tier',
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                      const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.close),
                         onPressed: () => Navigator.pop(ctx),
@@ -496,23 +502,19 @@ class _PlatformPlansScreenState extends ConsumerState<PlatformPlansScreen> {
                               }
                               if (context.mounted) {
                                 Navigator.pop(ctx);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      isEditing
-                                          ? 'Plan updated successfully'
-                                          : 'Plan created successfully',
-                                    ),
-                                  ),
+                                AppAlerts.showSuccess(
+                                  context,
+                                  isEditing
+                                      ? 'Plan updated successfully'
+                                      : 'Plan created successfully',
                                 );
                               }
                             } catch (e) {
                               setModalState(() => isSubmitting = false);
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error saving plan: $e'),
-                                  ),
+                                AppAlerts.showError(
+                                  context,
+                                  'Error saving plan: $e',
                                 );
                               }
                             }
@@ -571,15 +573,11 @@ class _PlatformPlansScreenState extends ConsumerState<PlatformPlansScreen> {
                     .read(platformPlansNotifierProvider.notifier)
                     .deletePlan(plan.id);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Plan "${plan.name}" deleted')),
-                  );
+                  AppAlerts.showSuccess(context, 'Plan "${plan.name}" deleted');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
+                  AppAlerts.showError(context, 'Delete failed: $e');
                 }
               }
             },
