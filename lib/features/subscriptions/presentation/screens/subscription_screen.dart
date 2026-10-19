@@ -463,15 +463,19 @@ class SubscriptionScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Status: ${isUnlimited ? 'Unlimited Firm Access' : '${((1.0 - pct) * 100).toInt()}% Quota Remaining'}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark
-                      ? LexColors.textSecondaryDark
-                      : LexColors.textSecondaryLight,
+              Expanded(
+                child: Text(
+                  'Status: ${isUnlimited ? 'Unlimited Firm Access' : '${((1.0 - pct) * 100).toInt()}% Quota Remaining'}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? LexColors.textSecondaryDark
+                        : LexColors.textSecondaryLight,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 8),
               const Text(
                 'Includes Cloud Storage',
                 style: TextStyle(fontSize: 12, color: Colors.grey),

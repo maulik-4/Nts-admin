@@ -8,31 +8,55 @@ import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
 import '../../../../shared/widgets/loading_shimmer.dart';
+import '../../../auth/domain/models/role_capabilities.dart';
 import '../../data/models/support_ticket.dart';
 import '../providers/support_notifier.dart';
 
+void showCreateTicketModal(
+  BuildContext context,
+  WidgetRef ref, {
+  String? initialCategory,
+}) {
+  final isClient = ref.read(currentUserRoleProvider).isClient;
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => CreateTicketSheet(
+      initialCategory: initialCategory ?? (isClient ? 'legal' : 'technical'),
+    ),
+  );
+}
+
 class SupportTicketsListScreen extends ConsumerWidget {
   const SupportTicketsListScreen({super.key});
-
-  void _showCreateTicketModal(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => const _CreateTicketSheet(),
-    );
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ticketsAsync = ref.watch(supportNotifierProvider);
     final statsAsync = ref.watch(supportStatsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isClient = ref.watch(currentUserRoleProvider).isClient;
 
     return Scaffold(
       backgroundColor: isDark ? LexColors.canvasDark : const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Help & Support'),
+        title: Text(isClient ? 'Help Queries & Support' : 'Help & Support'),
+        leading: Navigator.of(context).canPop()
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () {
+                  if (isClient) {
+                    context.go('/client/dashboard');
+                  } else {
+                    context.go('/app/more');
+                  }
+                },
+              ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
@@ -45,15 +69,18 @@ class SupportTicketsListScreen extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showCreateTicketModal(context, ref),
+        onPressed: () => showCreateTicketModal(context, ref),
         backgroundColor: LexColors.slatePrimary,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 4,
-        icon: const Icon(Icons.add_rounded, size: 20),
-        label: const Text(
-          'New Ticket',
-          style: TextStyle(fontWeight: FontWeight.w700),
+        icon: Icon(
+          isClient ? Icons.help_outline_rounded : Icons.add_rounded,
+          size: 20,
+        ),
+        label: Text(
+          isClient ? 'New Query' : 'New Ticket',
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
       ),
       body: Column(
@@ -177,22 +204,52 @@ class SupportTicketsListScreen extends ConsumerWidget {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          const Text(
-                            'No support tickets found',
-                            style: TextStyle(
+                          Text(
+                            isClient
+                                ? 'No Help Queries Found'
+                                : 'No support tickets found',
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Need technical, billing, or legal platform assistance?\nTap "New Ticket" to contact support.',
+                            isClient
+                                ? 'Need assistance with your case or legal inquiries?\nTap below to submit a query to your legal team.'
+                                : 'Need technical, billing, or legal platform assistance?\nTap "New Ticket" to contact support.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: isDark
                                   ? LexColors.textSecondaryDark
                                   : LexColors.textSecondaryLight,
                               fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          ElevatedButton.icon(
+                            onPressed: () => showCreateTicketModal(context, ref),
+                            icon: Icon(
+                              isClient
+                                  ? Icons.help_outline_rounded
+                                  : Icons.add_rounded,
+                              size: 18,
+                            ),
+                            label: Text(
+                              isClient ? 'Ask Query' : 'Open Ticket',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: LexColors.slatePrimary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ],
@@ -206,7 +263,7 @@ class SupportTicketsListScreen extends ConsumerWidget {
                   itemCount: tickets.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (ctx, idx) =>
-                      _buildTicketCard(context, tickets[idx], isDark),
+                      _buildTicketCard(context, ref, tickets[idx], isDark),
                 );
               },
             ),
@@ -248,11 +305,17 @@ class SupportTicketsListScreen extends ConsumerWidget {
 
   Widget _buildTicketCard(
     BuildContext context,
+    WidgetRef ref,
     SupportTicket ticket,
     bool isDark,
   ) {
+    final isClient = ref.watch(currentUserRoleProvider).isClient;
+    final targetPath = isClient
+        ? '/client/support/${ticket.id}'
+        : '/app/more/support/${ticket.id}';
+
     return InkWell(
-      onTap: () => context.push('/app/more/support/${ticket.id}'),
+      onTap: () => context.push(targetPath),
       borderRadius: BorderRadius.circular(16),
       child: LexCard(
         borderRadius: 16,
@@ -403,20 +466,31 @@ class SupportTicketsListScreen extends ConsumerWidget {
   }
 }
 
-class _CreateTicketSheet extends ConsumerStatefulWidget {
-  const _CreateTicketSheet();
+class CreateTicketSheet extends ConsumerStatefulWidget {
+  final String initialCategory;
+
+  const CreateTicketSheet({
+    super.key,
+    this.initialCategory = 'technical',
+  });
 
   @override
-  ConsumerState<_CreateTicketSheet> createState() => _CreateTicketSheetState();
+  ConsumerState<CreateTicketSheet> createState() => _CreateTicketSheetState();
 }
 
-class _CreateTicketSheetState extends ConsumerState<_CreateTicketSheet> {
+class _CreateTicketSheetState extends ConsumerState<CreateTicketSheet> {
   final _formKey = GlobalKey<FormState>();
   final _subjectCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
-  String _category = 'technical';
+  late String _category;
   String _priority = 'normal';
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _category = widget.initialCategory;
+  }
 
   @override
   void dispose() {
@@ -441,9 +515,12 @@ class _CreateTicketSheetState extends ConsumerState<_CreateTicketSheet> {
       ref.invalidate(supportStatsProvider);
       if (mounted) {
         Navigator.of(context).pop();
+        final isClient = ref.read(currentUserRoleProvider).isClient;
         AppAlerts.showSuccess(
           context,
-          'Support ticket #${ticket.ticketNumber} created successfully!',
+          isClient
+              ? 'Help query #${ticket.ticketNumber} submitted successfully!'
+              : 'Support ticket #${ticket.ticketNumber} created successfully!',
         );
       }
     } catch (e) {
@@ -502,12 +579,14 @@ class _CreateTicketSheetState extends ConsumerState<_CreateTicketSheet> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'CLIENT ASSISTANCE',
-                        style: TextStyle(
+                        ref.watch(currentUserRoleProvider).isClient
+                            ? 'CLIENT LEGAL ASSISTANCE'
+                            : 'CLIENT ASSISTANCE',
+                        style: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: LexColors.accentGold,
@@ -515,8 +594,10 @@ class _CreateTicketSheetState extends ConsumerState<_CreateTicketSheet> {
                         ),
                       ),
                       Text(
-                        'Open Support Ticket',
-                        style: TextStyle(
+                        ref.watch(currentUserRoleProvider).isClient
+                            ? 'Submit Help Query'
+                            : 'Open Support Ticket',
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                         ),
@@ -565,6 +646,10 @@ class _CreateTicketSheetState extends ConsumerState<_CreateTicketSheet> {
                 ),
                 items: const [
                   DropdownMenuItem(
+                    value: 'legal',
+                    child: Text('Legal Query / Case Assistance'),
+                  ),
+                  DropdownMenuItem(
                     value: 'technical',
                     child: Text('Technical Issue'),
                   ),
@@ -573,14 +658,13 @@ class _CreateTicketSheetState extends ConsumerState<_CreateTicketSheet> {
                     child: Text('Billing & Invoicing'),
                   ),
                   DropdownMenuItem(
-                    value: 'feature',
-                    child: Text('Feature Request'),
-                  ),
-                  DropdownMenuItem(
                     value: 'account',
                     child: Text('Account Access'),
                   ),
-                  DropdownMenuItem(value: 'legal', child: Text('Legal Query')),
+                  DropdownMenuItem(
+                    value: 'feature',
+                    child: Text('Feature Request'),
+                  ),
                   DropdownMenuItem(value: 'other', child: Text('Other')),
                 ],
                 onChanged: (v) {
@@ -665,14 +749,16 @@ class _CreateTicketSheetState extends ConsumerState<_CreateTicketSheet> {
                             color: Colors.white,
                           ),
                         )
-                      : const Row(
+                      : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.send_rounded, size: 18),
-                            SizedBox(width: 8),
+                            const Icon(Icons.send_rounded, size: 18),
+                            const SizedBox(width: 8),
                             Text(
-                              'Submit Ticket',
-                              style: TextStyle(
+                              ref.watch(currentUserRoleProvider).isClient
+                                  ? 'Submit Query'
+                                  : 'Submit Ticket',
+                              style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
                               ),

@@ -52,6 +52,16 @@ class RoleGuard {
 
     // 3. Client Role Navigation
     if (userRole.isClient) {
+      // Gracefully redirect support/helpdesk paths to client support view
+      if (currentPath == '/app/support' ||
+          currentPath.startsWith('/app/more/support')) {
+        if (currentPath.startsWith('/app/more/support/')) {
+          final id = currentPath.replaceFirst('/app/more/support/', '');
+          return '/client/support/$id';
+        }
+        return '/client/support';
+      }
+
       // Client is strictly isolated from firm back-office workspace (/app/...)
       if (isAuthRoute || currentPath.startsWith('/app') || currentPath == '/') {
         return '/client/dashboard';
@@ -72,17 +82,6 @@ class RoleGuard {
     // 4. Authenticated firm/platform user landing on entry or auth routes
     if (isAuthRoute || currentPath == '/app') {
       return '/app/dashboard';
-    }
-
-    // Service-level restrictions:
-    // Block services New Case, New Task, and Hearings create functionality
-    // Directing to Subscription & Quotas
-    if (!userRole.isSuperAdmin) {
-      if (currentPath == '/app/cases/create' ||
-          currentPath.startsWith('/app/tasks/create') ||
-          currentPath.startsWith('/app/hearings/create')) {
-        return '/app/more/subscriptions';
-      }
     }
 
     // 5. ROLE SPECIFIC GUARDS

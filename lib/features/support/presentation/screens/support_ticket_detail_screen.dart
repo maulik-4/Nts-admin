@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/lex_colors.dart';
@@ -7,6 +8,7 @@ import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
 import '../../../../shared/widgets/loading_shimmer.dart';
+import '../../../auth/domain/models/role_capabilities.dart';
 import '../../data/models/support_ticket.dart';
 import '../../data/repositories/support_repository.dart';
 import '../providers/support_notifier.dart';
@@ -85,6 +87,22 @@ class _SupportTicketDetailScreenState
       backgroundColor: isDark ? LexColors.canvasDark : const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text('Ticket #${widget.ticketId}'),
+        leading: Navigator.of(context).canPop()
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () {
+                  final isClient = ref.read(currentUserRoleProvider).isClient;
+                  if (isClient) {
+                    context.go('/client/support');
+                  } else {
+                    context.go('/app/more/support');
+                  }
+                },
+              ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),

@@ -120,6 +120,14 @@ class ClientPortalAppBar extends ConsumerWidget implements PreferredSizeWidget {
       actions: [
         ...?extraActions,
         IconButton(
+          icon: const Icon(Icons.help_outline_rounded),
+          tooltip: 'Help & Support Queries',
+          color: isDark
+              ? ClientPortalColors.darkSecondaryText
+              : ClientPortalColors.primaryNavy,
+          onPressed: () => context.push('/client/support'),
+        ),
+        IconButton(
           icon: const Icon(Icons.refresh_rounded),
           tooltip: 'Refresh Portal',
           color: isDark

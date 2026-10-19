@@ -139,80 +139,19 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
         capability: UserCapability.createTask,
         child: FloatingActionButton.extended(
           heroTag: 'fab_add_task',
-          onPressed: () {
-            AppAlerts.showWarning(
-              context,
-              'Task creation is currently locked. Please review your Subscription & Quotas.',
-            );
-            context.push('/app/more/subscriptions');
-          },
+          onPressed: () => context.push('/app/tasks/create'),
           backgroundColor: const Color(0xFF0F1F38),
           foregroundColor: Colors.white,
           elevation: 4,
-          icon: const Icon(Icons.lock_outline_rounded, size: 20),
+          icon: const Icon(Icons.add_task_rounded, size: 20),
           label: const Text(
-            'New Task (Locked)',
+            'New Task',
             style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
           ),
         ),
       ),
       body: Column(
         children: [
-          // Blocked Service Paywall Notification
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF59E0B).withAlpha(isDark ? 30 : 20),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFFF59E0B).withAlpha(120),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.lock_clock_rounded,
-                  color: Color(0xFFD97706),
-                  size: 20,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Tasks Service is currently locked under active tier. Manage Subscriptions & Quotas to upgrade.',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: isDark
-                          ? const Color(0xFFFDE68A)
-                          : const Color(0xFF92400E),
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/app/more/subscriptions'),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text(
-                    'Upgrade',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
-                      color: Color(0xFFD97706),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
 
           // Search & Filter header
           Padding(

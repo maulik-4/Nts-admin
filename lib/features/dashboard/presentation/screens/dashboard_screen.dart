@@ -905,7 +905,7 @@ class DashboardScreen extends ConsumerWidget {
                     label: 'New Case',
                     iconColor: const Color(0xFF2563EB),
                     iconBgColor: const Color(0xFFEFF6FF),
-                    onTap: () => _showServiceLockedDialog(context, 'New Case'),
+                    onTap: () => context.push('/app/cases/create'),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -927,8 +927,7 @@ class DashboardScreen extends ConsumerWidget {
                     label: 'Hearing',
                     iconColor: const Color(0xFFF59E0B),
                     iconBgColor: const Color(0xFFFFFBEB),
-                    onTap: () =>
-                        _showServiceLockedDialog(context, 'Hearings Agenda'),
+                    onTap: () => context.push('/app/hearings/create'),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -1043,7 +1042,7 @@ class DashboardScreen extends ConsumerWidget {
                     minWidth: 78,
                     icon: Icons.add_circle_outline,
                     label: 'New Case',
-                    onTap: () => _showServiceLockedDialog(context, 'New Case'),
+                    onTap: () => context.push('/app/cases/create'),
                   ),
                   const SizedBox(width: 8),
                   _buildQuickActionButton(
@@ -1059,8 +1058,7 @@ class DashboardScreen extends ConsumerWidget {
                     minWidth: 78,
                     icon: Icons.event_available_outlined,
                     label: 'Hearing',
-                    onTap: () =>
-                        _showServiceLockedDialog(context, 'Hearings Agenda'),
+                    onTap: () => context.push('/app/hearings/create'),
                   ),
                   const SizedBox(width: 8),
                   _buildQuickActionButton(
@@ -1068,7 +1066,7 @@ class DashboardScreen extends ConsumerWidget {
                     minWidth: 78,
                     icon: Icons.task_alt_outlined,
                     label: 'New Task',
-                    onTap: () => _showServiceLockedDialog(context, 'New Task'),
+                    onTap: () => context.push('/app/tasks/create'),
                   ),
                 ],
               ),
@@ -1163,7 +1161,7 @@ class DashboardScreen extends ConsumerWidget {
                     context,
                     icon: Icons.task_alt_outlined,
                     label: 'Create Task',
-                    onTap: () => _showServiceLockedDialog(context, 'New Task'),
+                    onTap: () => context.push('/app/tasks/create'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -1181,8 +1179,7 @@ class DashboardScreen extends ConsumerWidget {
                     context,
                     icon: Icons.event_available_outlined,
                     label: 'Court Schedule',
-                    onTap: () =>
-                        _showServiceLockedDialog(context, 'Hearings Agenda'),
+                    onTap: () => context.push('/app/hearings'),
                   ),
                 ),
               ],
@@ -1911,42 +1908,6 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  void _showServiceLockedDialog(BuildContext context, String serviceName) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            const Icon(Icons.lock_outline_rounded, color: Color(0xFFF59E0B)),
-            const SizedBox(width: 8),
-            Expanded(child: Text('$serviceName Locked')),
-          ],
-        ),
-        content: Text(
-          '$serviceName functionality is locked under your active tier. Please review your Subscription & Quotas to access or upgrade.',
-          style: const TextStyle(fontSize: 13.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              context.push('/app/more/subscriptions');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0F1F38),
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('View Subscriptions'),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildQuickActionButton(
     BuildContext context, {

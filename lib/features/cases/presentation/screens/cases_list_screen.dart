@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/capability_gate.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
@@ -87,19 +86,14 @@ class CasesListScreen extends ConsumerWidget {
       floatingActionButton: CapabilityGate(
         capability: UserCapability.createCases,
         child: FloatingActionButton.extended(
-          onPressed: () {
-            AppAlerts.showWarning(
-              context,
-              'New Case creation is currently locked. Please review your Subscription & Quotas.',
-            );
-            context.push('/app/more/subscriptions');
-          },
+          heroTag: 'fab_add_case',
+          onPressed: () => context.push('/app/cases/create'),
           backgroundColor: const Color(0xFF0F1F38),
           foregroundColor: Colors.white,
           elevation: 4,
-          icon: const Icon(Icons.lock_outline_rounded, size: 20),
+          icon: const Icon(Icons.add_rounded, size: 20),
           label: const Text(
-            'New Case (Locked)',
+            'New Case',
             style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
           ),
         ),
@@ -205,14 +199,8 @@ class CasesListScreen extends ConsumerWidget {
                     icon: Icons.folder_open_outlined,
                     title: 'No Cases Found',
                     message: 'No legal cases match your search query or filter criteria.',
-                    actionLabel: 'View Subscription & Quotas',
-                    onAction: () {
-                      AppAlerts.showWarning(
-                        context,
-                        'New Case creation is currently locked. Please review your Subscription & Quotas.',
-                      );
-                      context.push('/app/more/subscriptions');
-                    },
+                    actionLabel: 'Create New Case',
+                    onAction: () => context.push('/app/cases/create'),
                   );
                 }
 

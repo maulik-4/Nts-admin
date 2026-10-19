@@ -13,6 +13,7 @@ import '../widgets/upcoming_hearing_card.dart';
 import '../widgets/welcome_card.dart';
 import '../../data/models/client_dashboard_model.dart';
 import '../../data/models/client_document_model.dart';
+import '../../../support/presentation/screens/support_tickets_list_screen.dart';
 
 class ClientDashboardScreen extends ConsumerWidget {
   const ClientDashboardScreen({super.key});
@@ -30,6 +31,22 @@ class ClientDashboardScreen extends ConsumerWidget {
           ? ClientPortalColors.darkPageBackground
           : ClientPortalColors.pageBackground,
       appBar: const ClientPortalAppBar(title: 'Client Portal'),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'client_help_query_fab',
+        onPressed: () => showCreateTicketModal(
+          context,
+          ref,
+          initialCategory: 'legal',
+        ),
+        backgroundColor: ClientPortalColors.primaryNavy,
+        foregroundColor: Colors.white,
+        elevation: 4,
+        icon: const Icon(Icons.help_outline_rounded, size: 20),
+        label: const Text(
+          'Ask Query',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
+      ),
       body: dashboardAsync.when(
         data: (data) => _DashboardBody(
           data: data,
@@ -50,7 +67,7 @@ class ClientDashboardScreen extends ConsumerWidget {
   }
 }
 
-class _DashboardBody extends StatelessWidget {
+class _DashboardBody extends ConsumerWidget {
   final ClientPortalDashboardData data;
   final List<ClientDocumentItem> documents;
   final bool isTablet;
@@ -64,7 +81,7 @@ class _DashboardBody extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final activeCasesCount = data.cases.length;
     final upcomingHearingsCount = data.hearings
         .where((h) => h.isUpcoming)
@@ -282,9 +299,168 @@ class _DashboardBody extends StatelessWidget {
                   ),
                 ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
+
+              // 5. Helpdesk & Legal Queries Card
+              _ClientHelpQueryCard(
+                isDark: isDark,
+                onViewAll: () => context.push('/client/support'),
+                onNewQuery: () => showCreateTicketModal(
+                  context,
+                  ref,
+                  initialCategory: 'legal',
+                ),
+              ),
+              const SizedBox(height: 24),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ClientHelpQueryCard extends StatelessWidget {
+  final bool isDark;
+  final VoidCallback onViewAll;
+  final VoidCallback onNewQuery;
+
+  const _ClientHelpQueryCard({
+    required this.isDark,
+    required this.onViewAll,
+    required this.onNewQuery,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? ClientPortalColors.darkCardBackground
+            : ClientPortalColors.cardBackground,
+        borderRadius: BorderRadius.circular(ClientPortalDimensions.cardRadius),
+        border: Border.all(
+          color: isDark
+              ? ClientPortalColors.darkBorder
+              : ClientPortalColors.border,
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A)
+                .withValues(alpha: isDark ? 0.35 : 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: ClientPortalColors.primaryBlue.withValues(
+                      alpha: isDark ? 0.2 : 0.1,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.support_agent_rounded,
+                    color: ClientPortalColors.primaryBlue,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Helpdesk & Legal Queries',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
+                          color: isDark
+                              ? ClientPortalColors.darkPrimaryText
+                              : ClientPortalColors.primaryNavy,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Direct assistance from your firm counsel & staff',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark
+                              ? ClientPortalColors.darkSecondaryText
+                              : ClientPortalColors.secondaryText,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Have a question about your case filings, courtroom hearing schedules, or document submissions? Submit a query directly to the legal desk.',
+              style: TextStyle(
+                fontSize: 12.5,
+                height: 1.45,
+                color: isDark
+                    ? ClientPortalColors.darkSecondaryText
+                    : ClientPortalColors.secondaryText,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: onNewQuery,
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: const Text('Ask a Query'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: ClientPortalColors.primaryNavy,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onViewAll,
+                    icon: const Icon(Icons.forum_outlined, size: 16),
+                    label: const Text('View Queries'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: isDark
+                          ? Colors.white
+                          : ClientPortalColors.primaryNavy,
+                      side: BorderSide(
+                        color: isDark
+                            ? ClientPortalColors.darkBorder
+                            : ClientPortalColors.border,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
@@ -86,79 +85,18 @@ class HearingsListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab_schedule_hearing',
-        onPressed: () {
-          AppAlerts.showWarning(
-            context,
-            'Hearings management is currently locked. Please review your Subscription & Quotas.',
-          );
-          context.push('/app/more/subscriptions');
-        },
+        onPressed: () => context.push('/app/hearings/create'),
         backgroundColor: const Color(0xFF0F1F38),
         foregroundColor: Colors.white,
         elevation: 4,
-        icon: const Icon(Icons.lock_outline_rounded, size: 20),
+        icon: const Icon(Icons.add_rounded, size: 20),
         label: const Text(
-          'Schedule Hearing (Locked)',
+          'Schedule Hearing',
           style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
         ),
       ),
       body: Column(
         children: [
-          // Blocked Service Paywall Notification
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF59E0B).withAlpha(isDark ? 30 : 20),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFFF59E0B).withAlpha(120),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.lock_clock_rounded,
-                  color: Color(0xFFD97706),
-                  size: 20,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Hearings Service is locked. Review Subscription & Quotas to unlock courtroom scheduling.',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: isDark
-                          ? const Color(0xFFFDE68A)
-                          : const Color(0xFF92400E),
-                    ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/app/more/subscriptions'),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text(
-                    'Upgrade',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
-                      color: Color(0xFFD97706),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
 
           // Search Bar
           Padding(
@@ -261,14 +199,8 @@ class HearingsListScreen extends ConsumerWidget {
                     title: 'No Hearings Found',
                     message:
                         'No scheduled courtroom hearings match your criteria.',
-                    actionLabel: 'View Subscription & Quotas',
-                    onAction: () {
-                      AppAlerts.showWarning(
-                        context,
-                        'Hearings management is currently locked. Please review your Subscription & Quotas.',
-                      );
-                      context.push('/app/more/subscriptions');
-                    },
+                    actionLabel: 'Schedule Hearing',
+                    onAction: () => context.push('/app/hearings/create'),
                   );
                 }
 

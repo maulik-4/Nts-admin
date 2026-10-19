@@ -162,6 +162,29 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
 
+      // Client Support & Help Queries Routes
+      GoRoute(
+        path: '/client/support',
+        builder: (context, state) => const SupportTicketsListScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) {
+              final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+              return SupportTicketDetailScreen(ticketId: id);
+            },
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/client/help',
+        redirect: (context, state) => '/client/support',
+      ),
+      GoRoute(
+        path: '/client/queries',
+        redirect: (context, state) => '/client/support',
+      ),
+
       // Paywall & Account Barrier Routes
       GoRoute(
         path: '/firm-blocked',

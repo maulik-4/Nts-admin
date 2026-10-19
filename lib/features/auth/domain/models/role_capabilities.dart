@@ -167,6 +167,11 @@ class RoleCapabilities {
       UserCapability.viewSupport,
       UserCapability.viewBranding,
     },
+    UserRole.client: {
+      UserCapability.viewDashboard,
+      UserCapability.viewProfile,
+      UserCapability.viewSupport,
+    },
     UserRole.unknown: {UserCapability.viewProfile},
   };
 

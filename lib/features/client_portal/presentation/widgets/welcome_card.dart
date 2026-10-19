@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../theme/client_portal_theme.dart';
@@ -222,11 +223,12 @@ class WelcomeCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (contactPhone != null && contactPhone.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (contactPhone != null &&
+                              contactPhone.isNotEmpty) ...[
                             _ActionButton(
                               icon: Icons.phone_outlined,
                               tooltip: 'Call Firm',
@@ -240,9 +242,16 @@ class WelcomeCard extends StatelessWidget {
                               onTap: () => _openWhatsApp(contactPhone),
                               isDark: isDark,
                             ),
+                            const SizedBox(width: 8),
                           ],
-                        ),
-                      ],
+                          _ActionButton(
+                            icon: Icons.help_outline_rounded,
+                            tooltip: 'Help Query',
+                            onTap: () => context.push('/client/support'),
+                            isDark: isDark,
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ],
