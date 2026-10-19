@@ -9,6 +9,8 @@ import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../../shared/widgets/status_badge.dart';
 import '../../../cases/presentation/providers/cases_notifier.dart';
+import '../../../clients/presentation/providers/clients_notifier.dart';
+import '../../../communications/presentation/widgets/whatsapp_composer_modal.dart';
 import '../../data/repositories/hearings_repository.dart';
 import '../providers/hearings_notifier.dart';
 
@@ -44,12 +46,44 @@ class HearingDetailScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(
+              Icons.chat_bubble_rounded,
+              color: Color(0xFF25D366),
+            ),
+            tooltip: 'Send WhatsApp Reminder',
+            onPressed: () {
+              final hearing = hearingAsync.valueOrNull;
+              if (hearing == null) return;
+              final associatedCase = casesAsync.valueOrNull
+                  ?.where((c) => c.id == hearing.caseId)
+                  .firstOrNull;
+              final clients =
+                  ref.read(clientsNotifierProvider).valueOrNull ?? [];
+              final client = clients
+                  .where((c) => c.id == associatedCase?.client)
+                  .firstOrNull;
+
+              WhatsAppComposerModal.show(
+                context,
+                clientId: associatedCase?.client ?? 0,
+                recipientName: client?.name ?? 'Client',
+                recipientNumber: client?.phone ?? '',
+                caseId: associatedCase?.id,
+                caseTitle: associatedCase?.title,
+                defaultTemplate: 'hearing_reminder',
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.edit_outlined),
             tooltip: 'Edit Hearing',
             onPressed: () => context.push('/app/hearings/$hearingId/edit'),
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFEF4444)),
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              color: Color(0xFFEF4444),
+            ),
             tooltip: 'Delete Hearing',
             onPressed: () => _confirmDelete(context, ref),
           ),
@@ -67,7 +101,8 @@ class HearingDetailScreen extends ConsumerWidget {
             weekdayFormatted = DateFormat('EEEE, MMMM d, yyyy')
                 .format(hearing.parsedDate!)
                 .toUpperCase();
-            dateFormatted = DateFormat('MMMM d, yyyy').format(hearing.parsedDate!);
+            dateFormatted = DateFormat('MMMM d, yyyy')
+                .format(hearing.parsedDate!);
           }
 
           return SingleChildScrollView(
@@ -90,10 +125,14 @@ class HearingDetailScreen extends ConsumerWidget {
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                              color: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFEFF6FF),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                                color: isDark
+                                    ? const Color(0xFF334155)
+                                    : const Color(0xFFDBEAFE),
                               ),
                             ),
                             child: const Icon(
@@ -122,7 +161,9 @@ class HearingDetailScreen extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w800,
-                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A),
                                   ),
                                 ),
                               ],
@@ -136,9 +177,14 @@ class HearingDetailScreen extends ConsumerWidget {
                           StatusBadge(status: hearing.status, showDot: true),
                           const Spacer(),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                              color: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -147,7 +193,9 @@ class HearingDetailScreen extends ConsumerWidget {
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.4,
-                                color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                                color: isDark
+                                    ? const Color(0xFFCBD5E1)
+                                    : const Color(0xFF475569),
                               ),
                             ),
                           ),
@@ -202,7 +250,9 @@ class HearingDetailScreen extends ConsumerWidget {
                       _buildInfoRow(
                         context,
                         'Courtroom',
-                        hearing.courtName.isNotEmpty ? hearing.courtName : 'Court Unspecified',
+                        hearing.courtName.isNotEmpty
+                            ? hearing.courtName
+                            : 'Court Unspecified',
                         Icons.account_balance_rounded,
                       ),
                       if (hearing.judgeName?.isNotEmpty == true) ...[
@@ -252,24 +302,31 @@ class HearingDetailScreen extends ConsumerWidget {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                              color: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFF8FAFC),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                color: isDark
+                                    ? const Color(0xFF334155)
+                                    : const Color(0xFFE2E8F0),
                               ),
                             ),
                             child: Row(
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         associatedCase.title,
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w700,
-                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                          color: isDark
+                                              ? Colors.white
+                                              : const Color(0xFF0F172A),
                                         ),
                                       ),
                                       const SizedBox(height: 3),
@@ -277,7 +334,9 @@ class HearingDetailScreen extends ConsumerWidget {
                                         '${associatedCase.caseNumber} • ${associatedCase.clientName ?? "Client #${associatedCase.client}"}',
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                          color: isDark
+                                              ? const Color(0xFF94A3B8)
+                                              : const Color(0xFF64748B),
                                         ),
                                       ),
                                     ],
@@ -297,7 +356,9 @@ class HearingDetailScreen extends ConsumerWidget {
                           'Case #${hearing.caseId}',
                           style: TextStyle(
                             fontSize: 13,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                     ],
@@ -331,13 +392,13 @@ class HearingDetailScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        hearing.notes?.isNotEmpty == true
-                            ? hearing.notes!
-                            : 'No specific preparation notes recorded for this hearing session.',
+                        hearing.notes?.isNotEmpty == true ? hearing.notes! : 'No specific preparation notes recorded for this hearing session.',
                         style: TextStyle(
                           fontSize: 13,
                           height: 1.45,
-                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                          color: isDark
+                              ? const Color(0xFFCBD5E1)
+                              : const Color(0xFF475569),
                         ),
                       ),
                     ],
@@ -424,7 +485,9 @@ class HearingDetailScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(true),
-            style: TextButton.styleFrom(foregroundColor: const Color(0xFFEF4444)),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFEF4444),
+            ),
             child: const Text('Delete'),
           ),
         ],

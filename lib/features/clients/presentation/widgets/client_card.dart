@@ -33,9 +33,13 @@ class ClientCard extends StatelessWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                  color: isDark
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFEFF6FF),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFDBEAFE),
                   ),
                 ),
                 child: Center(
@@ -73,7 +77,9 @@ class ClientCard extends StatelessWidget {
                           Icon(
                             Icons.location_on_outlined,
                             size: 13,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
                           ),
                           const SizedBox(width: 4),
                           Expanded(
@@ -83,7 +89,9 @@ class ClientCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                color: isDark
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF64748B),
                               ),
                             ),
                           ),
@@ -111,7 +119,9 @@ class ClientCard extends StatelessWidget {
               Icon(
                 Icons.phone_outlined,
                 size: 14,
-                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                color: isDark
+                    ? const Color(0xFF94A3B8)
+                    : const Color(0xFF64748B),
               ),
               const SizedBox(width: 6),
               Flexible(
@@ -122,7 +132,9 @@ class ClientCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                    color: isDark
+                        ? const Color(0xFFCBD5E1)
+                        : const Color(0xFF334155),
                   ),
                 ),
               ),
@@ -131,7 +143,9 @@ class ClientCard extends StatelessWidget {
                 Icon(
                   Icons.email_outlined,
                   size: 14,
-                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
                 ),
                 const SizedBox(width: 6),
                 Expanded(
@@ -141,7 +155,9 @@ class ClientCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                      color: isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B),
                     ),
                   ),
                 ),
@@ -149,7 +165,9 @@ class ClientCard extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 18,
-                color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                color: isDark
+                    ? const Color(0xFF64748B)
+                    : const Color(0xFF94A3B8),
               ),
             ],
           ),

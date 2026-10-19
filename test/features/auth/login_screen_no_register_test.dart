@@ -15,7 +15,7 @@ class _MockAuthNotifier extends StateNotifier<AuthState>
 
 void main() {
   testWidgets(
-    'LoginScreen does NOT contain Register Firm or Add Firm options',
+    'LoginScreen contains Vidhanta login options matching login.png mockup',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -28,14 +28,22 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // Verify appropriate auth features ARE present
-      expect(find.text('Sign In'), findsWidgets);
+      // Verify Vidhanta Login features matching login.png ARE present
+      expect(find.text('Firm Login'), findsOneWidget);
+      expect(find.text('Client Login'), findsOneWidget);
+      expect(find.text('Sign In as Firm'), findsOneWidget);
       expect(find.text('Username'), findsOneWidget);
       expect(find.text('Password'), findsOneWidget);
       expect(find.text('Forgot password?'), findsOneWidget);
-      expect(find.text('Accept Invite'), findsOneWidget);
+      expect(find.text('Have an invitation code?'), findsNothing);
+      expect(find.text('Accept your invite to join'), findsNothing);
+      expect(find.textContaining('New User?'), findsOneWidget);
+      expect(
+        find.textContaining('Get in Touch / Request Access'),
+        findsOneWidget,
+      );
 
-      // CRITICAL REQUIREMENT #4: Add Firm / Register Firm MUST NOT be on the Login page
+      // Verify old raw text buttons are NOT present
       expect(find.text('Register Firm'), findsNothing);
       expect(find.text('Add Firm'), findsNothing);
       expect(find.text('Create Firm'), findsNothing);

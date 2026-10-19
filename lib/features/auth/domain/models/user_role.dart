@@ -15,17 +15,19 @@ class RoleConfig {
   });
 }
 
-/// Centralized role model representing the four supported user roles in NTS Legal Pro:
+/// Centralized role model representing the supported user roles in NTS Legal Pro:
 /// - [superAdmin]: Platform-level administrator (super_admin or is_superuser == true)
 /// - [firmAdmin]: Law firm tenant administrator (admin)
 /// - [lawyer]: Advocate / practicing lawyer (lawyer)
 /// - [staff]: Legal clerk / paralegal / operational staff (staff)
+/// - [client]: Law firm end client (client)
 /// - [unknown]: Fallback for unassigned or unrecognized roles
 enum UserRole {
   superAdmin,
   firmAdmin,
   lawyer,
   staff,
+  client,
   unknown;
 
   /// Safe parser mapping backend strings and superuser flag to [UserRole].
@@ -58,6 +60,8 @@ enum UserRole {
       case 'assistant':
       case 'paralegal':
         return UserRole.staff;
+      case 'client':
+        return UserRole.client;
       default:
         return UserRole.unknown;
     }
@@ -90,6 +94,12 @@ enum UserRole {
           description: 'Legal Staff / Paralegal',
           badgeColor: Color(0xFF64748B), // Neutral Slate
         );
+      case UserRole.client:
+        return const RoleConfig(
+          title: 'Client',
+          description: 'Law Firm Client',
+          badgeColor: Color(0xFF7C3AED), // Violet
+        );
       case UserRole.unknown:
         return const RoleConfig(
           title: 'Member',
@@ -111,6 +121,8 @@ enum UserRole {
         return 'lawyer';
       case UserRole.staff:
         return 'staff';
+      case UserRole.client:
+        return 'client';
       case UserRole.unknown:
         return 'unknown';
     }
@@ -125,6 +137,7 @@ enum UserRole {
   bool get isFirmAdmin => this == UserRole.firmAdmin;
   bool get isLawyer => this == UserRole.lawyer;
   bool get isStaff => this == UserRole.staff;
+  bool get isClient => this == UserRole.client;
 
   /// Returns true for tenant users associated with a specific law firm
   bool get isFirmUser =>
@@ -134,7 +147,7 @@ enum UserRole {
 }
 
 /// Standalone parser matching the prompt specification:
-/// Maps 'super_admin', 'admin', 'firm_admin', 'lawyer', 'staff'.
+/// Maps 'super_admin', 'admin', 'firm_admin', 'lawyer', 'staff', 'client'.
 /// Does not guess role and handles unknown roles safely.
 UserRole parseUserRole(String? role, {bool isSuperuser = false}) {
   if (isSuperuser) return UserRole.superAdmin;
@@ -161,6 +174,8 @@ UserRole parseUserRole(String? role, {bool isSuperuser = false}) {
     case 'assistant':
     case 'paralegal':
       return UserRole.staff;
+    case 'client':
+      return UserRole.client;
     default:
       return UserRole.unknown;
   }
@@ -177,4 +192,5 @@ extension UserRoleExtension on UserRole {
   bool get isFirmAdminRole => this == UserRole.firmAdmin;
   bool get isLawyerRole => this == UserRole.lawyer;
   bool get isStaffRole => this == UserRole.staff;
+  bool get isClientRole => this == UserRole.client;
 }

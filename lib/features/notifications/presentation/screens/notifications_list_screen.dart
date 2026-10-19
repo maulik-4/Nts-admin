@@ -59,7 +59,10 @@ class NotificationsListScreen extends ConsumerWidget {
                       .read(notificationsNotifierProvider.notifier)
                       .markAllAsRead();
                   if (context.mounted) {
-                    AppAlerts.showSuccess(context, 'All notifications marked as read');
+                    AppAlerts.showSuccess(
+                      context,
+                      'All notifications marked as read',
+                    );
                   }
                 } catch (e) {
                   if (context.mounted) {
@@ -222,7 +225,9 @@ class NotificationsListScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                isUnread ? Icons.notifications_active_rounded : Icons.notifications_outlined,
+                isUnread
+                    ? Icons.notifications_active_rounded
+                    : Icons.notifications_outlined,
                 size: 20,
                 color: isUnread
                     ? LexColors.accentGold
@@ -241,8 +246,12 @@ class NotificationsListScreen extends ConsumerWidget {
                           item.title,
                           style: TextStyle(
                             fontSize: 15,
-                            fontWeight: isUnread ? FontWeight.w800 : FontWeight.w600,
-                            color: isDark ? Colors.white : LexColors.slatePrimary,
+                            fontWeight: isUnread
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                            color: isDark
+                                ? Colors.white
+                                : LexColors.slatePrimary,
                           ),
                         ),
                       ),

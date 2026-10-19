@@ -59,7 +59,9 @@ class MessagesListScreen extends ConsumerWidget {
           itemCount: 6,
           separatorBuilder: (_, _) => const SizedBox(height: 12),
           itemBuilder: (ctx, idx) => Align(
-            alignment: idx.isEven ? Alignment.centerRight : Alignment.centerLeft,
+            alignment: idx.isEven
+                ? Alignment.centerRight
+                : Alignment.centerLeft,
             child: ShimmerBox(
               width: MediaQuery.of(context).size.width * 0.72,
               height: 80,
@@ -201,7 +203,9 @@ class MessagesListScreen extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    isMe ? Icons.arrow_outward_rounded : Icons.south_west_rounded,
+                    isMe
+                        ? Icons.arrow_outward_rounded
+                        : Icons.south_west_rounded,
                     size: 13,
                     color: isMe ? Colors.white70 : LexColors.accentGold,
                   ),
@@ -364,7 +368,10 @@ class _ComposeMessageSheetState extends ConsumerState<_ComposeMessageSheet> {
                     ),
                     Text(
                       'Send Firm Message',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ],
                 ),
@@ -405,13 +412,17 @@ class _ComposeMessageSheetState extends ConsumerState<_ComposeMessageSheet> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        color: isDark
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFE2E8F0),
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        color: isDark
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFE2E8F0),
                       ),
                     ),
                   ),

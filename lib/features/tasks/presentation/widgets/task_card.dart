@@ -114,8 +114,8 @@ class TaskCard extends StatelessWidget {
                         color: task.isCompleted
                             ? const Color(0xFF10B981)
                             : (isDark
-                                ? const Color(0xFF475569)
-                                : const Color(0xFFCBD5E1)),
+                                  ? const Color(0xFF475569)
+                                  : const Color(0xFFCBD5E1)),
                         width: 1.8,
                       ),
                     ),
@@ -142,15 +142,16 @@ class TaskCard extends StatelessWidget {
                         fontSize: 14.5,
                         fontWeight: FontWeight.w700,
                         height: 1.25,
-                        decoration:
-                            task.isCompleted ? TextDecoration.lineThrough : null,
+                        decoration: task.isCompleted
+                            ? TextDecoration.lineThrough
+                            : null,
                         color: task.isCompleted
                             ? (isDark
-                                ? LexColors.textSecondaryDark
-                                : const Color(0xFF94A3B8))
+                                  ? LexColors.textSecondaryDark
+                                  : const Color(0xFF94A3B8))
                             : (isDark
-                                ? LexColors.textPrimaryDark
-                                : const Color(0xFF0F172A)),
+                                  ? LexColors.textPrimaryDark
+                                  : const Color(0xFF0F172A)),
                       ),
                     ),
                     if (task.description != null &&
@@ -184,7 +185,9 @@ class TaskCard extends StatelessWidget {
                   icon: const Icon(Icons.more_vert_rounded, size: 18),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
                   onPressed: onMorePressed,
                 ),
               ],
@@ -209,8 +212,10 @@ class TaskCard extends StatelessWidget {
               // Case Folder Badge
               if (task.caseTitle != null && task.caseTitle!.isNotEmpty)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: isDark
                         ? const Color(0xFF1E293B)
@@ -258,8 +263,8 @@ class TaskCard extends StatelessWidget {
                       color: task.isOverdue
                           ? const Color(0xFFEF4444)
                           : (isDark
-                              ? const Color(0xFF94A3B8)
-                              : const Color(0xFF64748B)),
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B)),
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -272,8 +277,8 @@ class TaskCard extends StatelessWidget {
                         color: task.isOverdue
                             ? const Color(0xFFEF4444)
                             : (isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B)),
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B)),
                       ),
                     ),
                   ],

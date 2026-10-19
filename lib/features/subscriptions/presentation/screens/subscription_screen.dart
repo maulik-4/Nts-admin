@@ -867,7 +867,10 @@ class _BillingSelectionDialogState
                   } catch (e) {
                     if (context.mounted) {
                       setState(() => _isSubmitting = false);
-                      AppAlerts.showError(context, 'Failed to activate plan: $e');
+                      AppAlerts.showError(
+                        context,
+                        'Failed to activate plan: $e',
+                      );
                     }
                   }
                 },

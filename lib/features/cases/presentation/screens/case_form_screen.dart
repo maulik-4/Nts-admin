@@ -107,7 +107,8 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
     );
     if (picked != null) {
       setState(() {
-        _nextHearingDateController.text = DateFormat('yyyy-MM-dd').format(picked);
+        _nextHearingDateController.text = DateFormat('yyyy-MM-dd')
+            .format(picked);
       });
     }
   }
@@ -165,9 +166,13 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
         }
       }
     } on ApiException catch (e) {
-      if (mounted) AppAlerts.showError(context, e.message);
+      if (mounted) {
+        AppAlerts.showError(context, e.message);
+      }
     } catch (e) {
-      if (mounted) AppAlerts.showError(context, 'An unexpected error occurred: $e');
+      if (mounted) {
+        AppAlerts.showError(context, 'An unexpected error occurred: $e');
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -200,16 +205,25 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                          color: isDark
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFEFF6FF),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                            color: isDark
+                                ? const Color(0xFF334155)
+                                : const Color(0xFFDBEAFE),
                           ),
                         ),
                         child: Text(
-                          isEdit ? 'CASE METADATA UPDATE' : 'CASE SPECIFICATION',
+                          isEdit
+                              ? 'CASE METADATA UPDATE'
+                              : 'CASE SPECIFICATION',
                           style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -224,7 +238,9 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -257,7 +273,9 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                          color: isDark
+                              ? const Color(0xFFCBD5E1)
+                              : const Color(0xFF334155),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -279,7 +297,10 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                                 horizontal: 14,
                                 vertical: 12,
                               ),
-                              prefixIcon: const Icon(Icons.person_outline_rounded, size: 19),
+                              prefixIcon: const Icon(
+                                Icons.person_outline_rounded,
+                                size: 19,
+                              ),
                               filled: true,
                               fillColor: isDark
                                   ? const Color(0xFF1E293B)
@@ -293,7 +314,10 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                                 ),
                               ),
                             ),
-                            hint: const Text('Select Associated Client', style: TextStyle(fontSize: 13)),
+                            hint: const Text(
+                              'Select Associated Client',
+                              style: TextStyle(fontSize: 13),
+                            ),
                             items: clients.map((c) {
                               return DropdownMenuItem<int>(
                                 value: c.id,
@@ -322,7 +346,9 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                          color: isDark
+                              ? const Color(0xFFCBD5E1)
+                              : const Color(0xFF334155),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -333,7 +359,10 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                             horizontal: 14,
                             vertical: 12,
                           ),
-                          prefixIcon: const Icon(Icons.category_outlined, size: 19),
+                          prefixIcon: const Icon(
+                            Icons.category_outlined,
+                            size: 19,
+                          ),
                           filled: true,
                           fillColor: isDark
                               ? const Color(0xFF1E293B)
@@ -345,7 +374,10 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                         items: _caseTypes.map((type) {
                           return DropdownMenuItem(
                             value: type,
-                            child: Text(type, style: const TextStyle(fontSize: 13)),
+                            child: Text(
+                              type,
+                              style: const TextStyle(fontSize: 13),
+                            ),
                           );
                         }).toList(),
                         onChanged: (val) {
@@ -385,7 +417,9 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                          color: isDark
+                              ? const Color(0xFFCBD5E1)
+                              : const Color(0xFF334155),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -409,9 +443,16 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                             value: 'open',
                             child: Row(
                               children: [
-                                Icon(Icons.circle, size: 8, color: Color(0xFF10B981)),
+                                Icon(
+                                  Icons.circle,
+                                  size: 8,
+                                  color: Color(0xFF10B981),
+                                ),
                                 SizedBox(width: 8),
-                                Text('Open / Active Case', style: TextStyle(fontSize: 13)),
+                                Text(
+                                  'Open / Active Case',
+                                  style: TextStyle(fontSize: 13),
+                                ),
                               ],
                             ),
                           ),
@@ -419,9 +460,16 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                             value: 'closed',
                             child: Row(
                               children: [
-                                Icon(Icons.circle, size: 8, color: Color(0xFF94A3B8)),
+                                Icon(
+                                  Icons.circle,
+                                  size: 8,
+                                  color: Color(0xFF94A3B8),
+                                ),
                                 SizedBox(width: 8),
-                                Text('Closed / Resolved', style: TextStyle(fontSize: 13)),
+                                Text(
+                                  'Closed / Resolved',
+                                  style: TextStyle(fontSize: 13),
+                                ),
                               ],
                             ),
                           ),

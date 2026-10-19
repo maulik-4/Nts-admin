@@ -73,6 +73,12 @@ class AppShell extends ConsumerWidget {
       );
     }
 
+    // Safeguard: If destinations has fewer than 2 items (e.g. during auth transition or client role),
+    // do not attempt to render NavigationBar or NavigationRail which asserts destinations.length >= 2
+    if (destinations.length < 2) {
+      return Scaffold(body: buildScreenWithWatermark(navigationShell));
+    }
+
     if (isTablet) {
       final isExpanded = width >= 950;
 
@@ -165,7 +171,8 @@ class AppShell extends ConsumerWidget {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0F172A).withValues(alpha: isDark ? 0.4 : 0.06),
+              color: const Color(0xFF0F172A)
+                  .withValues(alpha: isDark ? 0.4 : 0.06),
               blurRadius: 18,
               offset: const Offset(0, -4),
             ),

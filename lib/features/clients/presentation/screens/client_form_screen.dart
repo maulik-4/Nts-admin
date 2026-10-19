@@ -119,9 +119,13 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
         }
       }
     } on ApiException catch (e) {
-      if (mounted) AppAlerts.showError(context, e.message);
+      if (mounted) {
+        AppAlerts.showError(context, e.message);
+      }
     } catch (e) {
-      if (mounted) AppAlerts.showError(context, 'An unexpected error occurred: $e');
+      if (mounted) {
+        AppAlerts.showError(context, 'An unexpected error occurred: $e');
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -153,16 +157,25 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                          color: isDark
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFEFF6FF),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                            color: isDark
+                                ? const Color(0xFF334155)
+                                : const Color(0xFFDBEAFE),
                           ),
                         ),
                         child: Text(
-                          isEdit ? 'UPDATE CLIENT PROFILE' : 'CLIENT PROFILE SPECIFICATION',
+                          isEdit
+                              ? 'UPDATE CLIENT PROFILE'
+                              : 'CLIENT PROFILE SPECIFICATION',
                           style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -177,7 +190,9 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -233,7 +248,8 @@ class _ClientFormScreenState extends ConsumerState<ClientFormScreen> {
                       LexTextField(
                         controller: _addressController,
                         label: 'Office / Postal Address *',
-                        hintText: 'Street address, office suite, or postal address',
+                        hintText:
+                            'Street address, office suite, or postal address',
                         prefixIcon: Icons.home_outlined,
                         validator: (val) => Validators.required(val, 'Address'),
                       ),

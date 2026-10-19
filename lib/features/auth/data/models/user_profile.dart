@@ -42,6 +42,7 @@ class UserProfile {
   bool get isFirmAdmin => isAdmin;
   bool get isLawyer => !isSuperAdmin && userRole.isLawyer;
   bool get isStaff => !isSuperAdmin && userRole.isStaff;
+  bool get isClient => userRole.isClient;
 
   /// Firm scoping matching User model
   int? get firm => firmId;

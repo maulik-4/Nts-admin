@@ -71,10 +71,7 @@ class PaymentCard extends StatelessWidget {
                   ],
                 ),
               ),
-              StatusBadge(
-                status: payment.status.displayName,
-                showDot: true,
-              ),
+              StatusBadge(status: payment.status.displayName, showDot: true),
             ],
           ),
           const SizedBox(height: 12),
@@ -127,7 +124,9 @@ class PaymentCard extends StatelessWidget {
                 Icon(
                   Icons.folder_open_rounded,
                   size: 13,
-                  color: isDark ? LexColors.accentGold : const Color(0xFF64748B),
+                  color: isDark
+                      ? LexColors.accentGold
+                      : const Color(0xFF64748B),
                 ),
                 const SizedBox(width: 4),
                 Expanded(
@@ -166,7 +165,9 @@ class PaymentCard extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 18,
-                color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                color: isDark
+                    ? const Color(0xFF64748B)
+                    : const Color(0xFF94A3B8),
               ),
             ],
           ),

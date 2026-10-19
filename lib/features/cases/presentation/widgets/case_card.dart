@@ -48,10 +48,14 @@ class CaseCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                  color: isDark
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 child: Text(
@@ -62,7 +66,9 @@ class CaseCard extends StatelessWidget {
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.3,
-                    color: isDark ? LexColors.accentGold : Theme.of(context).colorScheme.primary,
+                    color: isDark
+                        ? LexColors.accentGold
+                        : Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
@@ -71,12 +77,19 @@ class CaseCard extends StatelessWidget {
               // Category Badge
               if (caseItem.caseType.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1A2234) : const Color(0xFFEFF6FF),
+                    color: isDark
+                        ? const Color(0xFF1A2234)
+                        : const Color(0xFFEFF6FF),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF1E3A8A).withAlpha(100) : const Color(0xFFDBEAFE),
+                      color: isDark
+                          ? const Color(0xFF1E3A8A).withAlpha(100)
+                          : const Color(0xFFDBEAFE),
                     ),
                   ),
                   child: Text(
@@ -111,7 +124,9 @@ class CaseCard extends StatelessWidget {
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     height: 1.25,
-                    color: isDark ? LexColors.textPrimaryDark : const Color(0xFF0F172A),
+                    color: isDark
+                        ? LexColors.textPrimaryDark
+                        : const Color(0xFF0F172A),
                   ),
                 ),
               ),
@@ -119,7 +134,9 @@ class CaseCard extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 20,
-                color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                color: isDark
+                    ? const Color(0xFF64748B)
+                    : const Color(0xFF94A3B8),
               ),
             ],
           ),
@@ -131,7 +148,9 @@ class CaseCard extends StatelessWidget {
               Icon(
                 Icons.person_outline_rounded,
                 size: 15,
-                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                color: isDark
+                    ? const Color(0xFF94A3B8)
+                    : const Color(0xFF64748B),
               ),
               const SizedBox(width: 6),
               Expanded(
@@ -144,7 +163,9 @@ class CaseCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w500,
-                    color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                    color: isDark
+                        ? const Color(0xFFCBD5E1)
+                        : const Color(0xFF475569),
                   ),
                 ),
               ),
@@ -158,17 +179,23 @@ class CaseCard extends StatelessWidget {
               Icon(
                 Icons.balance_rounded,
                 size: 14,
-                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                color: isDark
+                    ? const Color(0xFF94A3B8)
+                    : const Color(0xFF64748B),
               ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  caseItem.courtName.isNotEmpty ? caseItem.courtName : 'Court unspecified',
+                  caseItem.courtName.isNotEmpty
+                      ? caseItem.courtName
+                      : 'Court unspecified',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
                   ),
                 ),
               ),
@@ -181,10 +208,14 @@ class CaseCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF2A2415) : const Color(0xFFFFFBEB),
+                color: isDark
+                    ? const Color(0xFF2A2415)
+                    : const Color(0xFFFFFBEB),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isDark ? const Color(0xFF78350F) : const Color(0xFFFDE68A),
+                  color: isDark
+                      ? const Color(0xFF78350F)
+                      : const Color(0xFFFDE68A),
                 ),
               ),
               child: Row(

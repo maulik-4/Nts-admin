@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../config/env_config.dart';
 import '../constants/api_endpoints.dart';
 import '../errors/api_exception.dart';
+import '../events/app_events.dart';
 import '../storage/secure_token_storage.dart';
 
 typedef UnauthorizedCallback = void Function();
@@ -242,6 +243,10 @@ class ErrorInterceptor extends Interceptor {
 
   void _rejectWithError(DioException err, ErrorInterceptorHandler handler) {
     ApiException customException;
+    final requestIdHeader =
+        err.response?.headers.value('x-request-id') ??
+        err.response?.headers.value('X-Request-ID');
+
     if (err.type == DioExceptionType.connectionTimeout ||
         err.type == DioExceptionType.sendTimeout ||
         err.type == DioExceptionType.receiveTimeout ||
@@ -251,11 +256,36 @@ class ErrorInterceptor extends Interceptor {
       customException = ApiException.fromResponse(
         err.response?.statusCode,
         err.response?.data,
+        requestIdHeader: requestIdHeader,
       );
     } else {
       customException = ApiException(
         message: err.message ?? 'An unexpected network error occurred.',
         statusCode: null,
+        requestId: requestIdHeader,
+      );
+    }
+
+    // Intercept Paywall / Firm Block Global Events
+    if (customException.code == 'FIRM_BLOCKED') {
+      debugPrint(
+        '[PAYWALL] Intercepted FIRM_BLOCKED error code. Emitting event.',
+      );
+      AppEventBus.instance.emit(
+        FirmBlockedEvent(
+          customException.message,
+          requestId: customException.requestId,
+        ),
+      );
+    } else if (customException.code == 'SUBSCRIPTION_EXPIRED') {
+      debugPrint(
+        '[PAYWALL] Intercepted SUBSCRIPTION_EXPIRED error code. Emitting event.',
+      );
+      AppEventBus.instance.emit(
+        SubscriptionExpiredEvent(
+          customException.message,
+          requestId: customException.requestId,
+        ),
       );
     }
 

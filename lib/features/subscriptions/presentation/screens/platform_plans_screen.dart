@@ -11,6 +11,8 @@ import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../../shared/widgets/status_badge.dart';
 import '../../data/models/subscription_models.dart';
 import '../providers/subscriptions_notifier.dart';
+import '../widgets/admin_gateway_tab.dart';
+import '../widgets/admin_transactions_tab.dart';
 
 class PlatformPlansScreen extends ConsumerStatefulWidget {
   const PlatformPlansScreen({super.key});
@@ -28,68 +30,99 @@ class _PlatformPlansScreenState extends ConsumerState<PlatformPlansScreen> {
     final plansAsync = ref.watch(platformPlansNotifierProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Subscription Plans'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh Plans',
-            onPressed: () =>
-                ref.read(platformPlansNotifierProvider.notifier).loadPlans(),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showPlanFormDialog(context),
-        icon: const Icon(Icons.add),
-        label: const Text('New Plan'),
-        backgroundColor: _superAdminGold,
-        foregroundColor: Colors.black,
-      ),
-      body: plansAsync.when(
-        data: (plans) {
-          if (plans.isEmpty) {
-            return const EmptyStateWidget(
-              title: 'No Subscription Plans',
-              message: 'No plans have been configured on the platform.',
-              icon: Icons.card_membership_outlined,
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () =>
-                ref.read(platformPlansNotifierProvider.notifier).loadPlans(),
-            child: ListView.separated(
-              padding: const EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 16,
-                bottom: 88,
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Plans & Gateway Control'),
+          bottom: const TabBar(
+            indicatorColor: _superAdminGold,
+            indicatorWeight: 3,
+            tabs: [
+              Tab(icon: Icon(Icons.layers_outlined, size: 20), text: 'Plans'),
+              Tab(
+                icon: Icon(Icons.payment_outlined, size: 20),
+                text: 'Payment Gateway',
               ),
-              itemCount: plans.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 14),
-              itemBuilder: (ctx, idx) =>
-                  _buildPlanCard(context, plans[idx], isDark),
-            ),
-          );
-        },
-        loading: () => SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: List.generate(
-              3,
-              (_) => const Padding(
-                padding: EdgeInsets.only(bottom: 14),
-                child: SkeletonLoader(height: 140),
+              Tab(
+                icon: Icon(Icons.receipt_long_outlined, size: 20),
+                text: 'Transactions',
               ),
-            ),
+            ],
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Refresh Plans',
+              onPressed: () =>
+                  ref.read(platformPlansNotifierProvider.notifier).loadPlans(),
+            ),
+          ],
         ),
-        error: (err, _) => ErrorStateWidget(
-          message: 'Unable to Load Plans: $err',
-          onRetry: () =>
-              ref.read(platformPlansNotifierProvider.notifier).loadPlans(),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => _showPlanFormDialog(context),
+          icon: const Icon(Icons.add),
+          label: const Text('New Plan'),
+          backgroundColor: _superAdminGold,
+          foregroundColor: Colors.black,
+        ),
+        body: TabBarView(
+          children: [
+            // Tab 0: Plans List
+            plansAsync.when(
+              data: (plans) {
+                if (plans.isEmpty) {
+                  return const EmptyStateWidget(
+                    title: 'No Subscription Plans',
+                    message: 'No plans have been configured on the platform.',
+                    icon: Icons.card_membership_outlined,
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () => ref
+                      .read(platformPlansNotifierProvider.notifier)
+                      .loadPlans(),
+                  child: ListView.separated(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      top: 16,
+                      bottom: 88,
+                    ),
+                    itemCount: plans.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 14),
+                    itemBuilder: (ctx, idx) =>
+                        _buildPlanCard(context, plans[idx], isDark),
+                  ),
+                );
+              },
+              loading: () => SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: List.generate(
+                    3,
+                    (_) => const Padding(
+                      padding: EdgeInsets.only(bottom: 14),
+                      child: SkeletonLoader(height: 140),
+                    ),
+                  ),
+                ),
+              ),
+              error: (err, _) => ErrorStateWidget(
+                message: 'Unable to Load Plans: $err',
+                onRetry: () => ref
+                    .read(platformPlansNotifierProvider.notifier)
+                    .loadPlans(),
+              ),
+            ),
+
+            // Tab 1: Razorpay Gateway Settings
+            const AdminGatewayTab(),
+
+            // Tab 2: Subscription Transactions Audit
+            const AdminTransactionsTab(),
+          ],
         ),
       ),
     );

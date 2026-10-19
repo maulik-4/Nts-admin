@@ -6,7 +6,7 @@ class RoleGuard {
 
   /// Evaluates whether [userRole] can access [currentPath].
   /// Returns null if access is ALLOWED.
-  /// Returns redirect path (e.g. '/app/dashboard' or '/app/more') if access is DENIED.
+  /// Returns redirect path (e.g. '/app/dashboard', '/client/dashboard', '/login') if access is DENIED.
   static String? evaluate({
     required UserRole userRole,
     required String currentPath,
@@ -23,28 +23,71 @@ class RoleGuard {
       return null;
     }
 
+    // Paywall and error screens can be viewed regardless of role when navigated to
+    if (currentPath == '/firm-blocked' ||
+        currentPath == '/subscription-expired') {
+      return null;
+    }
+
     final isAuthRoute =
         currentPath == '/login' ||
         currentPath == '/new-user' ||
         currentPath == '/register' ||
-        currentPath == '/accept-invite';
+        currentPath == '/accept-invite' ||
+        currentPath == '/client/login' ||
+        currentPath == '/client/accept-invite';
 
     // 2. Unauthenticated check
     if (!isAuthenticated) {
       if (currentPath.startsWith('/app')) {
         return '/login';
       }
+      if (currentPath.startsWith('/client') &&
+          currentPath != '/client/login' &&
+          currentPath != '/client/accept-invite') {
+        return '/client/login';
+      }
       return null;
     }
 
-    // 3. Authenticated user landing on entry or auth routes
+    // 3. Client Role Navigation
+    if (userRole.isClient) {
+      // Client is strictly isolated from firm back-office workspace (/app/...)
+      if (isAuthRoute || currentPath.startsWith('/app') || currentPath == '/') {
+        return '/client/dashboard';
+      }
+      if (currentPath.startsWith('/client')) {
+        return null;
+      }
+      return '/client/dashboard';
+    }
+
+    // Non-client trying to access client-portal routes
+    if (currentPath.startsWith('/client') &&
+        currentPath != '/client/login' &&
+        currentPath != '/client/accept-invite') {
+      return '/app/dashboard';
+    }
+
+    // 4. Authenticated firm/platform user landing on entry or auth routes
     if (isAuthRoute || currentPath == '/app') {
       return '/app/dashboard';
     }
 
-    // 4. ROLE SPECIFIC GUARDS
+    // Service-level restrictions:
+    // Block services New Case, New Task, and Hearings create functionality
+    // Directing to Subscription & Quotas
+    if (!userRole.isSuperAdmin) {
+      if (currentPath == '/app/cases/create' ||
+          currentPath.startsWith('/app/tasks/create') ||
+          currentPath.startsWith('/app/hearings/create')) {
+        return '/app/more/subscriptions';
+      }
+    }
 
-    // 4a. SUPER ADMIN
+    // 5. ROLE SPECIFIC GUARDS
+
+    // 5a. SUPER ADMIN
     if (userRole.isSuperAdmin) {
       // Super Admin is isolated from confidential tenant litigation cases, clients, hearings, and tasks
       if (currentPath.startsWith('/app/cases') ||
@@ -61,7 +104,7 @@ class RoleGuard {
       return null;
     }
 
-    // 4b. NON-SUPER ADMIN BLOCKED FROM PLATFORM ROUTES
+    // 5b. NON-SUPER ADMIN BLOCKED FROM PLATFORM ROUTES
     if (currentPath.startsWith('/app/firms') ||
         currentPath.startsWith('/app/plans') ||
         currentPath.startsWith('/app/platform-team') ||
@@ -69,13 +112,13 @@ class RoleGuard {
       return '/app/dashboard';
     }
 
-    // 4c. ADMIN / FIRM ADMIN
+    // 5c. ADMIN / FIRM ADMIN
     if (userRole.isAdmin || userRole.isFirmAdmin) {
       // Firm Admin has full litigation and firm management authority
       return null;
     }
 
-    // 4d. LAWYER
+    // 5d. LAWYER
     if (userRole.isLawyer) {
       // Subroutes under /app/more redirect back to /app/more
       if (currentPath.startsWith('/app/more/team') ||
@@ -97,7 +140,7 @@ class RoleGuard {
       return null;
     }
 
-    // 4e. STAFF
+    // 5e. STAFF
     if (userRole.isStaff) {
       // Staff is blocked from Cases and Documents (backend returns 403 Forbidden)
       if (currentPath.startsWith('/app/cases') ||
@@ -123,7 +166,7 @@ class RoleGuard {
       return null;
     }
 
-    // 4f. UNKNOWN ROLE
+    // 5f. UNKNOWN ROLE
     // Protect all privileged platform and litigation routes
     if (currentPath.startsWith('/app/cases') ||
         currentPath.startsWith('/app/clients') ||

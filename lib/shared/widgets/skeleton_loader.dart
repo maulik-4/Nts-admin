@@ -29,7 +29,7 @@ class _SkeletonLoaderState extends State<SkeletonLoader>
       duration: const Duration(milliseconds: 1400),
     )..repeat(reverse: true);
 
-  _animation = Tween<double>(
+    _animation = Tween<double>(
       begin: 0.35,
       end: 0.85,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));

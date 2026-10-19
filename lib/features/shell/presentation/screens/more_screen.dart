@@ -43,11 +43,7 @@ class MoreScreen extends ConsumerWidget {
               color: isDark ? iconColor.withAlpha(35) : iconBgColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              size: 22,
-              color: iconColor,
-            ),
+            child: Icon(icon, size: 22, color: iconColor),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -59,7 +55,9 @@ class MoreScreen extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 14.5,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? LexColors.textPrimaryDark : const Color(0xFF0F172A),
+                    color: isDark
+                        ? LexColors.textPrimaryDark
+                        : const Color(0xFF0F172A),
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -69,7 +67,9 @@ class MoreScreen extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
                   ),
                 ),
               ],
@@ -81,12 +81,18 @@ class MoreScreen extends ConsumerWidget {
             decoration: BoxDecoration(
               color: isWarningBadge
                   ? (isDark ? const Color(0xFF78350F) : const Color(0xFFFEF3C7))
-                  : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
+                  : (isDark
+                        ? const Color(0xFF1E293B)
+                        : const Color(0xFFF1F5F9)),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isWarningBadge
-                    ? (isDark ? const Color(0xFFB45309) : const Color(0xFFFDE68A))
-                    : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                    ? (isDark
+                          ? const Color(0xFFB45309)
+                          : const Color(0xFFFDE68A))
+                    : (isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0)),
               ),
             ),
             child: Text(
@@ -96,7 +102,9 @@ class MoreScreen extends ConsumerWidget {
                 fontWeight: FontWeight.w700,
                 color: isWarningBadge
                     ? const Color(0xFFD97706)
-                    : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
+                    : (isDark
+                          ? const Color(0xFFCBD5E1)
+                          : const Color(0xFF475569)),
               ),
             ),
           ),
@@ -146,7 +154,8 @@ class MoreScreen extends ConsumerWidget {
       orElse: () => 0,
     );
 
-    final firmDisplayName = (user?.firmName != null && user!.firmName!.trim().isNotEmpty)
+    final firmDisplayName =
+        (user?.firmName != null && user!.firmName!.trim().isNotEmpty)
         ? user.firmName!
         : 'LexTech Law Practice';
 
@@ -166,7 +175,9 @@ class MoreScreen extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: isDark ? LexColors.textSecondaryDark : const Color(0xFF64748B),
+                color: isDark
+                    ? LexColors.textSecondaryDark
+                    : const Color(0xFF64748B),
               ),
             ),
           ],
@@ -226,11 +237,16 @@ class MoreScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                user?.username ?? (userRole.isSuperAdmin ? 'Super Admin' : 'Advocate'),
+                                user?.username ??
+                                    (userRole.isSuperAdmin
+                                        ? 'Super Admin'
+                                        : 'Advocate'),
                                 style: TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.w700,
-                                  color: isDark ? LexColors.textPrimaryDark : const Color(0xFF0F172A),
+                                  color: isDark
+                                      ? LexColors.textPrimaryDark
+                                      : const Color(0xFF0F172A),
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -238,7 +254,9 @@ class MoreScreen extends ConsumerWidget {
                                 user?.email ?? '',
                                 style: TextStyle(
                                   fontSize: 12.5,
-                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  color: isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B),
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -251,7 +269,9 @@ class MoreScreen extends ConsumerWidget {
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                                      color: isDark
+                                          ? const Color(0xFF64748B)
+                                          : const Color(0xFF94A3B8),
                                     ),
                                   ),
                                 ],
@@ -270,12 +290,19 @@ class MoreScreen extends ConsumerWidget {
                     if (!userRole.isSuperAdmin) ...[
                       const SizedBox(height: 16),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                          color: isDark
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                            color: isDark
+                                ? const Color(0xFF334155)
+                                : const Color(0xFFE2E8F0),
                           ),
                         ),
                         child: Row(
@@ -301,12 +328,18 @@ class MoreScreen extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A),
                                   ),
                                 ),
                               ],
                             ),
-                            Container(width: 1, height: 26, color: const Color(0xFFCBD5E1)),
+                            Container(
+                              width: 1,
+                              height: 26,
+                              color: const Color(0xFFCBD5E1),
+                            ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -325,12 +358,18 @@ class MoreScreen extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A),
                                   ),
                                 ),
                               ],
                             ),
-                            Container(width: 1, height: 26, color: const Color(0xFFCBD5E1)),
+                            Container(
+                              width: 1,
+                              height: 26,
+                              color: const Color(0xFFCBD5E1),
+                            ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -349,7 +388,9 @@ class MoreScreen extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A),
                                   ),
                                 ),
                               ],
@@ -374,14 +415,17 @@ class MoreScreen extends ConsumerWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.8,
-                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
                 ),
               ),
               const SizedBox(height: 10),
               _buildOperationTile(
                 context,
                 title: 'Tenant Law Firms',
-                subtitle: 'Manage registered firms, status, stats & admin transfer',
+                subtitle:
+                    'Manage registered firms, status, stats & admin transfer',
                 icon: Icons.business_rounded,
                 iconColor: const Color(0xFF2563EB),
                 iconBgColor: const Color(0xFFEFF6FF),
@@ -414,7 +458,8 @@ class MoreScreen extends ConsumerWidget {
               _buildOperationTile(
                 context,
                 title: 'Support Tickets & Helpdesk',
-                subtitle: 'Resolve tickets, reply to inquiries & platform assistance',
+                subtitle:
+                    'Resolve tickets, reply to inquiries & platform assistance',
                 icon: Icons.support_agent_rounded,
                 iconColor: const Color(0xFFEA580C),
                 iconBgColor: const Color(0xFFFFF7ED),
@@ -445,13 +490,18 @@ class MoreScreen extends ConsumerWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.8,
-                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
                 ),
               ),
               const SizedBox(height: 10),
 
               // Tasks Card
-              if (RoleCapabilities.hasCapability(userRole, UserCapability.viewTasks)) ...[
+              if (RoleCapabilities.hasCapability(
+                userRole,
+                UserCapability.viewTasks,
+              )) ...[
                 _buildOperationTile(
                   context,
                   title: 'Tasks & Deadlines',
@@ -467,7 +517,10 @@ class MoreScreen extends ConsumerWidget {
               ],
 
               // Documents Card
-              if (RoleCapabilities.hasCapability(userRole, UserCapability.viewDocuments)) ...[
+              if (RoleCapabilities.hasCapability(
+                userRole,
+                UserCapability.viewDocuments,
+              )) ...[
                 _buildOperationTile(
                   context,
                   title: 'Legal Documents',
@@ -482,7 +535,10 @@ class MoreScreen extends ConsumerWidget {
               ],
 
               // Payments Card
-              if (RoleCapabilities.hasCapability(userRole, UserCapability.viewPayments)) ...[
+              if (RoleCapabilities.hasCapability(
+                userRole,
+                UserCapability.viewPayments,
+              )) ...[
                 _buildOperationTile(
                   context,
                   title: 'Payments & Billing',
@@ -526,7 +582,8 @@ class MoreScreen extends ConsumerWidget {
               _buildOperationTile(
                 context,
                 title: 'Help & Support',
-                subtitle: 'Submit support tickets, report issues & query status',
+                subtitle:
+                    'Submit support tickets, report issues & query status',
                 icon: Icons.support_agent_rounded,
                 iconColor: const Color(0xFFE11D48),
                 iconBgColor: const Color(0xFFFFF1F2),
@@ -546,7 +603,9 @@ class MoreScreen extends ConsumerWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.8,
-                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
                 ),
               ),
               const SizedBox(height: 10),
@@ -564,7 +623,9 @@ class MoreScreen extends ConsumerWidget {
               _buildOperationTile(
                 context,
                 title: 'Subscription & Quotas',
-                subtitle: dashboardAsync.valueOrNull?.clientUsage?.planName ?? 'Professional Plan',
+                subtitle:
+                    dashboardAsync.valueOrNull?.clientUsage?.planName ??
+                    'Professional Plan',
                 icon: Icons.credit_card_outlined,
                 iconColor: const Color(0xFF059669),
                 iconBgColor: const Color(0xFFECFDF5),

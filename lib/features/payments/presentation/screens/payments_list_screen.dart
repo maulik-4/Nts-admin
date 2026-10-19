@@ -183,7 +183,9 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                           ),
                         ),
                       ],
@@ -237,7 +239,9 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                           ),
                         ),
                       ],
@@ -261,19 +265,24 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
                 hintText: 'Search by client, case, method, or amount...',
                 hintStyle: TextStyle(
                   fontSize: 13,
-                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                  color: isDark
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF94A3B8),
                 ),
                 prefixIcon: Icon(
                   Icons.search_rounded,
                   size: 20,
-                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear_rounded, size: 18),
                         onPressed: () {
                           _searchController.clear();
-                          ref.read(paymentSearchQueryProvider.notifier).state = '';
+                          ref.read(paymentSearchQueryProvider.notifier).state =
+                              '';
                           setState(() {});
                         },
                       )
@@ -287,13 +296,17 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -318,7 +331,8 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
                   label: 'All Payments',
                   isSelected: statusFilter == null,
                   onTap: () =>
-                      ref.read(paymentStatusFilterProvider.notifier).state = null,
+                      ref.read(paymentStatusFilterProvider.notifier).state =
+                          null,
                 ),
                 const SizedBox(width: 8),
                 ...PaymentStatus.values.map((s) {
@@ -328,16 +342,18 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
                       context: context,
                       label: s.displayName,
                       isSelected: statusFilter == s,
-                      onTap: () => ref
-                          .read(paymentStatusFilterProvider.notifier)
-                          .state = statusFilter == s ? null : s,
+                      onTap: () =>
+                          ref.read(paymentStatusFilterProvider.notifier).state =
+                              statusFilter == s ? null : s,
                     ),
                   );
                 }),
                 Container(
                   width: 1,
                   height: 22,
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFCBD5E1),
                 ),
                 const SizedBox(width: 8),
                 _buildFilterPill(
@@ -345,7 +361,8 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
                   label: 'All Methods',
                   isSelected: methodFilter == null,
                   onTap: () =>
-                      ref.read(paymentMethodFilterProvider.notifier).state = null,
+                      ref.read(paymentMethodFilterProvider.notifier).state =
+                          null,
                 ),
                 const SizedBox(width: 8),
                 ...PaymentMethod.values.map((m) {
@@ -355,9 +372,9 @@ class _PaymentsListScreenState extends ConsumerState<PaymentsListScreen> {
                       context: context,
                       label: m.displayName,
                       isSelected: methodFilter == m,
-                      onTap: () => ref
-                          .read(paymentMethodFilterProvider.notifier)
-                          .state = methodFilter == m ? null : m,
+                      onTap: () =>
+                          ref.read(paymentMethodFilterProvider.notifier).state =
+                              methodFilter == m ? null : m,
                     ),
                   );
                 }),

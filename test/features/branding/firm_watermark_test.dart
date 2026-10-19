@@ -217,7 +217,9 @@ void main() {
       );
     }
 
-    testWidgets('renders firm watermark for lawyer role', (tester) async {
+    testWidgets('does NOT render firm watermark on pages for lawyer role', (
+      tester,
+    ) async {
       final customTheme = FirmTheme(
         firmName: 'Veritas Legal Chambers',
         primaryColor: const Color(0xFF0F5132),
@@ -243,9 +245,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Workspace Child Screen'), findsOneWidget);
-      // Firm watermark must be rendered in the background for lawyer/advocate
-      expect(find.byType(FirmWatermarkBackground), findsWidgets);
-      expect(find.text('VERITAS LEGAL CHAMBERS'), findsWidgets);
+      // Firm watermark has been removed across all pages as requested
+      expect(find.byType(FirmWatermarkBackground), findsNothing);
     });
 
     testWidgets('does NOT render firm watermark for super admin role', (

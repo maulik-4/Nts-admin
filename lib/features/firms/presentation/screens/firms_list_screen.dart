@@ -546,7 +546,10 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                 }
               } catch (e) {
                 if (context.mounted) {
-                  AppAlerts.showError(context, 'Failed to update block status: $e');
+                  AppAlerts.showError(
+                    context,
+                    'Failed to update block status: $e',
+                  );
                 }
               }
             },
@@ -889,7 +892,10 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                   : () async {
                       final userId = int.tryParse(userIdCtrl.text.trim());
                       if (userId == null) {
-                        AppAlerts.showError(context, 'Please enter a valid User ID');
+                        AppAlerts.showError(
+                          context,
+                          'Please enter a valid User ID',
+                        );
                         return;
                       }
 
@@ -908,7 +914,10 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                       } catch (e) {
                         setDialogState(() => isSubmitting = false);
                         if (context.mounted) {
-                          AppAlerts.showError(context, 'Failed to change admin: $e');
+                          AppAlerts.showError(
+                            context,
+                            'Failed to change admin: $e',
+                          );
                         }
                       }
                     },
@@ -1299,7 +1308,10 @@ class _FirmsListScreenState extends ConsumerState<FirmsListScreen> {
                             });
                         if (context.mounted) {
                           Navigator.pop(ctx);
-                          AppAlerts.showSuccess(context, 'Firm updated successfully');
+                          AppAlerts.showSuccess(
+                            context,
+                            'Firm updated successfully',
+                          );
                         }
                       } catch (e) {
                         setDialogState(() => isSubmitting = false);

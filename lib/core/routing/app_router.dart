@@ -44,6 +44,15 @@ import '../../features/tasks/presentation/screens/task_detail_screen.dart';
 import '../../features/tasks/presentation/screens/task_form_screen.dart';
 import '../../features/tasks/presentation/screens/tasks_list_screen.dart';
 import '../../features/team/presentation/screens/team_list_screen.dart';
+import '../../features/client_portal/presentation/screens/client_accept_invite_screen.dart';
+import '../../features/client_portal/presentation/screens/client_cases_screen.dart';
+import '../../features/client_portal/presentation/screens/client_dashboard_screen.dart';
+import '../../features/client_portal/presentation/screens/client_document_preview_screen.dart';
+import '../../features/client_portal/presentation/screens/client_documents_screen.dart';
+import '../../features/client_portal/presentation/screens/client_hearings_screen.dart';
+import '../../features/client_portal/presentation/screens/client_portal_shell.dart';
+import '../../features/subscriptions/presentation/screens/firm_suspended_screen.dart';
+import '../../features/subscriptions/presentation/screens/subscription_expired_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final routerNotifier = ref.watch(routerNotifierProvider);
@@ -70,6 +79,108 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final token = state.uri.queryParameters['token'];
           return AcceptInviteScreen(initialToken: token);
+        },
+      ),
+
+      // Client Portal Routes
+      GoRoute(
+        path: '/client/login',
+        builder: (context, state) =>
+            const LoginScreen(initialType: LoginType.client),
+      ),
+      GoRoute(
+        path: '/client/accept-invite',
+        builder: (context, state) {
+          final token = state.uri.queryParameters['token'];
+          return ClientAcceptInviteScreen(initialToken: token);
+        },
+      ),
+      GoRoute(
+        path: '/client',
+        redirect: (context, state) => '/client/dashboard',
+      ),
+
+      // Client Portal Stateful Shell with 4 Dedicated Primary Destinations
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return ClientPortalShell(navigationShell: navigationShell);
+        },
+        branches: [
+          // Branch 0: Dashboard
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/client/dashboard',
+                builder: (context, state) => const ClientDashboardScreen(),
+              ),
+            ],
+          ),
+
+          // Branch 1: Hearings
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/client/hearings',
+                builder: (context, state) => const ClientHearingsScreen(),
+              ),
+            ],
+          ),
+
+          // Branch 2: Cases
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/client/cases',
+                builder: (context, state) => const ClientCasesScreen(),
+              ),
+            ],
+          ),
+
+          // Branch 3: Documents
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/client/documents',
+                builder: (context, state) => const ClientDocumentsScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+
+      // Direct Document Preview Route for deep linking and sharing
+      GoRoute(
+        path: '/client/documents/:id',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+          final extra = state.extra as Map<String, dynamic>?;
+          return ClientDocumentPreviewScreen(
+            documentId: id,
+            title: extra?['title']?.toString() ?? 'Document #$id',
+            fileExt: extra?['fileExt']?.toString(),
+          );
+        },
+      ),
+
+      // Paywall & Account Barrier Routes
+      GoRoute(
+        path: '/firm-blocked',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return FirmSuspendedScreen(
+            message: extra?['message']?.toString(),
+            requestId: extra?['requestId']?.toString(),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/subscription-expired',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return SubscriptionExpiredScreen(
+            message: extra?['message']?.toString(),
+            requestId: extra?['requestId']?.toString(),
+          );
         },
       ),
 

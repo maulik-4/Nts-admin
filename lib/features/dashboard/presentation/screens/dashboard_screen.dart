@@ -202,7 +202,9 @@ class DashboardScreen extends ConsumerWidget {
                         color: const Color(0xFF10B981),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                          color: isDark
+                              ? const Color(0xFF1E293B)
+                              : Colors.white,
                           width: 1.5,
                         ),
                       ),
@@ -223,12 +225,7 @@ class DashboardScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Role-Specific Welcome Banner matching UI image
-              _buildRoleBanner(
-                context,
-                userRole,
-                user,
-                firmTheme.firmName,
-              ),
+              _buildRoleBanner(context, userRole, user, firmTheme.firmName),
               const SizedBox(height: 18),
 
               // Role-Specific Dashboard View
@@ -275,13 +272,18 @@ class DashboardScreen extends ConsumerWidget {
         icon = Icons.task_alt_rounded;
         subtitle = 'Operations & Tasks Queue • Client Intake';
         break;
+      case UserRole.client:
+        icon = Icons.account_circle_outlined;
+        subtitle = 'Client Portal • Case Hearings & Documents';
+        break;
       case UserRole.unknown:
         icon = Icons.person_rounded;
         subtitle = 'Workspace Member';
         break;
     }
 
-    final displayName = firmName ?? user?.firmName ?? (user?.username ?? 'apex');
+    final displayName =
+        firmName ?? user?.firmName ?? (user?.username ?? 'apex');
 
     return Container(
       decoration: BoxDecoration(
@@ -433,6 +435,9 @@ class DashboardScreen extends ConsumerWidget {
         break;
       case UserRole.staff:
         label = 'STAFF';
+        break;
+      case UserRole.client:
+        label = 'CLIENT';
         break;
       case UserRole.unknown:
         label = 'MEMBER';
@@ -900,7 +905,7 @@ class DashboardScreen extends ConsumerWidget {
                     label: 'New Case',
                     iconColor: const Color(0xFF2563EB),
                     iconBgColor: const Color(0xFFEFF6FF),
-                    onTap: () => context.push('/app/cases/create'),
+                    onTap: () => _showServiceLockedDialog(context, 'New Case'),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -922,7 +927,8 @@ class DashboardScreen extends ConsumerWidget {
                     label: 'Hearing',
                     iconColor: const Color(0xFFF59E0B),
                     iconBgColor: const Color(0xFFFFFBEB),
-                    onTap: () => context.push('/app/hearings/create'),
+                    onTap: () =>
+                        _showServiceLockedDialog(context, 'Hearings Agenda'),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -1037,7 +1043,7 @@ class DashboardScreen extends ConsumerWidget {
                     minWidth: 78,
                     icon: Icons.add_circle_outline,
                     label: 'New Case',
-                    onTap: () => context.push('/app/cases/create'),
+                    onTap: () => _showServiceLockedDialog(context, 'New Case'),
                   ),
                   const SizedBox(width: 8),
                   _buildQuickActionButton(
@@ -1053,7 +1059,8 @@ class DashboardScreen extends ConsumerWidget {
                     minWidth: 78,
                     icon: Icons.event_available_outlined,
                     label: 'Hearing',
-                    onTap: () => context.push('/app/hearings/create'),
+                    onTap: () =>
+                        _showServiceLockedDialog(context, 'Hearings Agenda'),
                   ),
                   const SizedBox(width: 8),
                   _buildQuickActionButton(
@@ -1061,7 +1068,7 @@ class DashboardScreen extends ConsumerWidget {
                     minWidth: 78,
                     icon: Icons.task_alt_outlined,
                     label: 'New Task',
-                    onTap: () => context.push('/app/tasks/create'),
+                    onTap: () => _showServiceLockedDialog(context, 'New Task'),
                   ),
                 ],
               ),
@@ -1156,7 +1163,7 @@ class DashboardScreen extends ConsumerWidget {
                     context,
                     icon: Icons.task_alt_outlined,
                     label: 'Create Task',
-                    onTap: () => context.push('/app/tasks/create'),
+                    onTap: () => _showServiceLockedDialog(context, 'New Task'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -1174,7 +1181,8 @@ class DashboardScreen extends ConsumerWidget {
                     context,
                     icon: Icons.event_available_outlined,
                     label: 'Court Schedule',
-                    onTap: () => context.push('/app/hearings'),
+                    onTap: () =>
+                        _showServiceLockedDialog(context, 'Hearings Agenda'),
                   ),
                 ),
               ],
@@ -1530,7 +1538,10 @@ class DashboardScreen extends ConsumerWidget {
                 onTap: () => context.push('/app/hearings'),
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 4,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -1621,7 +1632,8 @@ class DashboardScreen extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: isDark
                                 ? const Color(0xFF334155).withValues(alpha: 0.5)
-                                : const Color(0xFFFEF3C7).withValues(alpha: 0.8),
+                                : const Color(0xFFFEF3C7)
+                                      .withValues(alpha: 0.8),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -1742,7 +1754,10 @@ class DashboardScreen extends ConsumerWidget {
                 onTap: () => context.push('/app/cases'),
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 4,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -1896,6 +1911,43 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
+  void _showServiceLockedDialog(BuildContext context, String serviceName) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.lock_outline_rounded, color: Color(0xFFF59E0B)),
+            const SizedBox(width: 8),
+            Expanded(child: Text('$serviceName Locked')),
+          ],
+        ),
+        content: Text(
+          '$serviceName functionality is locked under your active tier. Please review your Subscription & Quotas to access or upgrade.',
+          style: const TextStyle(fontSize: 13.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.push('/app/more/subscriptions');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0F1F38),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('View Subscriptions'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildQuickActionButton(
     BuildContext context, {
     required IconData icon,
@@ -1907,7 +1959,8 @@ class DashboardScreen extends ConsumerWidget {
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final effIconColor = iconColor ??
+    final effIconColor =
+        iconColor ??
         (isDark ? theme.colorScheme.secondary : theme.colorScheme.primary);
     final effBgColor = iconBgColor ?? effIconColor.withValues(alpha: 0.12);
 
@@ -1922,7 +1975,8 @@ class DashboardScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF1E3A8A).withValues(alpha: isDark ? 0.2 : 0.04),
+              color: const Color(0xFF1E3A8A)
+                  .withValues(alpha: isDark ? 0.2 : 0.04),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -1947,16 +2001,14 @@ class DashboardScreen extends ConsumerWidget {
                     color: effBgColor,
                     borderRadius: BorderRadius.circular(9),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 18,
-                    color: effIconColor,
-                  ),
+                  child: Icon(icon, size: 18, color: effIconColor),
                 ),
                 Icon(
                   Icons.chevron_right_rounded,
                   size: 16,
-                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                  color: isDark
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF94A3B8),
                 ),
               ],
             ),

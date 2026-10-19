@@ -34,7 +34,9 @@ class AppUpdateService {
         );
       }
     } catch (e) {
-      debugPrint('[APP_UPDATE] Version check endpoint not reachable or using offline defaults: $e');
+      debugPrint(
+        '[APP_UPDATE] Version check endpoint not reachable or using offline defaults: $e',
+      );
     }
 
     // Default to up-to-date if server check fails or endpoint is not active yet

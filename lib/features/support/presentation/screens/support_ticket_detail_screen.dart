@@ -167,9 +167,14 @@ class _SupportTicketDetailScreenState
                             Row(
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: isDark ? Colors.white10 : const Color(0xFFF1F5F9),
+                                    color: isDark
+                                        ? Colors.white10
+                                        : const Color(0xFFF1F5F9),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
@@ -177,7 +182,9 @@ class _SupportTicketDetailScreenState
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
-                                      color: isDark ? Colors.white70 : LexColors.slatePrimary,
+                                      color: isDark
+                                          ? Colors.white70
+                                          : LexColors.slatePrimary,
                                     ),
                                   ),
                                 ),
@@ -223,7 +230,9 @@ class _SupportTicketDetailScreenState
                                     vertical: 3,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: ticket.priorityColor.withValues(alpha: 0.12),
+                                    color: ticket.priorityColor.withValues(
+                                      alpha: 0.12,
+                                    ),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
@@ -258,7 +267,9 @@ class _SupportTicketDetailScreenState
                             ),
                             const SizedBox(height: 14),
                             Divider(
-                              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                              color: isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFE2E8F0),
                             ),
                             const SizedBox(height: 8),
                             Wrap(
@@ -268,7 +279,11 @@ class _SupportTicketDetailScreenState
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.category_outlined, size: 13, color: Colors.grey),
+                                    const Icon(
+                                      Icons.category_outlined,
+                                      size: 13,
+                                      color: Colors.grey,
+                                    ),
                                     const SizedBox(width: 4),
                                     Text(
                                       'Category: ${ticket.category.toUpperCase()}',
@@ -284,7 +299,11 @@ class _SupportTicketDetailScreenState
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.calendar_today_outlined, size: 13, color: Colors.grey),
+                                      const Icon(
+                                        Icons.calendar_today_outlined,
+                                        size: 13,
+                                        color: Colors.grey,
+                                      ),
                                       const SizedBox(width: 4),
                                       Text(
                                         'Opened: ${DateFormat.yMMMd().format(ticket.createdAt!)}',
@@ -344,7 +363,9 @@ class _SupportTicketDetailScreenState
                           Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: LexColors.slatePrimary.withValues(alpha: 0.1),
+                              color: LexColors.slatePrimary.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(
@@ -391,11 +412,12 @@ class _SupportTicketDetailScreenState
               // Bottom Reply Box
               if (!ticket.isResolved)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? LexColors.surfaceDark
-                        : Colors.white,
+                    color: isDark ? LexColors.surfaceDark : Colors.white,
                     border: Border(
                       top: BorderSide(
                         color: isDark
@@ -434,7 +456,10 @@ class _SupportTicketDetailScreenState
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Icon(Icons.send_rounded, color: Colors.white),
+                                : const Icon(
+                                    Icons.send_rounded,
+                                    color: Colors.white,
+                                  ),
                           ),
                         ),
                       ],

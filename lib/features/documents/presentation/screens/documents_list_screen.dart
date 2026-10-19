@@ -98,10 +98,14 @@ class _DocumentsListScreenState extends ConsumerState<DocumentsListScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                color: isDark
+                    ? const Color(0xFF1E293B)
+                    : const Color(0xFFEFF6FF),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFDBEAFE),
                 ),
               ),
               child: Text(
@@ -155,19 +159,24 @@ class _DocumentsListScreenState extends ConsumerState<DocumentsListScreen> {
                 hintText: 'Search documents by filename or case...',
                 hintStyle: TextStyle(
                   fontSize: 13,
-                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                  color: isDark
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF94A3B8),
                 ),
                 prefixIcon: Icon(
                   Icons.search_rounded,
                   size: 20,
-                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear_rounded, size: 18),
                         onPressed: () {
                           _searchController.clear();
-                          ref.read(documentSearchQueryProvider.notifier).state = '';
+                          ref.read(documentSearchQueryProvider.notifier).state =
+                              '';
                           setState(() {});
                         },
                       )
@@ -181,13 +190,17 @@ class _DocumentsListScreenState extends ConsumerState<DocumentsListScreen> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -207,16 +220,19 @@ class _DocumentsListScreenState extends ConsumerState<DocumentsListScreen> {
               if (cases.isEmpty) return const SizedBox.shrink();
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 child: Row(
                   children: [
                     _buildFilterPill(
                       context: context,
                       label: 'All Cases',
                       isSelected: selectedCaseId == null,
-                      onTap: () => ref
-                          .read(documentCaseFilterProvider.notifier)
-                          .state = null,
+                      onTap: () =>
+                          ref.read(documentCaseFilterProvider.notifier).state =
+                              null,
                     ),
                     const SizedBox(width: 8),
                     ...cases.map((c) {
@@ -224,11 +240,16 @@ class _DocumentsListScreenState extends ConsumerState<DocumentsListScreen> {
                         padding: const EdgeInsets.only(right: 8),
                         child: _buildFilterPill(
                           context: context,
-                          label: c.caseNumber.isNotEmpty ? c.caseNumber : c.title,
+                          label: c.caseNumber.isNotEmpty
+                              ? c.caseNumber
+                              : c.title,
                           isSelected: selectedCaseId == c.id,
-                          onTap: () => ref
-                              .read(documentCaseFilterProvider.notifier)
-                              .state = selectedCaseId == c.id ? null : c.id,
+                          onTap: () =>
+                              ref
+                                  .read(documentCaseFilterProvider.notifier)
+                                  .state = selectedCaseId == c.id
+                              ? null
+                              : c.id,
                         ),
                       );
                     }),
@@ -254,8 +275,7 @@ class _DocumentsListScreenState extends ConsumerState<DocumentsListScreen> {
                         SizedBox(height: 60),
                         EmptyStateWidget(
                           title: 'No Documents Found',
-                          message:
-                              'Upload your first legal document or clear active filters.',
+                          message: 'Upload your first legal document or clear active filters.',
                           icon: Icons.folder_shared_outlined,
                         ),
                       ],

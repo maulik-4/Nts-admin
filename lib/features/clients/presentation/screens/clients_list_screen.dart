@@ -105,12 +105,16 @@ class ClientsListScreen extends ConsumerWidget {
                 hintText: 'Search by name, phone, city...',
                 hintStyle: TextStyle(
                   fontSize: 13,
-                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                  color: isDark
+                      ? const Color(0xFF64748B)
+                      : const Color(0xFF94A3B8),
                 ),
                 prefixIcon: Icon(
                   Icons.search_rounded,
                   size: 20,
-                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -121,13 +125,17 @@ class ClientsListScreen extends ConsumerWidget {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -152,7 +160,8 @@ class ClientsListScreen extends ConsumerWidget {
                   label: 'All Clients',
                   isSelected: activeFilter == null,
                   onTap: () =>
-                      ref.read(clientActiveFilterProvider.notifier).state = null,
+                      ref.read(clientActiveFilterProvider.notifier).state =
+                          null,
                 ),
                 const SizedBox(width: 8),
                 _buildFilterPill(
@@ -160,7 +169,8 @@ class ClientsListScreen extends ConsumerWidget {
                   label: 'Active',
                   isSelected: activeFilter == true,
                   onTap: () =>
-                      ref.read(clientActiveFilterProvider.notifier).state = true,
+                      ref.read(clientActiveFilterProvider.notifier).state =
+                          true,
                 ),
                 const SizedBox(width: 8),
                 _buildFilterPill(
@@ -168,7 +178,8 @@ class ClientsListScreen extends ConsumerWidget {
                   label: 'Inactive',
                   isSelected: activeFilter == false,
                   onTap: () =>
-                      ref.read(clientActiveFilterProvider.notifier).state = false,
+                      ref.read(clientActiveFilterProvider.notifier).state =
+                          false,
                 ),
               ],
             ),
@@ -183,8 +194,7 @@ class ClientsListScreen extends ConsumerWidget {
                   return EmptyStateWidget(
                     icon: Icons.people_outline,
                     title: 'No Clients Found',
-                    message:
-                        'No client profiles match your search criteria or active filter.',
+                    message: 'No client profiles match your search criteria or active filter.',
                     actionLabel: 'Add New Client',
                     onAction: () => context.push('/app/clients/create'),
                   );

@@ -70,7 +70,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     });
 
     try {
-      await ref.read(documentsNotifierProvider.notifier).uploadDocument(
+      await ref
+          .read(documentsNotifierProvider.notifier)
+          .uploadDocument(
             caseId: _selectedCaseId!,
             filePath: _pickedFile!.path!,
             fileName: _pickedFile!.name,
@@ -128,12 +130,19 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                                color: isDark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFEFF6FF),
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
-                                  color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                                  color: isDark
+                                      ? const Color(0xFF334155)
+                                      : const Color(0xFFDBEAFE),
                                 ),
                               ),
                               child: const Text(
@@ -154,7 +163,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -162,7 +173,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                           'Attach petitions, evidence, contracts, or court transcripts to an active case.',
                           style: TextStyle(
                             fontSize: 12.5,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -173,7 +186,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                            color: isDark
+                                ? const Color(0xFFCBD5E1)
+                                : const Color(0xFF334155),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -185,26 +200,39 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                                 hintText: 'Select case',
                                 hintStyle: TextStyle(
                                   fontSize: 13,
-                                  color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                                  color: isDark
+                                      ? const Color(0xFF64748B)
+                                      : const Color(0xFF94A3B8),
                                 ),
                                 prefixIcon: Icon(
                                   Icons.balance_rounded,
                                   size: 19,
-                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  color: isDark
+                                      ? const Color(0xFF94A3B8)
+                                      : const Color(0xFF64748B),
                                 ),
                                 filled: true,
-                                fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                fillColor: isDark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFF8FAFC),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(
-                                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                    color: isDark
+                                        ? const Color(0xFF334155)
+                                        : const Color(0xFFE2E8F0),
                                   ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide(
-                                    color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                    color: isDark
+                                        ? const Color(0xFF334155)
+                                        : const Color(0xFFE2E8F0),
                                   ),
                                 ),
                               ),
@@ -243,7 +271,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                            color: isDark
+                                ? const Color(0xFFCBD5E1)
+                                : const Color(0xFF334155),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -251,14 +281,21 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                           onTap: _isUploading ? null : _pickFile,
                           child: Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 28,
+                              horizontal: 20,
+                            ),
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                              color: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFF8FAFC),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: _pickedFile != null
                                     ? const Color(0xFF10B981)
-                                    : (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
+                                    : (isDark
+                                          ? const Color(0xFF334155)
+                                          : const Color(0xFFCBD5E1)),
                                 width: 1.5,
                               ),
                             ),
@@ -285,14 +322,14 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
-                                  _pickedFile != null
-                                      ? _pickedFile!.name
-                                      : 'Tap to browse files or drop document here',
+                                  _pickedFile != null ? _pickedFile!.name : 'Tap to browse files or drop document here',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A),
                                   ),
                                 ),
                                 const SizedBox(height: 4),
@@ -303,28 +340,47 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                    color: isDark
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B),
                                   ),
                                 ),
                                 const SizedBox(height: 14),
                                 ElevatedButton.icon(
                                   onPressed: _isUploading ? null : _pickFile,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: isDark ? const Color(0xFF334155) : Colors.white,
-                                    foregroundColor: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    backgroundColor: isDark
+                                        ? const Color(0xFF334155)
+                                        : Colors.white,
+                                    foregroundColor: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A),
                                     side: BorderSide(
-                                      color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
+                                      color: isDark
+                                          ? const Color(0xFF475569)
+                                          : const Color(0xFFCBD5E1),
                                     ),
                                     elevation: 0,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
                                   ),
-                                  icon: const Icon(Icons.folder_open_rounded, size: 16),
+                                  icon: const Icon(
+                                    Icons.folder_open_rounded,
+                                    size: 16,
+                                  ),
                                   label: Text(
-                                    _pickedFile != null ? 'Change File' : 'Browse Files',
-                                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5),
+                                    _pickedFile != null
+                                        ? 'Change File'
+                                        : 'Browse Files',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 12.5,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -338,12 +394,19 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
 
                   // Security Assurance Box
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                      color: isDark
+                          ? const Color(0xFF1E293B)
+                          : const Color(0xFFF1F5F9),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        color: isDark
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFE2E8F0),
                       ),
                     ),
                     child: Row(
@@ -359,7 +422,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                             'End-to-end encrypted legal document storage adhering to Bar compliance.',
                             style: TextStyle(
                               fontSize: 11.5,
-                              color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                              color: isDark
+                                  ? const Color(0xFFCBD5E1)
+                                  : const Color(0xFF475569),
                             ),
                           ),
                         ),
@@ -372,7 +437,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                   if (_isUploading) ...[
                     LinearProgressIndicator(
                       value: _uploadProgress > 0 ? _uploadProgress : null,
-                      backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      backgroundColor: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                       color: const Color(0xFF0F1F38),
                     ),
                     const SizedBox(height: 8),
@@ -381,7 +448,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        color: isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B),
                       ),
                     ),
                     const SizedBox(height: 16),

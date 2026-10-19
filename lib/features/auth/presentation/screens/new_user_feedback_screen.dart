@@ -16,7 +16,8 @@ class NewUserFeedbackScreen extends ConsumerStatefulWidget {
   const NewUserFeedbackScreen({super.key});
 
   @override
-  ConsumerState<NewUserFeedbackScreen> createState() => _NewUserFeedbackScreenState();
+  ConsumerState<NewUserFeedbackScreen> createState() =>
+      _NewUserFeedbackScreenState();
 }
 
 class _NewUserFeedbackScreenState extends ConsumerState<NewUserFeedbackScreen> {
@@ -137,19 +138,18 @@ class _NewUserFeedbackScreenState extends ConsumerState<NewUserFeedbackScreen> {
                   Text(
                     'Get Started with Vidhanta',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                    style: Theme.of(context).textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Provide your details to connect with us and set up your legal firm workspace.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: isDark
-                              ? LexColors.textSecondaryDark
-                              : LexColors.textSecondaryLight,
-                        ),
+                      color: isDark
+                          ? LexColors.textSecondaryDark
+                          : LexColors.textSecondaryLight,
+                    ),
                   ),
                   const SizedBox(height: 24),
 
@@ -255,8 +255,7 @@ class _NewUserFeedbackScreenState extends ConsumerState<NewUserFeedbackScreen> {
                         LexTextField(
                           controller: _messageController,
                           label: 'Message / Inquiry *',
-                          hintText:
-                              'Describe your legal practice, requirements, or questions...',
+                          hintText: 'Describe your legal practice, requirements, or questions...',
                           prefixIcon: Icons.chat_bubble_outline,
                           maxLines: 4,
                           textInputAction: TextInputAction.newline,

@@ -11,6 +11,8 @@ class TeamMember {
   final int? firmId;
   final bool isSuperuser;
   final DateTime? joined;
+  final String? phone;
+  final String? name;
 
   const TeamMember({
     required this.id,
@@ -21,6 +23,8 @@ class TeamMember {
     this.firmId,
     this.isSuperuser = false,
     this.joined,
+    this.phone,
+    this.name,
   });
 
   bool get isSuperAdmin =>
@@ -107,6 +111,13 @@ class TeamMember {
       firmId: parsedFirmId,
       isSuperuser: isSuper,
       joined: joinedDate,
+      phone:
+          (json['phone'] ??
+                  json['phone_number'] ??
+                  json['mobile'] ??
+                  json['contact'])
+              ?.toString(),
+      name: (json['name'] ?? json['full_name'])?.toString(),
     );
   }
 
@@ -119,5 +130,7 @@ class TeamMember {
     'firm_id': firmId,
     'is_superuser': isSuperuser,
     'joined': joined?.toIso8601String(),
+    'phone': phone,
+    'name': name,
   };
 }

@@ -11,10 +11,7 @@ import 'lex_button.dart';
 class ForceUpdateDialog extends ConsumerWidget {
   final AppUpdateInfo updateInfo;
 
-  const ForceUpdateDialog({
-    super.key,
-    required this.updateInfo,
-  });
+  const ForceUpdateDialog({super.key, required this.updateInfo});
 
   /// Static helper to display the non-dismissible update alert dialog.
   static Future<void> show(BuildContext context, AppUpdateInfo updateInfo) {
@@ -36,9 +33,7 @@ class ForceUpdateDialog extends ConsumerWidget {
         // Strict blocking: app cannot be dismissed without updating
       },
       child: Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 24,
         insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: ConstrainedBox(
@@ -80,9 +75,9 @@ class ForceUpdateDialog extends ConsumerWidget {
                       : 'App Update Required',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.3,
-                      ),
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.3,
+                  ),
                 ),
                 const SizedBox(height: 8),
 
@@ -121,11 +116,11 @@ class ForceUpdateDialog extends ConsumerWidget {
                   updateInfo.message,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isDark
-                            ? LexColors.textSecondaryDark
-                            : LexColors.textSecondaryLight,
-                        height: 1.4,
-                      ),
+                    color: isDark
+                        ? LexColors.textSecondaryDark
+                        : LexColors.textSecondaryLight,
+                    height: 1.4,
+                  ),
                 ),
 
                 // Release notes list (if available)

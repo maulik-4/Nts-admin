@@ -126,18 +126,27 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
               color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
             ),
             filled: true,
-            fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            fillColor: isDark
+                ? const Color(0xFF1E293B)
+                : const Color(0xFFF8FAFC),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                color: isDark
+                    ? const Color(0xFF334155)
+                    : const Color(0xFFE2E8F0),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                color: isDark
+                    ? const Color(0xFF334155)
+                    : const Color(0xFFE2E8F0),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -199,7 +208,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                   // Profile Header Card with Camera Badge
                   LexCard(
                     borderRadius: 20,
-                    padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 22,
+                      horizontal: 16,
+                    ),
                     child: Column(
                       children: [
                         Stack(
@@ -237,7 +249,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).colorScheme.primary,
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 2),
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
                                 ),
                                 child: const Icon(
                                   Icons.camera_alt_rounded,
@@ -254,7 +269,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                           style: TextStyle(
                             fontSize: 19,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                           ),
                         ),
                         const SizedBox(height: 3),
@@ -262,14 +279,19 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                           user?.email ?? '',
                           style: TextStyle(
                             fontSize: 13,
-                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                         const SizedBox(height: 10),
                         RoleBadge(
                           role: userRole,
                           fontSize: 12,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 5,
+                          ),
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ],
@@ -387,17 +409,20 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                           const SizedBox(height: 14),
                           _buildDetailRow(
                             'Firm Name',
-                            _profileData!['firm']['name']?.toString() ?? 'LexTech Legal',
+                            _profileData!['firm']['name']?.toString() ??
+                                'LexTech Legal',
                           ),
                           const Divider(height: 18),
                           _buildDetailRow(
                             'Address',
-                            _profileData!['firm']['address']?.toString() ?? 'Headquarters',
+                            _profileData!['firm']['address']?.toString() ??
+                                'Headquarters',
                           ),
                           const Divider(height: 18),
                           _buildDetailRow(
                             'Firm Phone',
-                            _profileData!['firm']['phone']?.toString() ?? 'Direct line',
+                            _profileData!['firm']['phone']?.toString() ??
+                                'Direct line',
                           ),
                         ],
                       ),
@@ -432,7 +457,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                         const SizedBox(height: 14),
                         _buildDetailRow('Account ID', '#${user?.id ?? 1}'),
                         const Divider(height: 18),
-                        _buildDetailRow('Role Authority', userRole.displayTitle),
+                        _buildDetailRow(
+                          'Role Authority',
+                          userRole.displayTitle,
+                        ),
                         const Divider(height: 18),
                         _buildDetailRow('Status', 'Active Verified Account'),
                       ],
@@ -458,10 +486,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
         ),
         Text(
           value,
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 13,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
         ),
       ],
     );

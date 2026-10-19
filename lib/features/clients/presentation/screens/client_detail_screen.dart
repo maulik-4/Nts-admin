@@ -9,8 +9,12 @@ import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../../shared/widgets/status_badge.dart';
 import '../../../cases/presentation/providers/cases_notifier.dart';
+import '../../../communications/presentation/widgets/communication_preference_dialog.dart';
+import '../../../communications/presentation/widgets/whatsapp_composer_modal.dart';
+import '../../../documents/presentation/widgets/document_share_dialog.dart';
 import '../../data/repositories/clients_repository.dart';
 import '../providers/clients_notifier.dart';
+import '../widgets/invite_client_dialog.dart';
 
 final clientDetailProvider = FutureProvider.family<dynamic, int>((
   ref,
@@ -49,7 +53,10 @@ class ClientDetailScreen extends ConsumerWidget {
             onPressed: () => context.push('/app/clients/$clientId/edit'),
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFEF4444)),
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              color: Color(0xFFEF4444),
+            ),
             tooltip: 'Delete Client',
             onPressed: () => _confirmDelete(context, ref),
           ),
@@ -91,9 +98,13 @@ class ClientDetailScreen extends ConsumerWidget {
                             height: 52,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                              color: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFEFF6FF),
                               border: Border.all(
-                                color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                                color: isDark
+                                    ? const Color(0xFF334155)
+                                    : const Color(0xFFDBEAFE),
                               ),
                             ),
                             child: Center(
@@ -119,7 +130,9 @@ class ClientDetailScreen extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w800,
-                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A),
                                   ),
                                 ),
                                 const SizedBox(height: 3),
@@ -127,7 +140,9 @@ class ClientDetailScreen extends ConsumerWidget {
                                   'Client since $dateFormatted',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                    color: isDark
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B),
                                   ),
                                 ),
                               ],
@@ -205,6 +220,98 @@ class ClientDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
 
+                // Portal & Client Communication Actions Card
+                LexCard(
+                  borderRadius: 18,
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.handshake_outlined,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Client Portal & Communications',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: [
+                          OutlinedButton.icon(
+                            icon: const Icon(
+                              Icons.person_add_alt_1_rounded,
+                              size: 16,
+                            ),
+                            label: const Text('Invite to Portal'),
+                            onPressed: () {
+                              InviteClientDialog.show(
+                                context,
+                                initialEmail: client.email,
+                                initialName: client.name,
+                              );
+                            },
+                          ),
+                          OutlinedButton.icon(
+                            icon: const Icon(
+                              Icons.folder_shared_outlined,
+                              size: 16,
+                            ),
+                            label: const Text('Shared Documents'),
+                            onPressed: () {
+                              DocumentShareDialog.show(
+                                context,
+                                clientId: client.id,
+                                clientName: client.name,
+                              );
+                            },
+                          ),
+                          OutlinedButton.icon(
+                            icon: const Icon(
+                              Icons.chat_bubble_rounded,
+                              size: 16,
+                              color: Color(0xFF25D366),
+                            ),
+                            label: const Text('Send WhatsApp'),
+                            onPressed: () {
+                              WhatsAppComposerModal.show(
+                                context,
+                                clientId: client.id,
+                                recipientName: client.name,
+                                recipientNumber: client.phone,
+                              );
+                            },
+                          ),
+                          OutlinedButton.icon(
+                            icon: const Icon(Icons.tune_rounded, size: 16),
+                            label: const Text('Preferences'),
+                            onPressed: () {
+                              CommunicationPreferenceDialog.show(
+                                context,
+                                clientId: client.id,
+                                clientName: client.name,
+                                phoneNumber: client.phone,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
                 // Associated Cases Card
                 LexCard(
                   borderRadius: 18,
@@ -233,11 +340,18 @@ class ClientDetailScreen extends ConsumerWidget {
                             ],
                           ),
                           TextButton.icon(
-                            onPressed: () => context.push(
-                              '/app/cases/create?clientId=$clientId',
+                            onPressed: () {
+                              AppAlerts.showWarning(
+                                context,
+                                'New Case creation is currently locked. Please review your Subscription & Quotas.',
+                              );
+                              context.push('/app/more/subscriptions');
+                            },
+                            icon: const Icon(
+                              Icons.lock_outline_rounded,
+                              size: 16,
                             ),
-                            icon: const Icon(Icons.add_rounded, size: 16),
-                            label: const Text('Add Case'),
+                            label: const Text('Add Case (Locked)'),
                           ),
                         ],
                       ),
@@ -249,7 +363,9 @@ class ClientDetailScreen extends ConsumerWidget {
                             'No cases linked to this client yet.',
                             style: TextStyle(
                               fontSize: 13,
-                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                              color: isDark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B),
                             ),
                           ),
                         )
@@ -265,19 +381,24 @@ class ClientDetailScreen extends ConsumerWidget {
                               onTap: () => context.push('/app/cases/${c.id}'),
                               borderRadius: BorderRadius.circular(8),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
                                 child: Row(
                                   children: [
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             c.title,
                                             style: TextStyle(
                                               fontSize: 13.5,
                                               fontWeight: FontWeight.w700,
-                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : const Color(0xFF0F172A),
                                             ),
                                           ),
                                           const SizedBox(height: 2),
@@ -285,13 +406,18 @@ class ClientDetailScreen extends ConsumerWidget {
                                             '${c.caseNumber} • ${c.courtName}',
                                             style: TextStyle(
                                               fontSize: 12,
-                                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                              color: isDark
+                                                  ? const Color(0xFF94A3B8)
+                                                  : const Color(0xFF64748B),
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    StatusBadge(status: c.status, showDot: true),
+                                    StatusBadge(
+                                      status: c.status,
+                                      showDot: true,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -382,7 +508,9 @@ class ClientDetailScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(true),
-            style: TextButton.styleFrom(foregroundColor: const Color(0xFFEF4444)),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFEF4444),
+            ),
             child: const Text('Delete'),
           ),
         ],

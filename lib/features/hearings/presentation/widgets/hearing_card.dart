@@ -41,10 +41,14 @@ class HearingCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                  color: isDark
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFEFF6FF),
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFDBEAFE),
                   ),
                 ),
                 child: Text(
@@ -72,7 +76,9 @@ class HearingCard extends StatelessWidget {
               fontSize: 15,
               fontWeight: FontWeight.w700,
               height: 1.25,
-              color: isDark ? LexColors.textPrimaryDark : const Color(0xFF0F172A),
+              color: isDark
+                  ? LexColors.textPrimaryDark
+                  : const Color(0xFF0F172A),
             ),
           ),
 
@@ -82,10 +88,14 @@ class HearingCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                color: isDark
+                    ? const Color(0xFF1E293B)
+                    : const Color(0xFFF8FAFC),
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFE2E8F0),
                 ),
               ),
               child: Row(
@@ -94,7 +104,9 @@ class HearingCard extends StatelessWidget {
                   Icon(
                     Icons.folder_open_rounded,
                     size: 13,
-                    color: isDark ? LexColors.accentGold : const Color(0xFF2563EB),
+                    color: isDark
+                        ? LexColors.accentGold
+                        : const Color(0xFF2563EB),
                   ),
                   const SizedBox(width: 5),
                   Flexible(
@@ -105,7 +117,9 @@ class HearingCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
-                        color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                        color: isDark
+                            ? const Color(0xFFCBD5E1)
+                            : const Color(0xFF334155),
                       ),
                     ),
                   ),
@@ -147,7 +161,9 @@ class HearingCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF1E293B),
+                              color: isDark
+                                  ? const Color(0xFFE2E8F0)
+                                  : const Color(0xFF1E293B),
                             ),
                           ),
                         ),
@@ -173,7 +189,9 @@ class HearingCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 12,
-                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+                              color: isDark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF475569),
                             ),
                           ),
                         ),
@@ -199,12 +217,16 @@ class HearingCard extends StatelessWidget {
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(
-                            hearing.courtName.isNotEmpty ? hearing.courtName : 'Courtroom',
+                            hearing.courtName.isNotEmpty
+                                ? hearing.courtName
+                                : 'Courtroom',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 12,
-                              color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                              color: isDark
+                                  ? const Color(0xFFCBD5E1)
+                                  : const Color(0xFF334155),
                             ),
                           ),
                         ),
@@ -213,7 +235,8 @@ class HearingCard extends StatelessWidget {
                     const SizedBox(height: 5),
 
                     // Judge
-                    if (hearing.judgeName != null && hearing.judgeName!.isNotEmpty)
+                    if (hearing.judgeName != null &&
+                        hearing.judgeName!.isNotEmpty)
                       Row(
                         children: [
                           const Icon(
@@ -229,7 +252,9 @@ class HearingCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 11.5,
-                                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                color: isDark
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF64748B),
                               ),
                             ),
                           ),

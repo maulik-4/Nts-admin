@@ -34,11 +34,11 @@ class UserFeedbackState {
 
 final userFeedbackNotifierProvider =
     StateNotifierProvider.autoDispose<UserFeedbackNotifier, UserFeedbackState>((
-  ref,
-) {
-  final repository = ref.watch(authRepositoryProvider);
-  return UserFeedbackNotifier(repository);
-});
+      ref,
+    ) {
+      final repository = ref.watch(authRepositoryProvider);
+      return UserFeedbackNotifier(repository);
+    });
 
 class UserFeedbackNotifier extends StateNotifier<UserFeedbackState> {
   final AuthRepository _repository;

@@ -36,6 +36,7 @@ class User {
   bool get isFirmAdmin => isAdmin;
   bool get isLawyer => !isSuperAdmin && userRole == UserRole.lawyer;
   bool get isStaff => !isSuperAdmin && userRole == UserRole.staff;
+  bool get isClient => userRole == UserRole.client;
 
   /// Firm scoping
   int? get firmId => firm;

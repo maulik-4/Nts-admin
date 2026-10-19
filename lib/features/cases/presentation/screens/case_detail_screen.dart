@@ -56,7 +56,10 @@ class CaseDetailScreen extends ConsumerWidget {
           CapabilityGate(
             capability: UserCapability.deleteCases,
             child: IconButton(
-              icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFEF4444)),
+              icon: const Icon(
+                Icons.delete_outline_rounded,
+                color: Color(0xFFEF4444),
+              ),
               tooltip: 'Delete Case',
               onPressed: () => _confirmDelete(context, ref),
             ),
@@ -101,10 +104,14 @@ class CaseDetailScreen extends ConsumerWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                              color: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                color: isDark
+                                    ? const Color(0xFF334155)
+                                    : const Color(0xFFE2E8F0),
                               ),
                             ),
                             child: Text(
@@ -113,7 +120,9 @@ class CaseDetailScreen extends ConsumerWidget {
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.3,
-                                color: isDark ? LexColors.accentGold : Theme.of(context).colorScheme.primary,
+                                color: isDark
+                                    ? LexColors.accentGold
+                                    : Theme.of(context).colorScheme.primary,
                               ),
                             ),
                           ),
@@ -127,7 +136,9 @@ class CaseDetailScreen extends ConsumerWidget {
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           height: 1.25,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -135,13 +146,17 @@ class CaseDetailScreen extends ConsumerWidget {
                         'Category: ${caseItem.caseType.toUpperCase()} • Filed on $createdFormatted',
                         style: TextStyle(
                           fontSize: 12,
-                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          color: isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B),
                         ),
                       ),
                       const SizedBox(height: 16),
                       Divider(
                         height: 1,
-                        color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                        color: isDark
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFF1F5F9),
                       ),
                       const SizedBox(height: 14),
 
@@ -153,7 +168,9 @@ class CaseDetailScreen extends ConsumerWidget {
                               onPressed: () =>
                                   _toggleStatus(context, ref, caseItem),
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 11),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 11,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
@@ -168,7 +185,9 @@ class CaseDetailScreen extends ConsumerWidget {
                                 caseItem.isOpen
                                     ? 'Mark Case as Closed'
                                     : 'Reopen Case File',
-                                style: const TextStyle(fontWeight: FontWeight.w600),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
@@ -217,7 +236,9 @@ class CaseDetailScreen extends ConsumerWidget {
                       _buildInfoRow(
                         context,
                         'Courtroom',
-                        caseItem.courtName.isNotEmpty ? caseItem.courtName : 'Unspecified Court',
+                        caseItem.courtName.isNotEmpty
+                            ? caseItem.courtName
+                            : 'Unspecified Court',
                         Icons.account_balance_outlined,
                       ),
                       const Divider(height: 18),
@@ -271,11 +292,18 @@ class CaseDetailScreen extends ConsumerWidget {
                             ],
                           ),
                           TextButton.icon(
-                            onPressed: () => context.push(
-                              '/app/hearings/create?caseId=$caseId',
+                            onPressed: () {
+                              AppAlerts.showWarning(
+                                context,
+                                'Hearings scheduling is currently locked. Please review your Subscription & Quotas.',
+                              );
+                              context.push('/app/more/subscriptions');
+                            },
+                            icon: const Icon(
+                              Icons.lock_outline_rounded,
+                              size: 16,
                             ),
-                            icon: const Icon(Icons.add_rounded, size: 16),
-                            label: const Text('Schedule'),
+                            label: const Text('Schedule (Locked)'),
                           ),
                         ],
                       ),
@@ -287,7 +315,9 @@ class CaseDetailScreen extends ConsumerWidget {
                             'No hearings scheduled for this case yet.',
                             style: TextStyle(
                               fontSize: 13,
-                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                              color: isDark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B),
                             ),
                           ),
                         )
@@ -300,22 +330,28 @@ class CaseDetailScreen extends ConsumerWidget {
                           itemBuilder: (ctx, idx) {
                             final h = caseHearings[idx];
                             return InkWell(
-                              onTap: () => context.push('/app/hearings/${h.id}'),
+                              onTap: () =>
+                                  context.push('/app/hearings/${h.id}'),
                               borderRadius: BorderRadius.circular(8),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                ),
                                 child: Row(
                                   children: [
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             h.title,
                                             style: TextStyle(
                                               fontSize: 13.5,
                                               fontWeight: FontWeight.w700,
-                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : const Color(0xFF0F172A),
                                             ),
                                           ),
                                           const SizedBox(height: 2),
@@ -323,13 +359,18 @@ class CaseDetailScreen extends ConsumerWidget {
                                             '${h.date} • ${h.courtName}',
                                             style: TextStyle(
                                               fontSize: 12,
-                                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                              color: isDark
+                                                  ? const Color(0xFF94A3B8)
+                                                  : const Color(0xFF64748B),
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    StatusBadge(status: h.status, showDot: true),
+                                    StatusBadge(
+                                      status: h.status,
+                                      showDot: true,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -411,7 +452,10 @@ class CaseDetailScreen extends ConsumerWidget {
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: Text(actionLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+            child: Text(
+              actionLabel,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
           ),
       ],
     );
@@ -456,7 +500,9 @@ class CaseDetailScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(true),
-            style: TextButton.styleFrom(foregroundColor: const Color(0xFFEF4444)),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFEF4444),
+            ),
             child: const Text('Delete'),
           ),
         ],

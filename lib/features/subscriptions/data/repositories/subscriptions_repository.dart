@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/api_exception.dart';
 import '../../../../core/network/dio_client.dart';
+import '../models/payment_gateway_model.dart';
 import '../models/subscription_models.dart';
 
 final subscriptionsRepositoryProvider = Provider<SubscriptionsRepository>((
@@ -177,6 +178,65 @@ class SubscriptionsRepository {
           'razorpay_signature': signature,
         },
       );
+    } on DioException catch (e) {
+      if (e.error is ApiException) throw e.error as ApiException;
+      throw ApiException.fromResponse(e.response?.statusCode, e.response?.data);
+    }
+  }
+
+  /// Super Admin: Retrieve platform Razorpay payment gateway credentials
+  Future<PlatformPaymentGateway?> getPaymentGateway() async {
+    try {
+      final response = await _dio.get('/admin/payment-gateway/');
+      if (response.data is Map<String, dynamic>) {
+        return PlatformPaymentGateway.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+      }
+      return null;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return null;
+      if (e.error is ApiException) throw e.error as ApiException;
+      throw ApiException.fromResponse(e.response?.statusCode, e.response?.data);
+    }
+  }
+
+  /// Super Admin: Configure platform Razorpay payment gateway credentials
+  Future<PlatformPaymentGateway> savePaymentGateway(
+    PlatformPaymentGateway config,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '/admin/payment-gateway/',
+        data: config.toJson(),
+      );
+      return PlatformPaymentGateway.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+    } on DioException catch (e) {
+      if (e.error is ApiException) throw e.error as ApiException;
+      throw ApiException.fromResponse(e.response?.statusCode, e.response?.data);
+    }
+  }
+
+  /// Super Admin: Audit all firm subscription transactions
+  Future<List<AdminSubscriptionTransaction>>
+  getSubscriptionTransactions() async {
+    try {
+      final response = await _dio.get('/admin/subscription-transactions/');
+      final data = response.data;
+      if (data is Map<String, dynamic> && data['results'] is List) {
+        return (data['results'] as List)
+            .whereType<Map<String, dynamic>>()
+            .map((e) => AdminSubscriptionTransaction.fromJson(e))
+            .toList();
+      } else if (data is List) {
+        return data
+            .whereType<Map<String, dynamic>>()
+            .map((e) => AdminSubscriptionTransaction.fromJson(e))
+            .toList();
+      }
+      return [];
     } on DioException catch (e) {
       if (e.error is ApiException) throw e.error as ApiException;
       throw ApiException.fromResponse(e.response?.statusCode, e.response?.data);

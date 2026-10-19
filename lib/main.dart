@@ -7,6 +7,7 @@ import 'core/theme/firm_theme_provider.dart';
 import 'core/theme/lex_theme.dart';
 
 import 'core/theme/theme_mode_provider.dart';
+import 'features/subscriptions/presentation/widgets/paywall_barrier.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,8 @@ class NTSLegalProApp extends ConsumerWidget {
       darkTheme: LexTheme.buildDynamicTheme(firmTheme: firmTheme, isDark: true),
       themeMode: themeMode,
       routerConfig: router,
+      builder: (context, child) =>
+          PaywallBarrierListener(child: child ?? const SizedBox.shrink()),
     );
   }
 }

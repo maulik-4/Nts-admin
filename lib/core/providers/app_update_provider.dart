@@ -11,9 +11,9 @@ final appUpdateServiceProvider = Provider<AppUpdateService>((ref) {
 
 final appUpdateNotifierProvider =
     StateNotifierProvider<AppUpdateNotifier, AppUpdateInfo>((ref) {
-  final service = ref.watch(appUpdateServiceProvider);
-  return AppUpdateNotifier(service);
-});
+      final service = ref.watch(appUpdateServiceProvider);
+      return AppUpdateNotifier(service);
+    });
 
 class AppUpdateNotifier extends StateNotifier<AppUpdateInfo> {
   final AppUpdateService _service;
@@ -26,7 +26,8 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateInfo> {
   }) async {
     final info = await _service.checkForUpdate(
       currentVersion: currentVersion ?? AppUpdateService.currentAppVersion,
-      currentBuildNumber: currentBuildNumber ?? AppUpdateService.currentAppBuildNumber,
+      currentBuildNumber:
+          currentBuildNumber ?? AppUpdateService.currentAppBuildNumber,
     );
     if (mounted) {
       state = info;
@@ -41,24 +42,34 @@ class AppUpdateNotifier extends StateNotifier<AppUpdateInfo> {
     List<String>? releaseNotes,
   }) {
     state = AppUpdateInfo(
-      status: isForceUpdate ? AppUpdateStatus.forceUpdate : AppUpdateStatus.optionalUpdate,
+      status: isForceUpdate
+          ? AppUpdateStatus.forceUpdate
+          : AppUpdateStatus.optionalUpdate,
       currentVersion: AppUpdateService.currentAppVersion,
       currentBuildNumber: AppUpdateService.currentAppBuildNumber,
       latestVersion: latestVersion,
       latestBuildNumber: AppUpdateService.currentAppBuildNumber + 1,
-      minRequiredVersion: isForceUpdate ? latestVersion : AppUpdateService.currentAppVersion,
-      minRequiredBuildNumber: isForceUpdate ? AppUpdateService.currentAppBuildNumber + 1 : 1,
-      updateUrl: 'https://play.google.com/store/apps/details?id=com.legalpro.vidhanta',
+      minRequiredVersion: isForceUpdate
+          ? latestVersion
+          : AppUpdateService.currentAppVersion,
+      minRequiredBuildNumber: isForceUpdate
+          ? AppUpdateService.currentAppBuildNumber + 1
+          : 1,
+      updateUrl:
+          'https://play.google.com/store/apps/details?id=com.legalpro.vidhanta',
       title: isForceUpdate ? 'Mandatory App Update' : 'New Update Available',
-      message: message ??
+      message:
+          message ??
           (isForceUpdate
               ? 'A critical update is required to continue using Vidhanta. This update includes essential security patches and database synchronization.'
               : 'A newer version of Vidhanta is available with performance enhancements.'),
-      releaseNotes: releaseNotes ?? [
-        'Enhanced legal case timeline tracking',
-        'Direct document cloud synchronization',
-        'Critical security and stability patches',
-      ],
+      releaseNotes:
+          releaseNotes ??
+          [
+            'Enhanced legal case timeline tracking',
+            'Direct document cloud synchronization',
+            'Critical security and stability patches',
+          ],
     );
   }
 

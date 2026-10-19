@@ -143,7 +143,9 @@ class AuthRemoteDataSource {
     return null;
   }
 
-  Future<Map<String, dynamic>> submitUserFeedback(UserFeedbackRequest request) async {
+  Future<Map<String, dynamic>> submitUserFeedback(
+    UserFeedbackRequest request,
+  ) async {
     try {
       final response = await _dio.post(
         ApiEndpoints.userFeedback,

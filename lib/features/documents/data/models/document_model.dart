@@ -4,6 +4,11 @@ class Document {
   final String? caseTitle;
   final int firm;
   final String file;
+  final String? title;
+  final String? mimeType;
+  final int? fileSize;
+  final String? checksum;
+  final String accessPolicy;
   final int? uploadedBy;
   final bool isActive;
   final bool isDeleted;
@@ -16,12 +21,20 @@ class Document {
     this.caseTitle,
     required this.firm,
     required this.file,
+    this.title,
+    this.mimeType,
+    this.fileSize,
+    this.checksum,
+    this.accessPolicy = 'firm',
     this.uploadedBy,
     this.isActive = true,
     this.isDeleted = false,
     this.createdAt,
     this.updatedAt,
   });
+
+  String get displayTitle =>
+      (title != null && title!.isNotEmpty) ? title! : fileName;
 
   String get fileName {
     try {
@@ -43,9 +56,11 @@ class Document {
     return '';
   }
 
-  bool get isPdf => fileExtension == 'pdf';
+  bool get isPdf =>
+      fileExtension == 'pdf' || (mimeType?.contains('pdf') ?? false);
   bool get isImage =>
-      ['jpg', 'jpeg', 'png', 'webp', 'gif'].contains(fileExtension);
+      ['jpg', 'jpeg', 'png', 'webp', 'gif'].contains(fileExtension) ||
+      (mimeType?.startsWith('image/') ?? false);
   bool get isDoc => ['doc', 'docx', 'txt', 'rtf'].contains(fileExtension);
 
   factory Document.fromJson(Map<String, dynamic> json) {
@@ -61,6 +76,13 @@ class Document {
           ? json['firm'] as int
           : int.tryParse(json['firm']?.toString() ?? '0') ?? 0,
       file: json['file']?.toString() ?? '',
+      title: json['title']?.toString(),
+      mimeType: json['mime_type']?.toString(),
+      fileSize: json['file_size'] is int
+          ? json['file_size'] as int
+          : int.tryParse(json['file_size']?.toString() ?? ''),
+      checksum: json['checksum']?.toString(),
+      accessPolicy: json['access_policy']?.toString() ?? 'firm',
       uploadedBy: json['uploaded_by'] is int
           ? json['uploaded_by'] as int
           : int.tryParse(json['uploaded_by']?.toString() ?? ''),
@@ -81,6 +103,11 @@ class Document {
     'case_title': caseTitle,
     'firm': firm,
     'file': file,
+    'title': title,
+    'mime_type': mimeType,
+    'file_size': fileSize,
+    'checksum': checksum,
+    'access_policy': accessPolicy,
     'uploaded_by': uploadedBy,
     'is_active': isActive,
     'is_deleted': isDeleted,

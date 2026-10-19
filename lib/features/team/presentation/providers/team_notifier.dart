@@ -4,7 +4,7 @@ import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../data/models/team_member.dart';
 import '../../data/repositories/team_repository.dart';
 
-enum TeamFilter { all, advocates, staff }
+enum TeamFilter { all, advocates, staff, clients }
 
 final teamFilterProvider = StateProvider<TeamFilter>((ref) => TeamFilter.all);
 
@@ -77,6 +77,9 @@ final filteredTeamMembersProvider = Provider<AsyncValue<List<TeamMember>>>((
         break;
       case TeamFilter.staff:
         roleFiltered = firmScoped.where((m) => m.isStaff).toList();
+        break;
+      case TeamFilter.clients:
+        roleFiltered = [];
         break;
       case TeamFilter.all:
         roleFiltered = firmScoped;

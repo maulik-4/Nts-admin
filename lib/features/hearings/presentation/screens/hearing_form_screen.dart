@@ -200,9 +200,13 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
         }
       }
     } on ApiException catch (e) {
-      if (mounted) AppAlerts.showError(context, e.message);
+      if (mounted) {
+        AppAlerts.showError(context, e.message);
+      }
     } catch (e) {
-      if (mounted) AppAlerts.showError(context, 'An unexpected error occurred: $e');
+      if (mounted) {
+        AppAlerts.showError(context, 'An unexpected error occurred: $e');
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -235,16 +239,25 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                          color: isDark
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFEFF6FF),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                            color: isDark
+                                ? const Color(0xFF334155)
+                                : const Color(0xFFDBEAFE),
                           ),
                         ),
                         child: Text(
-                          isEdit ? 'UPDATE HEARING' : 'HEARING AGENDA SPECIFICATION',
+                          isEdit
+                              ? 'UPDATE HEARING'
+                              : 'HEARING AGENDA SPECIFICATION',
                           style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -259,7 +272,9 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 18),
@@ -270,7 +285,9 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
-                          color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                          color: isDark
+                              ? const Color(0xFFCBD5E1)
+                              : const Color(0xFF334155),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -287,7 +304,10 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                                 horizontal: 14,
                                 vertical: 12,
                               ),
-                              prefixIcon: const Icon(Icons.folder_open_rounded, size: 19),
+                              prefixIcon: const Icon(
+                                Icons.folder_open_rounded,
+                                size: 19,
+                              ),
                               filled: true,
                               fillColor: isDark
                                   ? const Color(0xFF1E293B)
@@ -296,7 +316,10 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            hint: const Text('Select Associated Case', style: TextStyle(fontSize: 13)),
+                            hint: const Text(
+                              'Select Associated Case',
+                              style: TextStyle(fontSize: 13),
+                            ),
                             items: cases.map((c) {
                               return DropdownMenuItem<int>(
                                 value: c.id,
@@ -436,7 +459,9 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                             ),
                           )
                         : Text(
-                            isEdit ? 'Save Hearing Changes' : 'Schedule Hearing',
+                            isEdit
+                                ? 'Save Hearing Changes'
+                                : 'Schedule Hearing',
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 14.5,

@@ -212,16 +212,25 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                       children: [
                         // Header pill
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                            color: isDark
+                                ? const Color(0xFF1E293B)
+                                : const Color(0xFFEFF6FF),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                              color: isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFDBEAFE),
                             ),
                           ),
                           child: Text(
-                            isEditing ? 'UPDATE TASK' : 'NEW TASK SPECIFICATION',
+                            isEditing
+                                ? 'UPDATE TASK'
+                                : 'NEW TASK SPECIFICATION',
                             style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
@@ -236,7 +245,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                           ),
                         ),
                         const SizedBox(height: 18),
@@ -247,7 +258,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                            color: isDark
+                                ? const Color(0xFFCBD5E1)
+                                : const Color(0xFF334155),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -255,10 +268,17 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                           controller: _titleController,
                           decoration: InputDecoration(
                             hintText: 'e.g., File reply to show cause notice',
-                            prefixIcon: const Icon(Icons.edit_note_rounded, size: 20),
+                            prefixIcon: const Icon(
+                              Icons.edit_note_rounded,
+                              size: 20,
+                            ),
                             filled: true,
-                            fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            fillColor: isDark
+                                ? const Color(0xFF1E293B)
+                                : const Color(0xFFF8FAFC),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           validator: (val) {
                             if (val == null || val.trim().isEmpty) {
@@ -278,7 +298,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                            color: isDark
+                                ? const Color(0xFFCBD5E1)
+                                : const Color(0xFF334155),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -292,8 +314,12 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                               child: Icon(Icons.notes_rounded, size: 20),
                             ),
                             filled: true,
-                            fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            fillColor: isDark
+                                ? const Color(0xFF1E293B)
+                                : const Color(0xFFF8FAFC),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -304,7 +330,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                            color: isDark
+                                ? const Color(0xFFCBD5E1)
+                                : const Color(0xFF334155),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -314,15 +342,25 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                               isExpanded: true,
                               initialValue: _selectedCaseId,
                               decoration: InputDecoration(
-                                prefixIcon: const Icon(Icons.folder_open_rounded, size: 19),
+                                prefixIcon: const Icon(
+                                  Icons.folder_open_rounded,
+                                  size: 19,
+                                ),
                                 filled: true,
-                                fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                fillColor: isDark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFF8FAFC),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                               items: [
                                 const DropdownMenuItem<int?>(
                                   value: null,
-                                  child: Text('None (General Practice Task)', overflow: TextOverflow.ellipsis),
+                                  child: Text(
+                                    'None (General Practice Task)',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                                 ...cases.map((c) {
                                   return DropdownMenuItem<int?>(
@@ -352,7 +390,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                            color: isDark
+                                ? const Color(0xFFCBD5E1)
+                                : const Color(0xFF334155),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -362,15 +402,25 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                               isExpanded: true,
                               initialValue: _selectedAssigneeId,
                               decoration: InputDecoration(
-                                prefixIcon: const Icon(Icons.person_outline_rounded, size: 19),
+                                prefixIcon: const Icon(
+                                  Icons.person_outline_rounded,
+                                  size: 19,
+                                ),
                                 filled: true,
-                                fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                fillColor: isDark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFF8FAFC),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                               items: [
                                 const DropdownMenuItem<int?>(
                                   value: null,
-                                  child: Text('Unassigned (General Firm Task)', overflow: TextOverflow.ellipsis),
+                                  child: Text(
+                                    'Unassigned (General Firm Task)',
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                                 ...members.map((m) {
                                   return DropdownMenuItem<int?>(
@@ -407,7 +457,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                                   style: TextStyle(
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                                    color: isDark
+                                        ? const Color(0xFFCBD5E1)
+                                        : const Color(0xFF334155),
                                   ),
                                 ),
                                 const SizedBox(height: 6),
@@ -416,9 +468,16 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                                   initialValue: _selectedPriority,
                                   decoration: InputDecoration(
                                     filled: true,
-                                    fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                                    fillColor: isDark
+                                        ? const Color(0xFF1E293B)
+                                        : const Color(0xFFF8FAFC),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 12,
+                                    ),
                                   ),
                                   items: TaskPriority.values.map((p) {
                                     final pColor = _getPriorityColor(p);
@@ -429,7 +488,10 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                                           Container(
                                             width: 8,
                                             height: 8,
-                                            decoration: BoxDecoration(shape: BoxShape.circle, color: pColor),
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: pColor,
+                                            ),
                                           ),
                                           const SizedBox(width: 8),
                                           Expanded(
@@ -437,7 +499,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                                               p.displayName,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(fontSize: 13),
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -445,7 +509,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                                     );
                                   }).toList(),
                                   onChanged: (val) {
-                                    if (val != null) setState(() => _selectedPriority = val);
+                                    if (val != null) {
+                                      setState(() => _selectedPriority = val);
+                                    }
                                   },
                                 ),
                               ],
@@ -459,7 +525,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                                   style: TextStyle(
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                                    color: isDark
+                                        ? const Color(0xFFCBD5E1)
+                                        : const Color(0xFF334155),
                                   ),
                                 ),
                                 const SizedBox(height: 6),
@@ -468,9 +536,16 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                                   initialValue: _selectedStatus,
                                   decoration: InputDecoration(
                                     filled: true,
-                                    fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                                    fillColor: isDark
+                                        ? const Color(0xFF1E293B)
+                                        : const Color(0xFFF8FAFC),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 12,
+                                    ),
                                   ),
                                   items: TaskStatus.values.map((s) {
                                     final sColor = _getStatusColor(s);
@@ -481,7 +556,10 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                                           Container(
                                             width: 8,
                                             height: 8,
-                                            decoration: BoxDecoration(shape: BoxShape.circle, color: sColor),
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: sColor,
+                                            ),
                                           ),
                                           const SizedBox(width: 8),
                                           Expanded(
@@ -489,7 +567,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                                               s.displayName,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(fontSize: 13),
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -497,7 +577,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                                     );
                                   }).toList(),
                                   onChanged: (val) {
-                                    if (val != null) setState(() => _selectedStatus = val);
+                                    if (val != null) {
+                                      setState(() => _selectedStatus = val);
+                                    }
                                   },
                                 ),
                               ],
@@ -531,7 +613,9 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                            color: isDark
+                                ? const Color(0xFFCBD5E1)
+                                : const Color(0xFF334155),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -541,20 +625,32 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                           child: InputDecorator(
                             decoration: InputDecoration(
                               hintText: 'Select task deadline',
-                              prefixIcon: const Icon(Icons.calendar_month_outlined, size: 19),
+                              prefixIcon: const Icon(
+                                Icons.calendar_month_outlined,
+                                size: 19,
+                              ),
                               filled: true,
-                              fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              fillColor: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFF8FAFC),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                             child: Text(
                               _selectedDueDate != null
-                                  ? DateFormat('MMMM d, yyyy').format(_selectedDueDate!)
+                                  ? DateFormat('MMMM d, yyyy')
+                                        .format(_selectedDueDate!)
                                   : 'No due date set',
                               style: TextStyle(
                                 fontSize: 13.5,
-                                fontWeight: _selectedDueDate != null ? FontWeight.w600 : FontWeight.w400,
+                                fontWeight: _selectedDueDate != null
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
                                 color: _selectedDueDate != null
-                                    ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                                    ? (isDark
+                                          ? Colors.white
+                                          : const Color(0xFF0F172A))
                                     : const Color(0xFF94A3B8),
                               ),
                             ),

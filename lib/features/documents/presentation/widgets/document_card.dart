@@ -47,7 +47,9 @@ class DocumentCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14.5,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? LexColors.textPrimaryDark : const Color(0xFF0F172A),
+                    color: isDark
+                        ? LexColors.textPrimaryDark
+                        : const Color(0xFF0F172A),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -58,7 +60,9 @@ class DocumentCard extends StatelessWidget {
                       Icon(
                         Icons.folder_open_rounded,
                         size: 13,
-                        color: isDark ? LexColors.accentGold : const Color(0xFF64748B),
+                        color: isDark
+                            ? LexColors.accentGold
+                            : const Color(0xFF64748B),
                       ),
                       const SizedBox(width: 4),
                       Flexible(
@@ -77,14 +81,17 @@ class DocumentCard extends StatelessWidget {
                       ),
                     ],
                     if (dateStr.isNotEmpty) ...[
-                      if (document.caseTitle != null && document.caseTitle!.isNotEmpty)
+                      if (document.caseTitle != null &&
+                          document.caseTitle!.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 6),
                           child: Text(
                             '•',
                             style: TextStyle(
                               fontSize: 12,
-                              color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                              color: isDark
+                                  ? const Color(0xFF64748B)
+                                  : const Color(0xFF94A3B8),
                             ),
                           ),
                         ),

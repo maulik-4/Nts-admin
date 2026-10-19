@@ -33,13 +33,16 @@ class MetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final primaryColor = iconColor ??
+    final primaryColor =
+        iconColor ??
         (isDark ? const Color(0xFF60A5FA) : const Color(0xFF2563EB));
     final bgColor = iconBgColor ?? primaryColor.withValues(alpha: 0.12);
 
-    final effectiveTrendColor = trendColor ??
+    final effectiveTrendColor =
+        trendColor ??
         (isDark ? const Color(0xFF34D399) : const Color(0xFF059669));
-    final effectiveTrendBg = trendBgColor ??
+    final effectiveTrendBg =
+        trendBgColor ??
         effectiveTrendColor.withValues(alpha: isDark ? 0.2 : 0.12);
 
     return LexCard(
@@ -60,11 +63,7 @@ class MetricCard extends StatelessWidget {
                   color: bgColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  icon,
-                  size: 18,
-                  color: primaryColor,
-                ),
+                child: Icon(icon, size: 18, color: primaryColor),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -114,7 +113,10 @@ class MetricCard extends StatelessWidget {
               ),
               if (trendText != null && trendText!.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: effectiveTrendBg,
                     borderRadius: BorderRadius.circular(10),

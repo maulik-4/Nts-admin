@@ -38,7 +38,8 @@ class LexCard extends StatelessWidget {
     final cardContent = Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: backgroundColor ??
+        color:
+            backgroundColor ??
             (isDark ? const Color(0xFF1E293B) : Colors.white),
         borderRadius: BorderRadius.circular(borderRadius),
         border: border ?? defaultBorder,

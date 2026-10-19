@@ -57,21 +57,24 @@ void main() {
       expect(info.hasUpdate, true);
     });
 
-    test('detects force update when is_force_update flag is explicitly true', () {
-      final info = AppUpdateInfo.fromJson(
-        json: {
-          'latest_version': '1.0.2',
-          'latest_build': 3,
-          'min_required_version': '1.0.1',
-          'min_required_build': 2,
-          'is_force_update': true,
-        },
-        currentVersion: '1.0.1',
-        currentBuildNumber: 2,
-      );
+    test(
+      'detects force update when is_force_update flag is explicitly true',
+      () {
+        final info = AppUpdateInfo.fromJson(
+          json: {
+            'latest_version': '1.0.2',
+            'latest_build': 3,
+            'min_required_version': '1.0.1',
+            'min_required_build': 2,
+            'is_force_update': true,
+          },
+          currentVersion: '1.0.1',
+          currentBuildNumber: 2,
+        );
 
-      expect(info.status, AppUpdateStatus.forceUpdate);
-      expect(info.isForceUpdate, true);
-    });
+        expect(info.status, AppUpdateStatus.forceUpdate);
+        expect(info.isForceUpdate, true);
+      },
+    );
   });
 }

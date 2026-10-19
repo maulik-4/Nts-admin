@@ -61,4 +61,39 @@ class ApiEndpoints {
 
   // Messaging
   static const String messages = '/messages/';
+
+  // Client Portal Endpoints
+  static const String clientLogin = '/client-portal/login/';
+  static const String clientAcceptInvite = '/client-portal/accept-invite/';
+  static const String clientInvite = '/client-portal/invite/';
+  static const String clientHearings = '/client-portal/hearings/';
+  static const String clientDocuments = '/client-portal/documents/';
+  static String clientDocumentAccessLink(int docId) =>
+      '/client-portal/documents/$docId/access-link/';
+  static String clientDocumentDownload(
+    int docId,
+    String token, {
+    String disposition = 'attachment',
+  }) =>
+      '/client-portal/documents/download/$docId/?token=$token&disposition=$disposition';
+
+  // Firm Document Sharing & Preview Endpoints
+  static String clientShareDocument(int clientId, int docId) =>
+      '/clients/$clientId/documents/$docId/share/';
+  static String clientSharedDocuments(int clientId) =>
+      '/clients/$clientId/shared-documents/';
+  static String documentPreview(int docId) => '/documents/$docId/preview/';
+
+  // WhatsApp Communications Endpoints
+  static const String whatsappSend = '/communications/whatsapp/send/';
+  static const String whatsappTemplates = '/communications/whatsapp/templates/';
+  static String whatsappPreferences(int clientId) =>
+      '/clients/$clientId/communication-preferences/';
+  static String whatsappMessageStatus(int msgId) =>
+      '/communications/messages/$msgId/';
+
+  // Admin Payment Gateway & Billing Transactions
+  static const String adminPaymentGateway = '/admin/payment-gateway/';
+  static const String adminSubscriptionTransactions =
+      '/admin/subscription-transactions/';
 }

@@ -112,12 +112,19 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF),
+                            color: isDark
+                                ? const Color(0xFF1E293B)
+                                : const Color(0xFFEFF6FF),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: isDark ? const Color(0xFF334155) : const Color(0xFFDBEAFE),
+                              color: isDark
+                                  ? const Color(0xFF334155)
+                                  : const Color(0xFFDBEAFE),
                             ),
                           ),
                           child: const Text(
@@ -136,7 +143,9 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                           ),
                         ),
                         const SizedBox(height: 18),
@@ -169,7 +178,9 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                            color: isDark
+                                ? const Color(0xFFCBD5E1)
+                                : const Color(0xFF334155),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -177,15 +188,25 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                           isExpanded: true,
                           initialValue: _selectedMethod,
                           decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.payment_rounded, size: 19),
+                            prefixIcon: const Icon(
+                              Icons.payment_rounded,
+                              size: 19,
+                            ),
                             filled: true,
-                            fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            fillColor: isDark
+                                ? const Color(0xFF1E293B)
+                                : const Color(0xFFF8FAFC),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           items: PaymentMethod.values.map((m) {
                             return DropdownMenuItem<PaymentMethod>(
                               value: m,
-                              child: Text(m.displayName, style: const TextStyle(fontSize: 13)),
+                              child: Text(
+                                m.displayName,
+                                style: const TextStyle(fontSize: 13),
+                              ),
                             );
                           }).toList(),
                           onChanged: (val) {
@@ -202,7 +223,9 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                            color: isDark
+                                ? const Color(0xFFCBD5E1)
+                                : const Color(0xFF334155),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -210,10 +233,17 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                           isExpanded: true,
                           initialValue: _selectedStatus,
                           decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.verified_outlined, size: 19),
+                            prefixIcon: const Icon(
+                              Icons.verified_outlined,
+                              size: 19,
+                            ),
                             filled: true,
-                            fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            fillColor: isDark
+                                ? const Color(0xFF1E293B)
+                                : const Color(0xFFF8FAFC),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                           items: PaymentStatus.values.map((s) {
                             final color = s == PaymentStatus.paid
@@ -226,10 +256,16 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                                   Container(
                                     width: 8,
                                     height: 8,
-                                    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: color,
+                                    ),
                                   ),
                                   const SizedBox(width: 8),
-                                  Text(s.displayName, style: const TextStyle(fontSize: 13)),
+                                  Text(
+                                    s.displayName,
+                                    style: const TextStyle(fontSize: 13),
+                                  ),
                                 ],
                               ),
                             );
@@ -248,7 +284,9 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                            color: isDark
+                                ? const Color(0xFFCBD5E1)
+                                : const Color(0xFF334155),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -258,15 +296,24 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                               isExpanded: true,
                               initialValue: _selectedClientId,
                               decoration: InputDecoration(
-                                prefixIcon: const Icon(Icons.person_outline_rounded, size: 19),
+                                prefixIcon: const Icon(
+                                  Icons.person_outline_rounded,
+                                  size: 19,
+                                ),
                                 filled: true,
-                                fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                fillColor: isDark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFF8FAFC),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                               items: [
                                 const DropdownMenuItem<int?>(
                                   value: null,
-                                  child: Text('None (General Practice Receipt)'),
+                                  child: Text(
+                                    'None (General Practice Receipt)',
+                                  ),
                                 ),
                                 ...clients.map((cl) {
                                   return DropdownMenuItem<int?>(
@@ -295,7 +342,9 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
-                            color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                            color: isDark
+                                ? const Color(0xFFCBD5E1)
+                                : const Color(0xFF334155),
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -305,10 +354,17 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                               isExpanded: true,
                               initialValue: _selectedCaseId,
                               decoration: InputDecoration(
-                                prefixIcon: const Icon(Icons.folder_open_rounded, size: 19),
+                                prefixIcon: const Icon(
+                                  Icons.folder_open_rounded,
+                                  size: 19,
+                                ),
                                 filled: true,
-                                fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                fillColor: isDark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFF8FAFC),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                               items: [
                                 const DropdownMenuItem<int?>(

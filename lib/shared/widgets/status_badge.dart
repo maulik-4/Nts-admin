@@ -101,9 +101,7 @@ class StatusBadge extends StatelessWidget {
     }
 
     // Default / closed / neutral
-    final text = isDark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF475569);
+    final text = isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569);
     final bg = isDark
         ? const Color(0xFF334155).withValues(alpha: 0.3)
         : const Color(0xFFF1F5F9);

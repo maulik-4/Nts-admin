@@ -74,7 +74,9 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFEF4444)),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Delete'),
           ),
@@ -112,7 +114,10 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFEF4444)),
+            icon: const Icon(
+              Icons.delete_outline_rounded,
+              color: Color(0xFFEF4444),
+            ),
             tooltip: 'Delete Payment',
             onPressed: _handleDelete,
           ),
@@ -165,7 +170,9 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w900,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -179,7 +186,9 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          color: isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B),
                         ),
                       ),
                     ],
@@ -243,8 +252,10 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
                         payment.paymentDate != null
                             ? dateFormat.format(payment.paymentDate!.toLocal())
                             : (payment.createdAt != null
-                                ? dateFormat.format(payment.createdAt!.toLocal())
-                                : 'Not recorded'),
+                                  ? dateFormat.format(
+                                      payment.createdAt!.toLocal(),
+                                    )
+                                  : 'Not recorded'),
                         Icons.calendar_today_outlined,
                       ),
                       const Divider(height: 18),
@@ -266,7 +277,9 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.6,
-                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -287,7 +300,9 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
                     ),
                     onPressed: _isSendingEmail ? null : _handleEmailReceipt,
                     style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
@@ -305,16 +320,23 @@ class _PaymentDetailScreenState extends ConsumerState<PaymentDetailScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                        : const Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            size: 18,
+                          ),
                     label: const Text(
                       'Send Receipt via WhatsApp',
                       style: TextStyle(fontWeight: FontWeight.w700),
                     ),
-                    onPressed: _isSendingWhatsapp ? null : _handleWhatsappReceipt,
+                    onPressed: _isSendingWhatsapp
+                        ? null
+                        : _handleWhatsappReceipt,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF0F1F38),
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),

@@ -30,7 +30,8 @@ class UserFeedbackRequest {
       email: json['email'] as String? ?? '',
       phone: json['phone'] as String? ?? '',
       message: json['message'] as String? ?? '',
-      companyName: (json['company_name'] ?? json['companyName'] ?? '') as String,
+      companyName:
+          (json['company_name'] ?? json['companyName'] ?? '') as String,
     );
   }
 }

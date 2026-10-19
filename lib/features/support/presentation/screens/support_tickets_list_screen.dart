@@ -51,7 +51,10 @@ class SupportTicketsListScreen extends ConsumerWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 4,
         icon: const Icon(Icons.add_rounded, size: 20),
-        label: const Text('New Ticket', style: TextStyle(fontWeight: FontWeight.w700)),
+        label: const Text(
+          'New Ticket',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
       ),
       body: Column(
         children: [
@@ -72,10 +75,26 @@ class SupportTicketsListScreen extends ConsumerWidget {
               ),
               child: Row(
                 children: [
-                  _buildStatItem('Total', stats.total.toString(), LexColors.slatePrimary),
-                  _buildStatItem('Open', stats.open.toString(), LexColors.warning),
-                  _buildStatItem('In Progress', stats.inProgress.toString(), Colors.blue),
-                  _buildStatItem('Resolved', stats.resolved.toString(), LexColors.success),
+                  _buildStatItem(
+                    'Total',
+                    stats.total.toString(),
+                    LexColors.slatePrimary,
+                  ),
+                  _buildStatItem(
+                    'Open',
+                    stats.open.toString(),
+                    LexColors.warning,
+                  ),
+                  _buildStatItem(
+                    'In Progress',
+                    stats.inProgress.toString(),
+                    Colors.blue,
+                  ),
+                  _buildStatItem(
+                    'Resolved',
+                    stats.resolved.toString(),
+                    LexColors.success,
+                  ),
                 ],
               ),
             ),
@@ -138,7 +157,9 @@ class SupportTicketsListScreen extends ConsumerWidget {
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: isDark ? LexColors.surfaceDark : Colors.white,
+                              color: isDark
+                                  ? LexColors.surfaceDark
+                                  : Colors.white,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
@@ -243,7 +264,10 @@ class SupportTicketsListScreen extends ConsumerWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: isDark ? Colors.white10 : const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(6),
@@ -492,7 +516,10 @@ class _CreateTicketSheetState extends ConsumerState<_CreateTicketSheet> {
                       ),
                       Text(
                         'Open Support Ticket',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ],
                   ),
@@ -522,21 +549,37 @@ class _CreateTicketSheetState extends ConsumerState<_CreateTicketSheet> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
                 ),
                 items: const [
-                  DropdownMenuItem(value: 'technical', child: Text('Technical Issue')),
-                  DropdownMenuItem(value: 'billing', child: Text('Billing & Invoicing')),
-                  DropdownMenuItem(value: 'feature', child: Text('Feature Request')),
-                  DropdownMenuItem(value: 'account', child: Text('Account Access')),
+                  DropdownMenuItem(
+                    value: 'technical',
+                    child: Text('Technical Issue'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'billing',
+                    child: Text('Billing & Invoicing'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'feature',
+                    child: Text('Feature Request'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'account',
+                    child: Text('Account Access'),
+                  ),
                   DropdownMenuItem(value: 'legal', child: Text('Legal Query')),
                   DropdownMenuItem(value: 'other', child: Text('Other')),
                 ],
@@ -558,21 +601,31 @@ class _CreateTicketSheetState extends ConsumerState<_CreateTicketSheet> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide(
-                      color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
                     ),
                   ),
                 ),
                 items: const [
                   DropdownMenuItem(value: 'low', child: Text('Low Priority')),
-                  DropdownMenuItem(value: 'normal', child: Text('Normal Priority')),
+                  DropdownMenuItem(
+                    value: 'normal',
+                    child: Text('Normal Priority'),
+                  ),
                   DropdownMenuItem(value: 'high', child: Text('High Priority')),
-                  DropdownMenuItem(value: 'critical', child: Text('Critical Priority')),
+                  DropdownMenuItem(
+                    value: 'critical',
+                    child: Text('Critical Priority'),
+                  ),
                 ],
                 onChanged: (v) {
                   if (v != null) setState(() => _priority = v);

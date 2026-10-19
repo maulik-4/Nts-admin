@@ -1,8 +1,4 @@
-enum AppUpdateStatus {
-  upToDate,
-  optionalUpdate,
-  forceUpdate,
-}
+enum AppUpdateStatus { upToDate, optionalUpdate, forceUpdate }
 
 class AppUpdateInfo {
   final AppUpdateStatus status;
@@ -25,7 +21,8 @@ class AppUpdateInfo {
     this.latestBuildNumber = 2,
     this.minRequiredVersion = '1.0.1',
     this.minRequiredBuildNumber = 2,
-    this.updateUrl = 'https://play.google.com/store/apps/details?id=com.legalpro.vidhanta',
+    this.updateUrl =
+        'https://play.google.com/store/apps/details?id=com.legalpro.vidhanta',
     this.title = 'App Update Required',
     this.message = 'A newer version of Vidhanta is required to continue. Please update your application to access the latest features and improvements.',
     this.releaseNotes = const [],
@@ -39,14 +36,29 @@ class AppUpdateInfo {
     required String currentVersion,
     required int currentBuildNumber,
   }) {
-    final latestVer = (json['latest_version'] ?? json['latestVersion'] ?? currentVersion) as String;
-    final latestBuild = (json['latest_build'] ?? json['latestBuild'] ?? currentBuildNumber) as int;
-    final minVer = (json['min_required_version'] ?? json['minRequiredVersion'] ?? '1.0.0') as String;
-    final minBuild = (json['min_required_build'] ?? json['minRequiredBuild'] ?? 1) as int;
-    final isForced = (json['is_force_update'] ?? json['forceUpdate'] ?? false) as bool;
-    final url = (json['update_url'] ?? json['updateUrl'] ?? 'https://play.google.com/store/apps/details?id=com.legalpro.vidhanta') as String;
+    final latestVer =
+        (json['latest_version'] ?? json['latestVersion'] ?? currentVersion)
+            as String;
+    final latestBuild =
+        (json['latest_build'] ?? json['latestBuild'] ?? currentBuildNumber)
+            as int;
+    final minVer =
+        (json['min_required_version'] ?? json['minRequiredVersion'] ?? '1.0.0')
+            as String;
+    final minBuild =
+        (json['min_required_build'] ?? json['minRequiredBuild'] ?? 1) as int;
+    final isForced =
+        (json['is_force_update'] ?? json['forceUpdate'] ?? false) as bool;
+    final url =
+        (json['update_url'] ??
+                json['updateUrl'] ??
+                'https://play.google.com/store/apps/details?id=com.legalpro.vidhanta')
+            as String;
     final title = (json['title'] ?? 'App Update Required') as String;
-    final msg = (json['message'] ?? 'A newer version of Vidhanta is available. Please update to proceed.') as String;
+    final msg =
+        (json['message'] ??
+                'A newer version of Vidhanta is available. Please update to proceed.')
+            as String;
 
     List<String> notes = [];
     if (json['release_notes'] is List) {
@@ -54,9 +66,12 @@ class AppUpdateInfo {
     }
 
     AppUpdateStatus updateStatus = AppUpdateStatus.upToDate;
-    if (isForced || currentBuildNumber < minBuild || _compareSemver(currentVersion, minVer) < 0) {
+    if (isForced ||
+        currentBuildNumber < minBuild ||
+        _compareSemver(currentVersion, minVer) < 0) {
       updateStatus = AppUpdateStatus.forceUpdate;
-    } else if (currentBuildNumber < latestBuild || _compareSemver(currentVersion, latestVer) < 0) {
+    } else if (currentBuildNumber < latestBuild ||
+        _compareSemver(currentVersion, latestVer) < 0) {
       updateStatus = AppUpdateStatus.optionalUpdate;
     }
 

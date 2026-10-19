@@ -207,6 +207,8 @@ class RoleMenuConfig {
         return lawyerMenu;
       case UserRole.staff:
         return staffMenu;
+      case UserRole.client:
+        return const [];
       case UserRole.unknown:
         return unknownMenu;
     }

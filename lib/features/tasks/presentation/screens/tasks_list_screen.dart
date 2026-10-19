@@ -74,7 +74,9 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected
                     ? Colors.white
-                    : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
+                    : (isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF475569)),
               ),
             ),
             if (count != null) ...[
@@ -84,7 +86,9 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? Colors.white.withAlpha(50)
-                      : (isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
+                      : (isDark
+                            ? const Color(0xFF334155)
+                            : const Color(0xFFF1F5F9)),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -94,7 +98,9 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
                     fontWeight: FontWeight.w700,
                     color: isSelected
                         ? Colors.white
-                        : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569)),
+                        : (isDark
+                              ? const Color(0xFFCBD5E1)
+                              : const Color(0xFF475569)),
                   ),
                 ),
               ),
@@ -133,22 +139,84 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
         capability: UserCapability.createTask,
         child: FloatingActionButton.extended(
           heroTag: 'fab_add_task',
-          onPressed: () => context.push('/app/tasks/create'),
+          onPressed: () {
+            AppAlerts.showWarning(
+              context,
+              'Task creation is currently locked. Please review your Subscription & Quotas.',
+            );
+            context.push('/app/more/subscriptions');
+          },
           backgroundColor: const Color(0xFF0F1F38),
           foregroundColor: Colors.white,
           elevation: 4,
-          icon: const Icon(Icons.add_task_rounded, size: 20),
+          icon: const Icon(Icons.lock_outline_rounded, size: 20),
           label: const Text(
-            'New Task',
+            'New Task (Locked)',
             style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
           ),
         ),
       ),
       body: Column(
         children: [
+          // Blocked Service Paywall Notification
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF59E0B).withAlpha(isDark ? 30 : 20),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFFF59E0B).withAlpha(120),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.lock_clock_rounded,
+                  color: Color(0xFFD97706),
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Tasks Service is currently locked under active tier. Manage Subscriptions & Quotas to upgrade.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? const Color(0xFFFDE68A)
+                          : const Color(0xFF92400E),
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/app/more/subscriptions'),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text(
+                    'Upgrade',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      color: Color(0xFFD97706),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // Search & Filter header
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
             child: Row(
               children: [
                 Expanded(
@@ -162,19 +230,26 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
                       hintText: 'Search tasks by title, case, or assignee...',
                       hintStyle: TextStyle(
                         fontSize: 13,
-                        color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                        color: isDark
+                            ? const Color(0xFF64748B)
+                            : const Color(0xFF94A3B8),
                       ),
                       prefixIcon: Icon(
                         Icons.search_rounded,
                         size: 20,
-                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        color: isDark
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF64748B),
                       ),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.clear_rounded, size: 18),
                               onPressed: () {
                                 _searchController.clear();
-                                ref.read(taskSearchQueryProvider.notifier).state = '';
+                                ref
+                                        .read(taskSearchQueryProvider.notifier)
+                                        .state =
+                                    '';
                                 setState(() {});
                               },
                             )
@@ -184,17 +259,23 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
                         vertical: 12,
                       ),
                       filled: true,
-                      fillColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      fillColor: isDark
+                          ? const Color(0xFF1E293B)
+                          : Colors.white,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: BorderSide(
-                          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                          color: isDark
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFE2E8F0),
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: BorderSide(
-                          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                          color: isDark
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFE2E8F0),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
@@ -245,7 +326,9 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
                 Container(
                   width: 1,
                   height: 22,
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFCBD5E1),
                 ),
                 const SizedBox(width: 8),
                 _buildFilterPill(
@@ -253,7 +336,8 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
                   label: 'All Priority',
                   isSelected: priorityFilter == null,
                   onTap: () =>
-                      ref.read(taskPriorityFilterProvider.notifier).state = null,
+                      ref.read(taskPriorityFilterProvider.notifier).state =
+                          null,
                 ),
                 const SizedBox(width: 8),
                 ...TaskPriority.values.map((p) {
@@ -304,8 +388,7 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
                       final task = tasks[index];
                       return TaskCard(
                         task: task,
-                        onTap: () =>
-                            context.push('/app/more/tasks/${task.id}'),
+                        onTap: () => context.push('/app/more/tasks/${task.id}'),
                         onToggleComplete: (shouldComplete) async {
                           try {
                             if (shouldComplete) {

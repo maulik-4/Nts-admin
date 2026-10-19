@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/providers/app_update_provider.dart';
 import '../../../../core/theme/lex_colors.dart';
 import '../../../../shared/widgets/force_update_dialog.dart';
+import '../../domain/models/role_capabilities.dart';
 import '../providers/auth_notifier.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -80,8 +81,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   void _navigateToNext() {
     final authState = ref.read(authNotifierProvider);
+    final userRole = ref.read(currentUserRoleProvider);
     if (authState.isAuthenticated) {
-      context.go('/app/dashboard');
+      if (userRole.isClient) {
+        context.go('/client/dashboard');
+      } else {
+        context.go('/app/dashboard');
+      }
     } else {
       context.go('/login');
     }
