@@ -94,7 +94,9 @@ class _LexTextFieldState extends State<LexTextField> {
         TextFormField(
           controller: widget.controller,
           obscureText: _obscureText,
-          keyboardType: widget.keyboardType,
+          keyboardType: widget.maxLines > 1 && widget.keyboardType == TextInputType.text
+              ? TextInputType.multiline
+              : widget.keyboardType,
           textInputAction: widget.textInputAction,
           validator: widget.validator,
           onChanged: widget.onChanged,

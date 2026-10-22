@@ -127,21 +127,12 @@ class ClientPortalShell extends StatelessWidget {
       );
     }
 
-    // Mobile layout with modern elevated bottom navigation bar
+    // Mobile layout with modern seamless bottom navigation bar
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: isDark ? ClientPortalColors.darkCardBackground : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF0F172A)
-                  .withValues(alpha: isDark ? 0.4 : 0.06),
-              blurRadius: 16,
-              offset: const Offset(0, -3),
-            ),
-          ],
           border: Border(
             top: BorderSide(
               color: isDark
@@ -150,19 +141,25 @@ class ClientPortalShell extends StatelessWidget {
               width: 1.0,
             ),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0F172A)
+                  .withValues(alpha: isDark ? 0.35 : 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          child: NavigationBarTheme(
-            data: NavigationBarThemeData(
-              height: 66,
-              elevation: 0,
-              backgroundColor: isDark
-                  ? ClientPortalColors.darkCardBackground
-                  : Colors.white,
-              indicatorColor: ClientPortalColors.primaryBlue.withValues(
-                alpha: isDark ? 0.22 : 0.12,
-              ),
+        child: NavigationBarTheme(
+          data: NavigationBarThemeData(
+            height: 66,
+            elevation: 0,
+            backgroundColor: isDark
+                ? ClientPortalColors.darkCardBackground
+                : Colors.white,
+            indicatorColor: ClientPortalColors.primaryBlue.withValues(
+              alpha: isDark ? 0.22 : 0.12,
+            ),
               indicatorShape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -243,7 +240,6 @@ class ClientPortalShell extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }

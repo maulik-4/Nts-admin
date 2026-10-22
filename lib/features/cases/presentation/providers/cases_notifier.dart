@@ -44,7 +44,8 @@ class CasesNotifier extends StateNotifier<AsyncValue<List<Case>>> {
 
   Future<void> loadCases() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _repository.getCases());
+    final res = await AsyncValue.guard(() => _repository.getCases());
+    if (mounted) state = res;
   }
 
   Future<Case> createCase(CreateCaseRequest request) async {

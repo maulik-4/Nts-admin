@@ -61,7 +61,8 @@ class TasksNotifier extends StateNotifier<AsyncValue<List<Task>>> {
 
   Future<void> loadTasks() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _repository.getTasks());
+    final res = await AsyncValue.guard(() => _repository.getTasks());
+    if (mounted) state = res;
   }
 
   Future<Task> createTask(CreateTaskRequest request) async {

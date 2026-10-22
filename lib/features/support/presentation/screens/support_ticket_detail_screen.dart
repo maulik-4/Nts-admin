@@ -59,6 +59,14 @@ class _SupportTicketDetailScreenState
   }
 
   Future<void> _resolve() async {
+    final userRole = ref.read(currentUserRoleProvider);
+    if (!userRole.isSuperAdmin) {
+      if (mounted) {
+        AppAlerts.showError(context, 'Only Super Admin can resolve help query requests.');
+      }
+      return;
+    }
+
     setState(() => _isResolving = true);
     try {
       await ref
@@ -80,6 +88,7 @@ class _SupportTicketDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    final userRole = ref.watch(currentUserRoleProvider);
     final ticketAsync = ref.watch(supportDetailProvider(widget.ticketId));
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -340,8 +349,8 @@ class _SupportTicketDetailScreenState
                       ),
                       const SizedBox(height: 16),
 
-                      // Resolve action button
-                      if (!ticket.isResolved)
+                      // Resolve action button - Only superAdmin can resolve help queries
+                      if (!ticket.isResolved && userRole.isSuperAdmin)
                         SizedBox(
                           height: 46,
                           child: OutlinedButton.icon(

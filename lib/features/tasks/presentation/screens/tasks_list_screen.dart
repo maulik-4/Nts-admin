@@ -8,6 +8,7 @@ import '../../../../shared/widgets/empty_state_widget.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../auth/domain/models/role_capabilities.dart';
+import '../../../dashboard/presentation/providers/dashboard_notifier.dart';
 import '../../data/models/task_model.dart';
 import '../providers/tasks_notifier.dart';
 import '../widgets/task_card.dart';
@@ -139,7 +140,10 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
         capability: UserCapability.createTask,
         child: FloatingActionButton.extended(
           heroTag: 'fab_add_task',
-          onPressed: () => context.push('/app/tasks/create'),
+          onPressed: () async {
+            await context.push('/app/tasks/create');
+            ref.read(tasksNotifierProvider.notifier).loadTasks();
+          },
           backgroundColor: const Color(0xFF0F1F38),
           foregroundColor: Colors.white,
           elevation: 4,
@@ -339,6 +343,7 @@ class _TasksListScreenState extends ConsumerState<TasksListScreen> {
                                   .read(tasksNotifierProvider.notifier)
                                   .reopenTask(task.id);
                             }
+                            ref.invalidate(dashboardNotifierProvider);
                           } catch (e) {
                             if (context.mounted) {
                               AppAlerts.showError(

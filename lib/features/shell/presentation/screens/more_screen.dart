@@ -552,18 +552,6 @@ class MoreScreen extends ConsumerWidget {
                 const SizedBox(height: 10),
               ],
 
-              // Firm Messages
-              _buildOperationTile(
-                context,
-                title: 'Firm Messages',
-                subtitle: 'Direct communication with firm colleagues',
-                icon: Icons.chat_bubble_outline_rounded,
-                iconColor: const Color(0xFF0891B2),
-                iconBgColor: const Color(0xFFECFEFF),
-                badgeText: 'Chat',
-                onTap: () => context.push('/app/more/messages'),
-              ),
-              const SizedBox(height: 10),
 
               // Notifications
               _buildOperationTile(

@@ -162,77 +162,73 @@ class AppShell extends ConsumerWidget {
       );
     }
 
-    // Mobile layout (< 600dp) with elevated rounded dock bar matching UI mocks
+    // Mobile layout (< 600dp) with seamless dock bar matching reference UI
     return Scaffold(
       body: buildScreenWithWatermark(navigationShell),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF0F172A)
-                  .withValues(alpha: isDark ? 0.4 : 0.06),
-              blurRadius: 18,
-              offset: const Offset(0, -4),
-            ),
-          ],
           border: Border(
             top: BorderSide(
               color: isDark
                   ? const Color(0xFF334155).withValues(alpha: 0.6)
-                  : const Color(0xFFE2E8F0).withValues(alpha: 0.8),
+                  : const Color(0xFFE2E8F0).withValues(alpha: 0.9),
               width: 1.0,
             ),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0F172A)
+                  .withValues(alpha: isDark ? 0.35 : 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-          child: NavigationBarTheme(
-            data: NavigationBarThemeData(
-              height: 68,
-              elevation: 0,
-              backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-              indicatorColor: selectedColor.withValues(
-                alpha: isDark ? 0.25 : 0.14,
-              ),
-              indicatorShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
-                    color: selectedColor,
-                  );
-                }
+        child: NavigationBarTheme(
+          data: NavigationBarThemeData(
+            height: 68,
+            elevation: 0,
+            backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+            indicatorColor: selectedColor.withValues(
+              alpha: isDark ? 0.25 : 0.14,
+            ),
+            indicatorShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
                 return TextStyle(
                   fontSize: 11.5,
-                  fontWeight: FontWeight.w500,
-                  color: isDark
-                      ? const Color(0xFF94A3B8)
-                      : const Color(0xFF64748B),
+                  fontWeight: FontWeight.w700,
+                  color: selectedColor,
                 );
-              }),
-            ),
-            child: NavigationBar(
-              selectedIndex: selectedIndex,
-              onDestinationSelected: onTap,
-              destinations: [
-                for (final d in destinations)
-                  NavigationDestination(
-                    icon: Icon(
-                      d.icon,
-                      color: isDark
-                          ? const Color(0xFF94A3B8)
-                          : const Color(0xFF64748B),
-                    ),
-                    selectedIcon: Icon(d.selectedIcon, color: selectedColor),
-                    label: d.label,
+              }
+              return TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w500,
+                color: isDark
+                    ? const Color(0xFF94A3B8)
+                    : const Color(0xFF64748B),
+              );
+            }),
+          ),
+          child: NavigationBar(
+            selectedIndex: selectedIndex,
+            onDestinationSelected: onTap,
+            destinations: [
+              for (final d in destinations)
+                NavigationDestination(
+                  icon: Icon(
+                    d.icon,
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
                   ),
-              ],
-            ),
+                  selectedIcon: Icon(d.selectedIcon, color: selectedColor),
+                  label: d.label,
+                ),
+            ],
           ),
         ),
       ),

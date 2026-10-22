@@ -5,8 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
+import '../../../../shared/widgets/searchable_picker_modal.dart';
 import '../../../cases/presentation/providers/cases_notifier.dart';
+import '../../../cases/presentation/screens/case_detail_screen.dart';
 import '../../../clients/presentation/providers/clients_notifier.dart';
+import '../../../dashboard/presentation/providers/dashboard_notifier.dart';
 import '../../data/models/payment_model.dart';
 import '../providers/payments_notifier.dart';
 
@@ -68,6 +71,10 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
       );
 
       await ref.read(paymentsNotifierProvider.notifier).createPayment(request);
+      ref.invalidate(dashboardNotifierProvider);
+      if (_selectedCaseId != null) {
+        ref.invalidate(caseDetailProvider(_selectedCaseId!));
+      }
 
       if (mounted) {
         AppAlerts.showSuccess(context, 'Payment record saved successfully.');
@@ -89,28 +96,152 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
     final clientsAsync = ref.watch(clientsNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Record Fee Payment',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
-        ),
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 650),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  LexCard(
-                    borderRadius: 20,
-                    padding: const EdgeInsets.all(20),
+      backgroundColor:
+          isDark ? const Color(0xFF070E1A) : const Color(0xFFF1F5F9),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Top Header with 1.1.png matching client_form_screen
+            Stack(
+              children: [
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/images/1.1.png',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.centerRight,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF071224), Color(0xFF1E3A8A)],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          const Color(0xFF071224).withValues(alpha: 0.95),
+                          const Color(0xFF071224).withValues(alpha: 0.8),
+                          const Color(0xFF0A1830).withValues(alpha: 0.35),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.45, 0.7, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+                SafeArea(
+                  bottom: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.arrow_back,
+                                  color: Colors.white),
+                              onPressed: () => context.pop(),
+                            ),
+                            const SizedBox(width: 4),
+                            const Text(
+                              'Record Fee Payment',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1E3A8A)
+                                    .withValues(alpha: 0.7),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: const Color(0xFF3B82F6)
+                                      .withValues(alpha: 0.5),
+                                ),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.currency_rupee_rounded,
+                                      size: 13, color: Color(0xFF93C5FD)),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'BILLING & FEE REVENUE',
+                                    style: TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.8,
+                                      color: Color(0xFF93C5FD),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Record Fee Receipt',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Log client fee collection, retainers, and legal service billing receipts with digital confirmation.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.white.withValues(alpha: 0.8),
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            // Form Body
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 650),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+                  child: Form(
+                    key: _formKey,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        LexCard(
+                          borderRadius: 20,
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -292,43 +423,137 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                         const SizedBox(height: 6),
                         clientsAsync.when(
                           data: (clients) {
-                            return DropdownButtonFormField<int?>(
-                              isExpanded: true,
-                              initialValue: _selectedClientId,
-                              decoration: InputDecoration(
-                                prefixIcon: const Icon(
-                                  Icons.person_outline_rounded,
-                                  size: 19,
-                                ),
-                                filled: true,
-                                fillColor: isDark
-                                    ? const Color(0xFF1E293B)
-                                    : const Color(0xFFF8FAFC),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              items: [
-                                const DropdownMenuItem<int?>(
-                                  value: null,
-                                  child: Text(
-                                    'None (General Practice Receipt)',
+                            final selectedClient = _selectedClientId == null
+                                ? null
+                                : clients
+                                    .where((cl) => cl.id == _selectedClientId)
+                                    .firstOrNull;
+
+                            return Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () async {
+                                  final items = [
+                                    const SearchablePickerItem<int>(
+                                      value: -1,
+                                      label: 'None (General Practice Receipt)',
+                                      subtitle:
+                                          'Do not associate with a specific client',
+                                      icon: Icons.remove_circle_outline_rounded,
+                                      iconColor: Color(0xFF64748B),
+                                    ),
+                                    ...clients.map((cl) {
+                                      final contact = cl.phone.isNotEmpty
+                                          ? cl.phone
+                                          : ((cl.email != null &&
+                                                  cl.email!.isNotEmpty)
+                                              ? cl.email!
+                                              : 'Client #${cl.id}');
+                                      return SearchablePickerItem<int>(
+                                        value: cl.id,
+                                        label: cl.name,
+                                        subtitle: contact,
+                                        icon: Icons.person_rounded,
+                                        iconColor: const Color(0xFF2563EB),
+                                      );
+                                    }),
+                                  ];
+
+                                  final pickedId =
+                                      await showSearchablePicker<int>(
+                                    context: context,
+                                    title: 'Select Associated Client',
+                                    searchHint:
+                                        'Search client name, phone, or email...',
+                                    selectedValue: _selectedClientId ?? -1,
+                                    items: items,
+                                  );
+
+                                  if (pickedId != null) {
+                                    setState(() {
+                                      _selectedClientId =
+                                          pickedId == -1 ? null : pickedId;
+                                    });
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 13,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF1E293B)
+                                        : const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? const Color(0xFF334155)
+                                          : const Color(0xFFCBD5E1),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.person_outline_rounded,
+                                        size: 19,
+                                        color: _selectedClientId != null
+                                            ? const Color(0xFF2563EB)
+                                            : (isDark
+                                                ? const Color(0xFF94A3B8)
+                                                : const Color(0xFF64748B)),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          selectedClient != null
+                                              ? selectedClient.name
+                                              : 'None (General Practice Receipt)',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: selectedClient != null
+                                                ? FontWeight.w600
+                                                : FontWeight.w400,
+                                            color: isDark
+                                                ? (selectedClient != null
+                                                    ? Colors.white
+                                                    : const Color(0xFF94A3B8))
+                                                : (selectedClient != null
+                                                    ? const Color(0xFF0F172A)
+                                                    : const Color(0xFF64748B)),
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      if (_selectedClientId != null)
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(
+                                              () => _selectedClientId = null,
+                                            );
+                                          },
+                                          child: Icon(
+                                            Icons.close_rounded,
+                                            size: 18,
+                                            color: isDark
+                                                ? const Color(0xFF94A3B8)
+                                                : const Color(0xFF64748B),
+                                          ),
+                                        )
+                                      else
+                                        Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          size: 20,
+                                          color: isDark
+                                              ? const Color(0xFF94A3B8)
+                                              : const Color(0xFF64748B),
+                                        ),
+                                    ],
                                   ),
                                 ),
-                                ...clients.map((cl) {
-                                  return DropdownMenuItem<int?>(
-                                    value: cl.id,
-                                    child: Text(
-                                      cl.name,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 13),
-                                    ),
-                                  );
-                                }),
-                              ],
-                              onChanged: (val) {
-                                setState(() => _selectedClientId = val);
-                              },
+                              ),
                             );
                           },
                           loading: () => const LinearProgressIndicator(),
@@ -350,41 +575,145 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                         const SizedBox(height: 6),
                         casesAsync.when(
                           data: (cases) {
-                            return DropdownButtonFormField<int?>(
-                              isExpanded: true,
-                              initialValue: _selectedCaseId,
-                              decoration: InputDecoration(
-                                prefixIcon: const Icon(
-                                  Icons.folder_open_rounded,
-                                  size: 19,
-                                ),
-                                filled: true,
-                                fillColor: isDark
-                                    ? const Color(0xFF1E293B)
-                                    : const Color(0xFFF8FAFC),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                            final selectedCase = _selectedCaseId == null
+                                ? null
+                                : cases
+                                    .where((c) => c.id == _selectedCaseId)
+                                    .firstOrNull;
+
+                            return Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () async {
+                                  final items = [
+                                    const SearchablePickerItem<int>(
+                                      value: -1,
+                                      label: 'None (General Legal Fee)',
+                                      subtitle:
+                                          'Do not associate with a specific case',
+                                      icon: Icons.remove_circle_outline_rounded,
+                                      iconColor: Color(0xFF64748B),
+                                    ),
+                                    ...cases.map((c) {
+                                      final subtitle = c.courtName.isNotEmpty
+                                          ? '${c.title} • ${c.courtName}'
+                                          : c.title;
+                                      return SearchablePickerItem<int>(
+                                        value: c.id,
+                                        label: c.caseNumber,
+                                        subtitle: subtitle,
+                                        icon: Icons.folder_rounded,
+                                        iconColor: const Color(0xFF2563EB),
+                                      );
+                                    }),
+                                  ];
+
+                                  final pickedId =
+                                      await showSearchablePicker<int>(
+                                    context: context,
+                                    title: 'Select Associated Case',
+                                    searchHint:
+                                        'Search case number, title, or court...',
+                                    selectedValue: _selectedCaseId ?? -1,
+                                    items: items,
+                                  );
+
+                                  if (pickedId != null) {
+                                    setState(() {
+                                      _selectedCaseId =
+                                          pickedId == -1 ? null : pickedId;
+                                      if (_selectedCaseId != null) {
+                                        final sc = cases
+                                            .where(
+                                              (c) => c.id == _selectedCaseId,
+                                            )
+                                            .firstOrNull;
+                                        if (sc != null &&
+                                            _selectedClientId == null) {
+                                          _selectedClientId = sc.client;
+                                        }
+                                      }
+                                    });
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 13,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF1E293B)
+                                        : const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? const Color(0xFF334155)
+                                          : const Color(0xFFCBD5E1),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.folder_open_rounded,
+                                        size: 19,
+                                        color: _selectedCaseId != null
+                                            ? const Color(0xFF2563EB)
+                                            : (isDark
+                                                ? const Color(0xFF94A3B8)
+                                                : const Color(0xFF64748B)),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          selectedCase != null
+                                              ? '${selectedCase.caseNumber} - ${selectedCase.title}'
+                                              : 'None (General Legal Fee)',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: selectedCase != null
+                                                ? FontWeight.w600
+                                                : FontWeight.w400,
+                                            color: isDark
+                                                ? (selectedCase != null
+                                                    ? Colors.white
+                                                    : const Color(0xFF94A3B8))
+                                                : (selectedCase != null
+                                                    ? const Color(0xFF0F172A)
+                                                    : const Color(0xFF64748B)),
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      if (_selectedCaseId != null)
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(
+                                              () => _selectedCaseId = null,
+                                            );
+                                          },
+                                          child: Icon(
+                                            Icons.close_rounded,
+                                            size: 18,
+                                            color: isDark
+                                                ? const Color(0xFF94A3B8)
+                                                : const Color(0xFF64748B),
+                                          ),
+                                        )
+                                      else
+                                        Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                          size: 20,
+                                          color: isDark
+                                              ? const Color(0xFF94A3B8)
+                                              : const Color(0xFF64748B),
+                                        ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              items: [
-                                const DropdownMenuItem<int?>(
-                                  value: null,
-                                  child: Text('None (General Legal Fee)'),
-                                ),
-                                ...cases.map((c) {
-                                  return DropdownMenuItem<int?>(
-                                    value: c.id,
-                                    child: Text(
-                                      '${c.caseNumber} - ${c.title}',
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 13),
-                                    ),
-                                  );
-                                }),
-                              ],
-                              onChanged: (val) {
-                                setState(() => _selectedCaseId = val);
-                              },
                             );
                           },
                           loading: () => const LinearProgressIndicator(),
@@ -397,7 +726,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
 
                   // Submit Button
                   SizedBox(
-                    height: 48,
+                    height: 52,
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _handleSubmit,
                       style: ElevatedButton.styleFrom(
@@ -406,24 +735,31 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        elevation: 3,
+                        elevation: 4,
                       ),
                       child: _isLoading
                           ? const SizedBox(
-                              width: 20,
-                              height: 20,
+                              width: 22,
+                              height: 22,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 color: Colors.white,
                               ),
                             )
-                          : const Text(
-                              'Record Payment Receipt',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14.5,
-                                letterSpacing: 0.2,
-                              ),
+                          : const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.receipt_long_rounded, size: 20),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Record Payment Receipt',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                    letterSpacing: 0.2,
+                                  ),
+                                ),
+                              ],
                             ),
                     ),
                   ),
@@ -433,6 +769,9 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
           ),
         ),
       ),
-    );
+    ],
+  ),
+),
+);
   }
 }

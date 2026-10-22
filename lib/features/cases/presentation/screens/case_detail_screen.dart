@@ -11,6 +11,7 @@ import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../../shared/widgets/status_badge.dart';
 import '../../../auth/domain/models/role_capabilities.dart';
+import '../../../dashboard/presentation/providers/dashboard_notifier.dart';
 import '../../../hearings/data/models/hearing_model.dart';
 import '../../../hearings/presentation/providers/hearings_notifier.dart';
 import '../../data/models/case_model.dart';
@@ -50,7 +51,11 @@ class CaseDetailScreen extends ConsumerWidget {
             child: IconButton(
               icon: const Icon(Icons.edit_outlined),
               tooltip: 'Edit Case',
-              onPressed: () => context.push('/app/cases/$caseId/edit'),
+              onPressed: () async {
+                await context.push('/app/cases/$caseId/edit');
+                ref.invalidate(caseDetailProvider(caseId));
+                ref.read(casesNotifierProvider.notifier).loadCases();
+              },
             ),
           ),
           CapabilityGate(
@@ -512,6 +517,7 @@ class CaseDetailScreen extends ConsumerWidget {
     if (confirmed == true && context.mounted) {
       try {
         await ref.read(casesNotifierProvider.notifier).deleteCase(caseId);
+        ref.invalidate(dashboardNotifierProvider);
         if (context.mounted) {
           AppAlerts.showSuccess(context, 'Case deleted successfully.');
           context.pop();

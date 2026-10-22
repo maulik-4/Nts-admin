@@ -18,6 +18,7 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardData>> {
 
   Future<void> loadDashboard() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _repository.getDashboardData());
+    final res = await AsyncValue.guard(() => _repository.getDashboardData());
+    if (mounted) state = res;
   }
 }

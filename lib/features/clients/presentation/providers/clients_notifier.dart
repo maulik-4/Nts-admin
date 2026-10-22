@@ -45,7 +45,8 @@ class ClientsNotifier extends StateNotifier<AsyncValue<List<Client>>> {
 
   Future<void> loadClients() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _repository.getClients());
+    final res = await AsyncValue.guard(() => _repository.getClients());
+    if (mounted) state = res;
   }
 
   Future<Client> createClient(CreateClientRequest request) async {

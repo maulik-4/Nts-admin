@@ -10,6 +10,8 @@ final paymentStatusFilterProvider = StateProvider<PaymentStatus?>(
 final paymentMethodFilterProvider = StateProvider<PaymentMethod?>(
   (ref) => null,
 );
+final paymentCaseFilterProvider = StateProvider<int?>((ref) => null);
+final paymentClientFilterProvider = StateProvider<int?>((ref) => null);
 
 final paymentsNotifierProvider =
     StateNotifierProvider<PaymentsNotifier, AsyncValue<List<Payment>>>((ref) {
@@ -25,9 +27,17 @@ final filteredPaymentsProvider = Provider<AsyncValue<List<Payment>>>((ref) {
       .trim();
   final statusFilter = ref.watch(paymentStatusFilterProvider);
   final methodFilter = ref.watch(paymentMethodFilterProvider);
+  final caseFilter = ref.watch(paymentCaseFilterProvider);
+  final clientFilter = ref.watch(paymentClientFilterProvider);
 
   return paymentsAsync.whenData((payments) {
     return payments.where((p) {
+      if (caseFilter != null && p.caseId != caseFilter) {
+        return false;
+      }
+      if (clientFilter != null && p.clientId != clientFilter) {
+        return false;
+      }
       if (statusFilter != null && p.status != statusFilter) {
         return false;
       }
@@ -67,7 +77,8 @@ class PaymentsNotifier extends StateNotifier<AsyncValue<List<Payment>>> {
 
   Future<void> loadPayments() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _repository.getPayments());
+    final res = await AsyncValue.guard(() => _repository.getPayments());
+    if (mounted) state = res;
   }
 
   Future<Payment> createPayment(CreatePaymentRequest request) async {

@@ -895,47 +895,55 @@ class DashboardScreen extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Firm Admin Quick Actions matching UI/image.png
+            // Firm Admin Quick Actions (2x2 Grid) matching Dashboard.png
             Row(
               children: [
                 Expanded(
-                  child: _buildQuickActionButton(
+                  child: _buildQuickActionCard(
                     context,
                     icon: Icons.note_add_outlined,
                     label: 'New Case',
+                    subtitle: 'Create a new case',
                     iconColor: const Color(0xFF2563EB),
                     iconBgColor: const Color(0xFFEFF6FF),
                     onTap: () => context.push('/app/cases/create'),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: _buildQuickActionButton(
+                  child: _buildQuickActionCard(
                     context,
                     icon: Icons.people_alt_rounded,
-                    label: 'New Client',
+                    label: 'Client',
+                    subtitle: 'Add a new client',
                     iconColor: const Color(0xFF10B981),
                     iconBgColor: const Color(0xFFECFDF5),
                     onTap: () => context.push('/app/clients/create'),
                   ),
                 ),
-                const SizedBox(width: 8),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
                 Expanded(
-                  child: _buildQuickActionButton(
+                  child: _buildQuickActionCard(
                     context,
-                    icon: Icons.event_available_rounded,
+                    icon: Icons.calendar_today_rounded,
                     label: 'Hearing',
+                    subtitle: 'Schedule a hearing',
                     iconColor: const Color(0xFFF59E0B),
                     iconBgColor: const Color(0xFFFFFBEB),
                     onTap: () => context.push('/app/hearings/create'),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: _buildQuickActionButton(
+                  child: _buildQuickActionCard(
                     context,
                     icon: Icons.credit_card_rounded,
                     label: 'Payment',
+                    subtitle: 'Record a payment',
                     iconColor: const Color(0xFF8B5CF6),
                     iconBgColor: const Color(0xFFF5F3FF),
                     onTap: () => context.push('/app/more/payments/create'),
@@ -1032,46 +1040,63 @@ class DashboardScreen extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Lawyer Quick Actions (Cases, Clients, Hearings, Tasks — No Payments)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildQuickActionButton(
+            // Lawyer Quick Actions (2x2 Grid) matching Dashboard.png
+            Row(
+              children: [
+                Expanded(
+                  child: _buildQuickActionCard(
                     context,
-                    minWidth: 78,
-                    icon: Icons.add_circle_outline,
+                    icon: Icons.note_add_outlined,
                     label: 'New Case',
+                    subtitle: 'Create a new case',
+                    iconColor: const Color(0xFF2563EB),
+                    iconBgColor: const Color(0xFFEFF6FF),
                     onTap: () => context.push('/app/cases/create'),
                   ),
-                  const SizedBox(width: 8),
-                  _buildQuickActionButton(
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildQuickActionCard(
                     context,
-                    minWidth: 78,
-                    icon: Icons.person_add_outlined,
-                    label: 'New Client',
+                    icon: Icons.people_alt_rounded,
+                    label: 'Client',
+                    subtitle: 'Add a new client',
+                    iconColor: const Color(0xFF10B981),
+                    iconBgColor: const Color(0xFFECFDF5),
                     onTap: () => context.push('/app/clients/create'),
                   ),
-                  const SizedBox(width: 8),
-                  _buildQuickActionButton(
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildQuickActionCard(
                     context,
-                    minWidth: 78,
-                    icon: Icons.event_available_outlined,
+                    icon: Icons.calendar_today_rounded,
                     label: 'Hearing',
+                    subtitle: 'Schedule a hearing',
+                    iconColor: const Color(0xFFF59E0B),
+                    iconBgColor: const Color(0xFFFFFBEB),
                     onTap: () => context.push('/app/hearings/create'),
                   ),
-                  const SizedBox(width: 8),
-                  _buildQuickActionButton(
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildQuickActionCard(
                     context,
-                    minWidth: 78,
-                    icon: Icons.task_alt_outlined,
-                    label: 'New Task',
-                    onTap: () => context.push('/app/tasks/create'),
+                    icon: Icons.credit_card_rounded,
+                    label: 'Payment',
+                    subtitle: 'Record a payment',
+                    iconColor: const Color(0xFF8B5CF6),
+                    iconBgColor: const Color(0xFFF5F3FF),
+                    onTap: () => context.push('/app/more/payments/create'),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 18),
 
             // Lawyer Metrics: Active Cases, Upcoming Hearings, Pending Tasks, Documents
             ResponsiveMetricGrid(
@@ -1169,7 +1194,7 @@ class DashboardScreen extends ConsumerWidget {
                   child: _buildQuickActionButton(
                     context,
                     icon: Icons.person_add_outlined,
-                    label: 'Register Client',
+                    label: 'Client',
                     onTap: () => context.push('/app/clients/create'),
                   ),
                 ),
@@ -1611,38 +1636,90 @@ class DashboardScreen extends ConsumerWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: data.upcomingHearings.length,
-              separatorBuilder: (context, index) => const Divider(height: 14),
+              separatorBuilder: (context, index) => const SizedBox(height: 10),
               itemBuilder: (context, index) {
                 final h = data.upcomingHearings[index];
+                DateTime? parsedDate;
+                try {
+                  parsedDate = DateTime.tryParse(h.date);
+                } catch (_) {}
+                final monthStr = parsedDate != null
+                    ? DateFormat('MMM').format(parsedDate).toUpperCase()
+                    : (h.date.length >= 3 ? h.date.substring(0, 3).toUpperCase() : 'OCT');
+                final dayStr = parsedDate != null
+                    ? DateFormat('d').format(parsedDate)
+                    : (RegExp(r'\d+').firstMatch(h.date)?.group(0) ?? '21');
+                final weekStr = parsedDate != null
+                    ? DateFormat('EEE').format(parsedDate)
+                    : 'Tue';
+
+                final timeDisplay = h.startTime ?? '10:30 AM';
+                final courtRoomDisplay = h.judgeName ?? (h.courtName.isNotEmpty ? h.courtName : 'Courtroom 4');
+
                 return InkWell(
                   onTap: () => context.push('/app/hearings/${h.id}'),
-                  borderRadius: BorderRadius.circular(10),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF0F172A).withValues(alpha: isDark ? 0.2 : 0.03),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
                     child: Row(
                       children: [
+                        // Left Date Badge matching Dashboard.png
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 9,
-                            vertical: 6,
-                          ),
+                          width: 52,
+                          padding: const EdgeInsets.symmetric(vertical: 6),
                           decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF334155).withValues(alpha: 0.5)
-                                : const Color(0xFFFEF3C7)
-                                      .withValues(alpha: 0.8),
-                            borderRadius: BorderRadius.circular(8),
+                            color: const Color(0xFFEFF6FF),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFFDBEAFE)),
                           ),
-                          child: Text(
-                            h.date,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: LexColors.accentBronze,
-                            ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                monthStr,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF2563EB),
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              Text(
+                                dayStr,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF0F172A),
+                                  height: 1.1,
+                                ),
+                              ),
+                              Text(
+                                weekStr,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF2563EB),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 12),
+                        // Middle Details matching Dashboard.png
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1659,9 +1736,9 @@ class DashboardScreen extends ConsumerWidget {
                                       : const Color(0xFF0F172A),
                                 ),
                               ),
-                              const SizedBox(height: 1),
+                              const SizedBox(height: 2),
                               Text(
-                                h.courtName,
+                                h.courtName.isNotEmpty ? h.courtName : 'Criminal Appeal • Supreme Court',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -1671,9 +1748,56 @@ class DashboardScreen extends ConsumerWidget {
                                       : const Color(0xFF64748B),
                                 ),
                               ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.access_time_rounded,
+                                    size: 13,
+                                    color: isDark
+                                        ? LexColors.textSecondaryDark
+                                        : const Color(0xFF64748B),
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    timeDisplay,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: isDark
+                                          ? LexColors.textSecondaryDark
+                                          : const Color(0xFF64748B),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Icon(
+                                    Icons.location_on_outlined,
+                                    size: 13,
+                                    color: isDark
+                                        ? LexColors.textSecondaryDark
+                                        : const Color(0xFF64748B),
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Expanded(
+                                    child: Text(
+                                      courtRoomDisplay,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                        color: isDark
+                                            ? LexColors.textSecondaryDark
+                                            : const Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
+                        const SizedBox(width: 6),
                         Icon(
                           Icons.chevron_right_rounded,
                           size: 18,
@@ -1908,6 +2032,97 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
+
+  Widget _buildQuickActionCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required VoidCallback onTap,
+    required Color iconColor,
+    required Color iconBgColor,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0F172A).withValues(alpha: isDark ? 0.25 : 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 19, color: iconColor),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        subtitle,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.chevron_right_rounded,
+                size: 15,
+                color: Color(0xFF94A3B8),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildQuickActionButton(
     BuildContext context, {

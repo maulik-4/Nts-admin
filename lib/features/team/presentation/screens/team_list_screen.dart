@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -8,11 +9,14 @@ import '../../../../core/theme/lex_colors.dart';
 import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/capability_gate.dart';
 import '../../../../shared/widgets/lex_card.dart';
+import '../../../../shared/widgets/searchable_picker_modal.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../auth/domain/models/role_capabilities.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../../clients/data/models/client_model.dart';
 import '../../../clients/presentation/providers/clients_notifier.dart';
+import '../../../dashboard/presentation/providers/dashboard_notifier.dart';
+import '../../../firms/presentation/providers/firms_notifier.dart';
 import '../../data/models/team_member.dart';
 import '../providers/team_notifier.dart';
 
@@ -31,6 +35,9 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
   @override
   void initState() {
     super.initState();
+    Future.microtask(() {
+      ref.read(teamSearchQueryProvider.notifier).state = '';
+    });
     if (widget.initialFilter == 'lawyer' ||
         widget.initialFilter == 'advocates') {
       Future.microtask(
@@ -46,12 +53,15 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
     super.dispose();
   }
 
-  void _showAddMemberModal(BuildContext context) {
+  void _showAddMemberModal(
+    BuildContext context, {
+    String initialRole = 'lawyer',
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => const _AddMemberModalSheet(),
+      builder: (ctx) => _AddMemberModalSheet(initialRole: initialRole),
     );
   }
 
@@ -624,21 +634,309 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
     );
   }
 
+  Widget _buildRoleFilterButton({
+    required BuildContext context,
+    required TeamFilter activeFilter,
+    required int advocatesCount,
+    required int staffCount,
+    required int adminCount,
+    required int clientsCount,
+    required bool isDark,
+  }) {
+    final hasSelection = activeFilter != TeamFilter.all;
+    String roleLabel = 'Filter by Role';
+    if (activeFilter == TeamFilter.advocates) roleLabel = 'Role: Advocates';
+    if (activeFilter == TeamFilter.staff) roleLabel = 'Role: Staff';
+    if (activeFilter == TeamFilter.admin) roleLabel = 'Role: Admins';
+    if (activeFilter == TeamFilter.clients) roleLabel = 'Role: Clients';
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () async {
+          final items = [
+            const SearchablePickerItem<TeamFilter>(
+              value: TeamFilter.all,
+              label: 'All Roles',
+              subtitle: 'Show all advocates, staff, admins, and clients',
+              icon: Icons.clear_all_rounded,
+              iconColor: Color(0xFF64748B),
+            ),
+            SearchablePickerItem<TeamFilter>(
+              value: TeamFilter.advocates,
+              label: 'Advocates / Lawyers',
+              subtitle:
+                  '$advocatesCount members with practicing advocate credentials',
+              icon: Icons.gavel_rounded,
+              iconColor: const Color(0xFF1E40AF),
+            ),
+            SearchablePickerItem<TeamFilter>(
+              value: TeamFilter.staff,
+              label: 'Legal Staff',
+              subtitle: '$staffCount paralegals and administrative personnel',
+              icon: Icons.badge_outlined,
+              iconColor: const Color(0xFF475569),
+            ),
+            SearchablePickerItem<TeamFilter>(
+              value: TeamFilter.admin,
+              label: 'Firm Admins',
+              subtitle: '$adminCount firm management administrators',
+              icon: Icons.shield_outlined,
+              iconColor: const Color(0xFF0F1F38),
+            ),
+            SearchablePickerItem<TeamFilter>(
+              value: TeamFilter.clients,
+              label: 'Clients',
+              subtitle: '$clientsCount registered client profiles',
+              icon: Icons.person_outline_rounded,
+              iconColor: const Color(0xFF7C3AED),
+            ),
+          ];
+
+          final picked = await showSearchablePicker<TeamFilter>(
+            context: context,
+            title: 'Filter by Role',
+            searchHint: 'Search role (Advocate, Staff, Admin, Client)...',
+            selectedValue: activeFilter,
+            items: items,
+          );
+
+          if (picked != null) {
+            ref.read(teamFilterProvider.notifier).state = picked;
+          }
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: hasSelection
+                ? (isDark
+                    ? const Color(0xFF1E3A8A).withAlpha(89)
+                    : const Color(0xFFEFF6FF))
+                : (isDark ? const Color(0xFF1E293B) : Colors.white),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: hasSelection
+                  ? (isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB))
+                  : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                hasSelection ? Icons.badge_rounded : Icons.tune_rounded,
+                size: 15,
+                color: hasSelection
+                    ? const Color(0xFF2563EB)
+                    : (isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B)),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                roleLabel,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight:
+                      hasSelection ? FontWeight.w700 : FontWeight.w500,
+                  color: hasSelection
+                      ? (isDark
+                          ? const Color(0xFF60A5FA)
+                          : const Color(0xFF1D4ED8))
+                      : (isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF475569)),
+                ),
+              ),
+              const SizedBox(width: 4),
+              if (hasSelection)
+                GestureDetector(
+                  onTap: () {
+                    ref.read(teamFilterProvider.notifier).state =
+                        TeamFilter.all;
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFDBEAFE),
+                    ),
+                    child: Icon(
+                      Icons.close_rounded,
+                      size: 12,
+                      color: isDark ? Colors.white : const Color(0xFF1E3A8A),
+                    ),
+                  ),
+                )
+              else
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 16,
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFirmFilterButton({
+    required BuildContext context,
+    required List<dynamic> firms,
+    required int? selectedFirmId,
+    required bool isDark,
+  }) {
+    dynamic selectedFirm;
+    if (selectedFirmId != null) {
+      for (final f in firms) {
+        if (f.id == selectedFirmId) {
+          selectedFirm = f;
+          break;
+        }
+      }
+    }
+    final hasSelection = selectedFirm != null;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () async {
+          final items = [
+            const SearchablePickerItem<int?>(
+              value: null,
+              label: 'All Firms',
+              subtitle: 'Show team members across all firms',
+              icon: Icons.clear_all_rounded,
+              iconColor: Color(0xFF64748B),
+            ),
+            ...firms.map((f) => SearchablePickerItem<int?>(
+                  value: f.id as int,
+                  label: f.name as String,
+                  subtitle: (f.domain as String).isNotEmpty
+                      ? (f.domain as String)
+                      : 'Firm #${f.id}',
+                  icon: Icons.business_rounded,
+                  iconColor: const Color(0xFF2563EB),
+                )),
+          ];
+
+          final picked = await showSearchablePicker<int?>(
+            context: context,
+            title: 'Filter by Firm',
+            searchHint: 'Search firm name or domain...',
+            selectedValue: selectedFirmId,
+            items: items,
+          );
+
+          ref.read(teamFirmFilterProvider.notifier).state = picked;
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: hasSelection
+                ? (isDark
+                    ? const Color(0xFF1E3A8A).withAlpha(89)
+                    : const Color(0xFFEFF6FF))
+                : (isDark ? const Color(0xFF1E293B) : Colors.white),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: hasSelection
+                  ? (isDark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB))
+                  : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                hasSelection ? Icons.business_rounded : Icons.domain_rounded,
+                size: 15,
+                color: hasSelection
+                    ? const Color(0xFF2563EB)
+                    : (isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B)),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                hasSelection ? selectedFirm.name as String : 'Filter by Firm',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight:
+                      hasSelection ? FontWeight.w700 : FontWeight.w500,
+                  color: hasSelection
+                      ? (isDark
+                          ? const Color(0xFF60A5FA)
+                          : const Color(0xFF1D4ED8))
+                      : (isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF475569)),
+                ),
+              ),
+              const SizedBox(width: 4),
+              if (hasSelection)
+                GestureDetector(
+                  onTap: () {
+                    ref.read(teamFirmFilterProvider.notifier).state = null;
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFDBEAFE),
+                    ),
+                    child: Icon(
+                      Icons.close_rounded,
+                      size: 12,
+                      color: isDark ? Colors.white : const Color(0xFF1E3A8A),
+                    ),
+                  ),
+                )
+              else
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  size: 16,
+                  color: isDark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final filteredMembersAsync = ref.watch(filteredTeamMembersProvider);
     final allMembers = ref.watch(teamNotifierProvider).value ?? [];
-    final clientsAsync = ref.watch(filteredClientsProvider);
+    final clientsAsync = ref.watch(teamClientsProvider);
     final allClients = ref.watch(clientsNotifierProvider).value ?? [];
     final activeFilter = ref.watch(teamFilterProvider);
+    final currentUser = ref.watch(authNotifierProvider).user;
+    final selectedFirmId = ref.watch(teamFirmFilterProvider);
+    final firmsAsync = ref.watch(firmsNotifierProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final advocatesCount = allMembers
-        .where((m) => m.role.toLowerCase() == 'lawyer')
-        .length;
-    final staffCount = allMembers
-        .where((m) => m.role.toLowerCase() == 'staff')
-        .length;
+    final adminCount = allMembers.where((m) => m.isFirmAdmin).length;
+    final advocatesCount =
+        allMembers.where((m) => m.role.toLowerCase() == 'lawyer').length;
+    final staffCount =
+        allMembers.where((m) => m.role.toLowerCase() == 'staff').length;
     final clientsCount = allClients.length;
     final totalCount = allMembers.length + clientsCount;
 
@@ -663,14 +961,36 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
         capability: UserCapability.manageTeam,
         child: FloatingActionButton.extended(
           heroTag: 'fab_add_member',
-          onPressed: () => _showAddMemberModal(context),
+          onPressed: () async {
+            if (activeFilter == TeamFilter.clients) {
+              await context.push('/app/clients/create');
+              if (context.mounted) {
+                ref.read(clientsNotifierProvider.notifier).loadClients();
+              }
+            } else if (activeFilter == TeamFilter.staff) {
+              _showAddMemberModal(context, initialRole: 'staff');
+            } else if (activeFilter == TeamFilter.admin) {
+              _showAddMemberModal(context, initialRole: 'admin');
+            } else {
+              _showAddMemberModal(context, initialRole: 'lawyer');
+            }
+          },
           backgroundColor: const Color(0xFF0F1F38),
           foregroundColor: Colors.white,
           elevation: 4,
-          icon: const Icon(Icons.person_add_rounded, size: 20),
-          label: const Text(
-            'Add Member',
-            style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
+          icon: Icon(
+            activeFilter == TeamFilter.clients
+                ? Icons.person_add_alt_1_rounded
+                : Icons.person_add_rounded,
+            size: 20,
+          ),
+          label: Text(
+            activeFilter == TeamFilter.clients
+                ? 'Add Client'
+                : activeFilter == TeamFilter.staff
+                    ? 'Add Staff'
+                    : 'Add Member',
+            style: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.2),
           ),
         ),
       ),
@@ -683,7 +1003,6 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
               controller: _searchCtrl,
               onChanged: (val) {
                 ref.read(teamSearchQueryProvider.notifier).state = val;
-                ref.read(clientSearchQueryProvider.notifier).state = val;
               },
               decoration: InputDecoration(
                 hintText: 'Search members, advocates, or clients...',
@@ -706,8 +1025,6 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                         onPressed: () {
                           _searchCtrl.clear();
                           ref.read(teamSearchQueryProvider.notifier).state = '';
-                          ref.read(clientSearchQueryProvider.notifier).state =
-                              '';
                         },
                       )
                     : null,
@@ -744,7 +1061,7 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
             ),
           ),
 
-          // Filter Tabs with Counts
+          // Filter Row: All, Filter by Role, Filter by Firm, Quick Pills
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -754,11 +1071,41 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                   context: context,
                   label: 'All',
                   count: totalCount,
-                  isSelected: activeFilter == TeamFilter.all,
-                  onTap: () => ref.read(teamFilterProvider.notifier).state =
-                      TeamFilter.all,
+                  isSelected:
+                      activeFilter == TeamFilter.all && selectedFirmId == null,
+                  onTap: () {
+                    ref.read(teamFilterProvider.notifier).state =
+                        TeamFilter.all;
+                    ref.read(teamFirmFilterProvider.notifier).state = null;
+                  },
                 ),
                 const SizedBox(width: 8),
+                _buildRoleFilterButton(
+                  context: context,
+                  activeFilter: activeFilter,
+                  advocatesCount: advocatesCount,
+                  staffCount: staffCount,
+                  adminCount: adminCount,
+                  clientsCount: clientsCount,
+                  isDark: isDark,
+                ),
+                if (currentUser?.isSuperAdmin == true) ...[
+                  const SizedBox(width: 8),
+                  _buildFirmFilterButton(
+                    context: context,
+                    firms: firmsAsync.valueOrNull ?? [],
+                    selectedFirmId: selectedFirmId,
+                    isDark: isDark,
+                  ),
+                ],
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  width: 1,
+                  height: 22,
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFCBD5E1),
+                ),
                 _buildFilterPill(
                   context: context,
                   label: 'Advocates',
@@ -779,6 +1126,15 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
                 const SizedBox(width: 8),
                 _buildFilterPill(
                   context: context,
+                  label: 'Admins',
+                  count: adminCount,
+                  isSelected: activeFilter == TeamFilter.admin,
+                  onTap: () => ref.read(teamFilterProvider.notifier).state =
+                      TeamFilter.admin,
+                ),
+                const SizedBox(width: 8),
+                _buildFilterPill(
+                  context: context,
                   label: 'Clients',
                   count: clientsCount,
                   isSelected: activeFilter == TeamFilter.clients,
@@ -788,6 +1144,94 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
               ],
             ),
           ),
+
+          // Active filter banner with quick create
+          if (activeFilter != TeamFilter.all || selectedFirmId != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFDBEAFE),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.filter_alt_rounded,
+                      size: 16,
+                      color: Color(0xFF2563EB),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        activeFilter == TeamFilter.advocates
+                            ? 'Showing $advocatesCount Advocates'
+                            : activeFilter == TeamFilter.staff
+                                ? 'Showing $staffCount Legal Staff'
+                                : activeFilter == TeamFilter.admin
+                                    ? 'Showing $adminCount Firm Admins'
+                                    : activeFilter == TeamFilter.clients
+                                        ? 'Showing $clientsCount Clients'
+                                        : 'Filtered by Firm',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? const Color(0xFF93C5FD)
+                              : const Color(0xFF1D4ED8),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: () async {
+                        if (activeFilter == TeamFilter.clients) {
+                          await context.push('/app/clients/create');
+                          if (context.mounted) {
+                            ref.read(clientsNotifierProvider.notifier).loadClients();
+                          }
+                        } else if (activeFilter == TeamFilter.staff) {
+                          _showAddMemberModal(context, initialRole: 'staff');
+                        } else if (activeFilter == TeamFilter.admin) {
+                          _showAddMemberModal(context, initialRole: 'admin');
+                        } else {
+                          _showAddMemberModal(context, initialRole: 'lawyer');
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
+                        child: Text(
+                          activeFilter == TeamFilter.clients
+                              ? '+ Add Client'
+                              : activeFilter == TeamFilter.staff
+                                  ? '+ Add Staff'
+                                  : '+ Add Member',
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF2563EB),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           const SizedBox(height: 8),
 
           // Member & Client List
@@ -876,7 +1320,8 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
     }
 
     if (activeFilter == TeamFilter.advocates ||
-        activeFilter == TeamFilter.staff) {
+        activeFilter == TeamFilter.staff ||
+        activeFilter == TeamFilter.admin) {
       return filteredMembersAsync.when(
         loading: () => ListView.separated(
           padding: const EdgeInsets.all(16),
@@ -915,7 +1360,9 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
               icon: Icons.group_outlined,
               title: activeFilter == TeamFilter.advocates
                   ? 'No advocates found in your firm'
-                  : 'No staff members found in your firm',
+                  : activeFilter == TeamFilter.admin
+                      ? 'No firm admins found in your firm'
+                      : 'No staff members found in your firm',
               description: 'Add advocates and staff to collaborate in your firm workspace.',
               isDark: isDark,
             );
@@ -1387,7 +1834,9 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen> {
 }
 
 class _AddMemberModalSheet extends ConsumerStatefulWidget {
-  const _AddMemberModalSheet();
+  final String initialRole;
+
+  const _AddMemberModalSheet({this.initialRole = 'lawyer'});
 
   @override
   ConsumerState<_AddMemberModalSheet> createState() =>
@@ -1399,9 +1848,15 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
   final _usernameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
-  String _selectedRole = 'lawyer';
+  late String _selectedRole;
   int _mode = 0; // 0: Add Directly, 1: Send Invite
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = widget.initialRole;
+  }
 
   @override
   void dispose() {
@@ -1427,6 +1882,7 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
               role: _selectedRole,
               firmId: currentFirmId,
             );
+        ref.invalidate(dashboardNotifierProvider);
         if (mounted) {
           Navigator.of(context).pop();
           AppAlerts.showSuccess(context, 'Member added to firm successfully.');
@@ -1435,6 +1891,7 @@ class _AddMemberModalSheetState extends ConsumerState<_AddMemberModalSheet> {
         await ref
             .read(teamNotifierProvider.notifier)
             .inviteMember(email: _emailCtrl.text.trim(), role: _selectedRole);
+        ref.invalidate(dashboardNotifierProvider);
         if (mounted) {
           Navigator.of(context).pop();
           AppAlerts.showSuccess(context, 'Invitation email sent successfully.');

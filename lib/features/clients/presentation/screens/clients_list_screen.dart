@@ -83,7 +83,10 @@ class ClientsListScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab_add_client',
-        onPressed: () => context.push('/app/clients/create'),
+        onPressed: () async {
+          await context.push('/app/clients/create');
+          ref.read(clientsNotifierProvider.notifier).loadClients();
+        },
         backgroundColor: const Color(0xFF0F1F38),
         foregroundColor: Colors.white,
         elevation: 4,
@@ -116,6 +119,14 @@ class ClientsListScreen extends ConsumerWidget {
                       ? const Color(0xFF94A3B8)
                       : const Color(0xFF64748B),
                 ),
+                suffixIcon: ref.watch(clientSearchQueryProvider).isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        onPressed: () {
+                          ref.read(clientSearchQueryProvider.notifier).state = '';
+                        },
+                      )
+                    : null,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 14,
                   vertical: 12,
@@ -196,7 +207,10 @@ class ClientsListScreen extends ConsumerWidget {
                     title: 'No Clients Found',
                     message: 'No client profiles match your search criteria or active filter.',
                     actionLabel: 'Add New Client',
-                    onAction: () => context.push('/app/clients/create'),
+                    onAction: () async {
+                      await context.push('/app/clients/create');
+                      ref.read(clientsNotifierProvider.notifier).loadClients();
+                    },
                   );
                 }
 

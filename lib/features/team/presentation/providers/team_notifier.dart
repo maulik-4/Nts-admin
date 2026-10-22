@@ -1,14 +1,34 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/presentation/providers/auth_notifier.dart';
+import '../../../clients/data/models/client_model.dart';
+import '../../../clients/presentation/providers/clients_notifier.dart';
 import '../../data/models/team_member.dart';
 import '../../data/repositories/team_repository.dart';
 
-enum TeamFilter { all, advocates, staff, clients }
+enum TeamFilter { all, advocates, staff, admin, clients }
 
 final teamFilterProvider = StateProvider<TeamFilter>((ref) => TeamFilter.all);
 
 final teamSearchQueryProvider = StateProvider<String>((ref) => '');
+
+final teamFirmFilterProvider = StateProvider<int?>((ref) => null);
+
+final teamClientsProvider = Provider<AsyncValue<List<Client>>>((ref) {
+  final clientsAsync = ref.watch(clientsNotifierProvider);
+  final query = ref.watch(teamSearchQueryProvider).toLowerCase().trim();
+
+  return clientsAsync.whenData((clients) {
+    if (query.isEmpty) return clients;
+    return clients.where((c) {
+      final nameMatches = c.name.toLowerCase().contains(query);
+      final phoneMatches = c.phone.toLowerCase().contains(query);
+      final emailMatches = c.email?.toLowerCase().contains(query) ?? false;
+      final cityMatches = c.city?.toLowerCase().contains(query) ?? false;
+      return nameMatches || phoneMatches || emailMatches || cityMatches;
+    }).toList();
+  });
+});
 
 final teamNotifierProvider =
     StateNotifierProvider<TeamNotifier, AsyncValue<List<TeamMember>>>((ref) {
@@ -66,10 +86,24 @@ final filteredTeamMembersProvider = Provider<AsyncValue<List<TeamMember>>>((
         }
       }
 
+      // If viewing user is a platform admin who selected a firm filter
+      if (currentUser?.isSuperAdmin == true) {
+        final selectedFirmId = ref.watch(teamFirmFilterProvider);
+        if (selectedFirmId != null) {
+          final memberFirmId = m.firmId;
+          final matchesId =
+              memberFirmId != null && memberFirmId == selectedFirmId;
+          final matchesIdString = m.firm.trim() == selectedFirmId.toString();
+          if (!matchesId && !matchesIdString) {
+            return false;
+          }
+        }
+      }
+
       return true;
     }).toList();
 
-    // 2. Role tab filtering (advocates vs staff vs all)
+    // 2. Role tab filtering (advocates vs staff vs admin vs all)
     List<TeamMember> roleFiltered;
     switch (filter) {
       case TeamFilter.advocates:
@@ -77,6 +111,9 @@ final filteredTeamMembersProvider = Provider<AsyncValue<List<TeamMember>>>((
         break;
       case TeamFilter.staff:
         roleFiltered = firmScoped.where((m) => m.isStaff).toList();
+        break;
+      case TeamFilter.admin:
+        roleFiltered = firmScoped.where((m) => m.isFirmAdmin).toList();
         break;
       case TeamFilter.clients:
         roleFiltered = [];
@@ -110,9 +147,10 @@ class TeamNotifier extends StateNotifier<AsyncValue<List<TeamMember>>> {
 
   Future<void> loadTeamMembers() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
+    final res = await AsyncValue.guard(
       () => _repository.getTeamMembers(firmId: _firmId),
     );
+    if (mounted) state = res;
   }
 
   Future<void> addUser({

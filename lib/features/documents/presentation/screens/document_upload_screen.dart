@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/lex_colors.dart';
 import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/lex_card.dart';
+import '../../../../shared/widgets/searchable_picker_modal.dart';
 import '../../../cases/presentation/providers/cases_notifier.dart';
 import '../providers/documents_notifier.dart';
 
@@ -38,12 +39,20 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
+        allowedExtensions: ['pdf'],
       );
 
       if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        final ext = file.extension?.toLowerCase() ?? '';
+        if (ext != 'pdf') {
+          if (mounted) {
+            AppAlerts.showError(context, 'Only PDF documents (.pdf) are allowed.');
+          }
+          return;
+        }
         setState(() {
-          _pickedFile = result.files.first;
+          _pickedFile = file;
         });
       }
     } catch (e) {
@@ -60,7 +69,12 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     }
 
     if (_pickedFile == null || _pickedFile!.path == null) {
-      AppAlerts.showError(context, 'Please select a file to upload.');
+      AppAlerts.showError(context, 'Please select a PDF file to upload.');
+      return;
+    }
+
+    if (_pickedFile!.extension?.toLowerCase() != 'pdf') {
+      AppAlerts.showError(context, 'Only PDF documents (.pdf) can be uploaded.');
       return;
     }
 
@@ -194,67 +208,147 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                         const SizedBox(height: 6),
                         casesAsync.when(
                           data: (cases) {
-                            return DropdownButtonFormField<int>(
-                              initialValue: _selectedCaseId,
-                              decoration: InputDecoration(
-                                hintText: 'Select case',
-                                hintStyle: TextStyle(
-                                  fontSize: 13,
+                            if (cases.isEmpty) {
+                              return Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
                                   color: isDark
-                                      ? const Color(0xFF64748B)
-                                      : const Color(0xFF94A3B8),
+                                      ? const Color(0xFF1E293B)
+                                      : const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? const Color(0xFF334155)
+                                        : const Color(0xFFE2E8F0),
+                                  ),
                                 ),
-                                prefixIcon: Icon(
-                                  Icons.balance_rounded,
-                                  size: 19,
-                                  color: isDark
-                                      ? const Color(0xFF94A3B8)
-                                      : const Color(0xFF64748B),
+                                child: Text(
+                                  'No active cases available',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: isDark
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B),
+                                  ),
                                 ),
-                                filled: true,
-                                fillColor: isDark
-                                    ? const Color(0xFF1E293B)
-                                    : const Color(0xFFF8FAFC),
-                                contentPadding: const EdgeInsets.symmetric(
+                              );
+                            }
+
+                            final selectedCase = _selectedCaseId != null
+                                ? cases
+                                    .where((c) => c.id == _selectedCaseId)
+                                    .firstOrNull
+                                : null;
+
+                            return InkWell(
+                              onTap: _isUploading
+                                  ? null
+                                  : () async {
+                                      final pickedId =
+                                          await showSearchablePicker<int>(
+                                        context: context,
+                                        title: 'Select Associated Case',
+                                        searchHint:
+                                            'Search case number, title, or court...',
+                                        selectedValue: _selectedCaseId,
+                                        items: cases.map((c) {
+                                          return SearchablePickerItem<int>(
+                                            value: c.id,
+                                            label: c.caseNumber,
+                                            subtitle:
+                                                '${c.title} • ${c.courtName}',
+                                            icon: Icons.balance_rounded,
+                                            iconColor: const Color(0xFF2563EB),
+                                          );
+                                        }).toList(),
+                                      );
+                                      if (pickedId != null) {
+                                        setState(() =>
+                                            _selectedCaseId = pickedId);
+                                      }
+                                    },
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
                                   horizontal: 14,
-                                  vertical: 12,
+                                  vertical: 13,
                                 ),
-                                border: OutlineInputBorder(
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF1E293B)
+                                      : const Color(0xFFF8FAFC),
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
-                                    color: isDark
-                                        ? const Color(0xFF334155)
-                                        : const Color(0xFFE2E8F0),
+                                  border: Border.all(
+                                    color: _selectedCaseId == null
+                                        ? (isDark
+                                            ? const Color(0xFF334155)
+                                            : const Color(0xFFCBD5E1))
+                                        : const Color(0xFF2563EB)
+                                            .withValues(alpha: 0.5),
+                                    width: _selectedCaseId != null ? 1.5 : 1,
                                   ),
                                 ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
-                                    color: isDark
-                                        ? const Color(0xFF334155)
-                                        : const Color(0xFFE2E8F0),
-                                  ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.balance_rounded,
+                                      size: 19,
+                                      color: _selectedCaseId != null
+                                        ? const Color(0xFF2563EB)
+                                        : (isDark
+                                            ? const Color(0xFF94A3B8)
+                                            : const Color(0xFF64748B)),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: selectedCase != null
+                                          ? Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  selectedCase.caseNumber,
+                                                  style: TextStyle(
+                                                    fontSize: 13.5,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: isDark
+                                                        ? Colors.white
+                                                        : const Color(0xFF0F172A),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '${selectedCase.title} • ${selectedCase.courtName}',
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: 11.5,
+                                                    color: isDark
+                                                        ? const Color(0xFF94A3B8)
+                                                        : const Color(0xFF64748B),
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          : Text(
+                                              'Search and select a case...',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                color: isDark
+                                                    ? const Color(0xFF64748B)
+                                                    : const Color(0xFF94A3B8),
+                                              ),
+                                            ),
+                                    ),
+                                    Icon(
+                                      Icons.arrow_drop_down_rounded,
+                                      color: isDark
+                                          ? const Color(0xFF94A3B8)
+                                          : const Color(0xFF64748B),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              items: cases.map((c) {
-                                return DropdownMenuItem<int>(
-                                  value: c.id,
-                                  child: Text(
-                                    '${c.caseNumber} - ${c.title}',
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 13),
-                                  ),
-                                );
-                              }).toList(),
-                              validator: (val) {
-                                if (val == null) {
-                                  return 'Associated case is required';
-                                }
-                                return null;
-                              },
-                              onChanged: (val) {
-                                setState(() => _selectedCaseId = val);
-                              },
                             );
                           },
                           loading: () => const LinearProgressIndicator(),
@@ -336,7 +430,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                                 Text(
                                   _pickedFile != null
                                       ? '${(_pickedFile!.size / 1024).toStringAsFixed(1)} KB'
-                                      : 'Supports PDF, DOC, DOCX, TXT, JPG, PNG up to 25MB',
+                                      : 'Only PDF documents (.pdf) are supported up to 25MB',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 12,

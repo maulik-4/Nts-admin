@@ -55,7 +55,10 @@ class DocumentsNotifier extends StateNotifier<AsyncValue<List<Document>>> {
 
   Future<void> loadDocuments() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _repository.getDocuments());
+    final res = await AsyncValue.guard(() => _repository.getDocuments());
+    if (mounted) {
+      state = res;
+    }
   }
 
   Future<Document> uploadDocument({

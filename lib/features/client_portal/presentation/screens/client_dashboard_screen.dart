@@ -113,7 +113,7 @@ class _DashboardBody extends ConsumerWidget {
               WelcomeCard(data: data),
               const SizedBox(height: 16),
 
-              // 2. Metrics / Overview row
+              // 2. Metrics / Overview row matching 4.png
               Row(
                 children: [
                   Expanded(
@@ -121,7 +121,7 @@ class _DashboardBody extends ConsumerWidget {
                       label: 'Active Cases',
                       count: activeCasesCount.toString(),
                       icon: Icons.work_outline_rounded,
-                      color: ClientPortalColors.primaryBlue,
+                      color: const Color(0xFF2563EB),
                       onTap: () => context.go('/client/cases'),
                       isDark: isDark,
                     ),
@@ -129,10 +129,10 @@ class _DashboardBody extends ConsumerWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _StatMetricCard(
-                      label: 'Upcoming',
+                      label: 'Upcoming\nHearings',
                       count: upcomingHearingsCount.toString(),
-                      icon: Icons.calendar_today_rounded,
-                      color: ClientPortalColors.warning,
+                      icon: Icons.calendar_today_outlined,
+                      color: const Color(0xFFF97316),
                       onTap: () => context.go('/client/hearings'),
                       isDark: isDark,
                     ),
@@ -143,7 +143,7 @@ class _DashboardBody extends ConsumerWidget {
                       label: 'Documents',
                       count: documentsCount.toString(),
                       icon: Icons.folder_outlined,
-                      color: ClientPortalColors.success,
+                      color: const Color(0xFF10B981),
                       onTap: () => context.go('/client/documents'),
                       isDark: isDark,
                     ),
@@ -490,19 +490,18 @@ class _StatMetricCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark
             ? ClientPortalColors.darkCardBackground
-            : ClientPortalColors.cardBackground,
-        borderRadius: BorderRadius.circular(14),
+            : Colors.white,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark
               ? ClientPortalColors.darkBorder
-              : ClientPortalColors.border,
+              : const Color(0xFFF1F5F9),
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A)
-                .withValues(alpha: isDark ? 0.25 : 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: const Color(0xFF0F172A).withValues(alpha: isDark ? 0.25 : 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -510,48 +509,58 @@ class _StatMetricCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            child: Row(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: isDark ? 0.2 : 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, size: 17, color: color),
+                // Icon + Chevron in top row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: isDark ? 0.2 : 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(icon, size: 18, color: color),
+                    ),
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      size: 16,
+                      color: Color(0xFF94A3B8),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        count,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: isDark
-                              ? ClientPortalColors.darkPrimaryText
-                              : ClientPortalColors.primaryNavy,
-                        ),
-                      ),
-                      Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w500,
-                          color: isDark
-                              ? ClientPortalColors.darkSecondaryText
-                              : ClientPortalColors.secondaryText,
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: 12),
+                // Bold Count
+                Text(
+                  count,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                    color: isDark
+                        ? ClientPortalColors.darkPrimaryText
+                        : const Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                // Label
+                Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    height: 1.2,
+                    color: isDark
+                        ? ClientPortalColors.darkSecondaryText
+                        : const Color(0xFF64748B),
                   ),
                 ),
               ],

@@ -430,42 +430,44 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                     const SizedBox(height: 18),
                   ],
 
-                  // Account & Security Card
-                  LexCard(
-                    borderRadius: 18,
-                    padding: const EdgeInsets.all(18),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.security_outlined,
-                              size: 19,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Account & Security',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
+                  // Account & Security Card (Hidden for lawyer profiles)
+                  if (!userRole.isLawyer) ...[
+                    LexCard(
+                      borderRadius: 18,
+                      padding: const EdgeInsets.all(18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.security_outlined,
+                                size: 19,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        _buildDetailRow('Account ID', '#${user?.id ?? 1}'),
-                        const Divider(height: 18),
-                        _buildDetailRow(
-                          'Role Authority',
-                          userRole.displayTitle,
-                        ),
-                        const Divider(height: 18),
-                        _buildDetailRow('Status', 'Active Verified Account'),
-                      ],
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Account & Security',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          _buildDetailRow('Account ID', '#${user?.id ?? 1}'),
+                          const Divider(height: 18),
+                          _buildDetailRow(
+                            'Role Authority',
+                            userRole.displayTitle,
+                          ),
+                          const Divider(height: 18),
+                          _buildDetailRow('Status', 'Active Verified Account'),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),

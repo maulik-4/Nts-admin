@@ -8,10 +8,13 @@ import '../../../../core/utils/app_alerts.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
+import '../../../../shared/widgets/searchable_picker_modal.dart';
 import '../../../auth/presentation/providers/auth_notifier.dart';
 import '../../../clients/presentation/providers/clients_notifier.dart';
+import '../../../dashboard/presentation/providers/dashboard_notifier.dart';
 import '../../data/models/case_model.dart';
 import '../providers/cases_notifier.dart';
+import 'case_detail_screen.dart';
 
 class CaseFormScreen extends ConsumerStatefulWidget {
   final int? caseId;
@@ -142,6 +145,8 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
         await ref
             .read(casesNotifierProvider.notifier)
             .updateCase(widget.caseId!, request);
+        ref.invalidate(caseDetailProvider(widget.caseId!));
+        ref.invalidate(dashboardNotifierProvider);
         if (mounted) {
           AppAlerts.showSuccess(context, 'Case updated successfully.');
           context.pop();
@@ -160,6 +165,7 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
               : null,
         );
         await ref.read(casesNotifierProvider.notifier).createCase(request);
+        ref.invalidate(dashboardNotifierProvider);
         if (mounted) {
           AppAlerts.showSuccess(context, 'Case created successfully.');
           context.pop();
@@ -184,20 +190,150 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
     final clientsAsync = ref.watch(clientsNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          isEdit ? 'Edit Case' : 'New Legal Case',
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+      backgroundColor:
+          isDark ? const Color(0xFF070E1A) : const Color(0xFFF1F5F9),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Top Header with 1.1.png matching client_form_screen
+            Stack(
               children: [
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/images/1.1.png',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.centerRight,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Color(0xFF071224), Color(0xFF1E3A8A)],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          const Color(0xFF071224).withValues(alpha: 0.95),
+                          const Color(0xFF071224).withValues(alpha: 0.8),
+                          const Color(0xFF0A1830).withValues(alpha: 0.35),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.45, 0.7, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+                SafeArea(
+                  bottom: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.arrow_back,
+                                  color: Colors.white),
+                              onPressed: () => context.pop(),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              isEdit ? 'Edit Case' : 'New Legal Case',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1E3A8A)
+                                    .withValues(alpha: 0.7),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: const Color(0xFF3B82F6)
+                                      .withValues(alpha: 0.5),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.balance_rounded,
+                                      size: 13, color: Color(0xFF93C5FD)),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    isEdit
+                                        ? 'CASE MODIFICATION'
+                                        : 'LITIGATION RECORD',
+                                    style: const TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 0.8,
+                                      color: Color(0xFF93C5FD),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              isEdit
+                                  ? 'Update Case File'
+                                  : 'Register New Legal Case',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Establish legal matter profile, assign client representation, and configure court tracking.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.white.withValues(alpha: 0.8),
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            // Form Body
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 650),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                 LexCard(
                   borderRadius: 20,
                   padding: const EdgeInsets.all(20),
@@ -267,7 +403,7 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Client Selector Dropdown
+                      // Client Selector (Searchable)
                       Text(
                         'Associated Client *',
                         style: TextStyle(
@@ -290,48 +426,92 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                             );
                           }
 
-                          return DropdownButtonFormField<int>(
-                            initialValue: _selectedClientId,
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(
+                          final selectedClient = _selectedClientId != null
+                              ? clients.where((c) => c.id == _selectedClientId).firstOrNull
+                              : null;
+
+                          return InkWell(
+                            onTap: () async {
+                              final pickedId = await showSearchablePicker<int>(
+                                context: context,
+                                title: 'Select Associated Client',
+                                searchHint: 'Search by client name or phone...',
+                                selectedValue: _selectedClientId,
+                                items: clients.map((c) {
+                                  return SearchablePickerItem<int>(
+                                    value: c.id,
+                                    label: c.name,
+                                    subtitle: c.phone.isNotEmpty ? c.phone : c.email,
+                                    icon: Icons.person_rounded,
+                                    iconColor: const Color(0xFF2563EB),
+                                  );
+                                }).toList(),
+                              );
+                              if (pickedId != null) {
+                                setState(() => _selectedClientId = pickedId);
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: 14,
-                                vertical: 12,
+                                vertical: 13,
                               ),
-                              prefixIcon: const Icon(
-                                Icons.person_outline_rounded,
-                                size: 19,
-                              ),
-                              filled: true,
-                              fillColor: isDark
-                                  ? const Color(0xFF1E293B)
-                                  : const Color(0xFFF8FAFC),
-                              border: OutlineInputBorder(
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFF8FAFC),
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
+                                border: Border.all(
                                   color: isDark
                                       ? const Color(0xFF334155)
-                                      : const Color(0xFFE2E8F0),
+                                      : const Color(0xFFCBD5E1),
+                                  width: 1.0,
                                 ),
                               ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.person_outline_rounded,
+                                    size: 19,
+                                    color: isDark
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      selectedClient != null
+                                          ? '${selectedClient.name} (${selectedClient.phone})'
+                                          : 'Select Associated Client',
+                                      style: TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: selectedClient != null
+                                            ? FontWeight.w600
+                                            : FontWeight.w400,
+                                        color: selectedClient != null
+                                            ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                                            : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? const Color(0xFF0B1426) : const Color(0xFFE2E8F0),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Icon(
+                                      Icons.search_rounded,
+                                      size: 16,
+                                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            hint: const Text(
-                              'Select Associated Client',
-                              style: TextStyle(fontSize: 13),
-                            ),
-                            items: clients.map((c) {
-                              return DropdownMenuItem<int>(
-                                value: c.id,
-                                child: Text(
-                                  '${c.name} (${c.phone})',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 13),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (val) =>
-                                setState(() => _selectedClientId = val),
-                            validator: (val) =>
-                                val == null ? 'Client is required' : null,
                           );
                         },
                         loading: () => const LinearProgressIndicator(),
@@ -411,9 +591,9 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Status Dropdown
+                      // Status Selector (Optimized Modern Pill UI)
                       Text(
-                        'Status',
+                        'Case Status *',
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
@@ -422,61 +602,129 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                               : const Color(0xFF334155),
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      DropdownButtonFormField<String>(
-                        initialValue: _status,
-                        decoration: InputDecoration(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
-                          ),
-                          filled: true,
-                          fillColor: isDark
-                              ? const Color(0xFF1E293B)
-                              : const Color(0xFFF8FAFC),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'open',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 8,
-                                  color: Color(0xFF10B981),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () => setState(() => _status = 'open'),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
                                 ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Open / Active Case',
-                                  style: TextStyle(fontSize: 13),
+                                decoration: BoxDecoration(
+                                  color: _status == 'open'
+                                      ? (isDark
+                                          ? const Color(0xFF064E3B).withValues(alpha: 0.4)
+                                          : const Color(0xFFECFDF5))
+                                      : (isDark
+                                          ? const Color(0xFF1E293B)
+                                          : const Color(0xFFF8FAFC)),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: _status == 'open'
+                                        ? const Color(0xFF10B981)
+                                        : (isDark
+                                            ? const Color(0xFF334155)
+                                            : const Color(0xFFCBD5E1)),
+                                    width: _status == 'open' ? 1.8 : 1.0,
+                                  ),
                                 ),
-                              ],
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: _status == 'open'
+                                            ? const Color(0xFF10B981)
+                                            : const Color(0xFF94A3B8),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'OPEN',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.5,
+                                        color: _status == 'open'
+                                            ? const Color(0xFF059669)
+                                            : (isDark
+                                                ? const Color(0xFF94A3B8)
+                                                : const Color(0xFF64748B)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
-                          DropdownMenuItem(
-                            value: 'closed',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 8,
-                                  color: Color(0xFF94A3B8),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () => setState(() => _status = 'closed'),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
                                 ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Closed / Resolved',
-                                  style: TextStyle(fontSize: 13),
+                                decoration: BoxDecoration(
+                                  color: _status == 'closed'
+                                      ? (isDark
+                                          ? const Color(0xFF334155).withValues(alpha: 0.5)
+                                          : const Color(0xFFF1F5F9))
+                                      : (isDark
+                                          ? const Color(0xFF1E293B)
+                                          : const Color(0xFFF8FAFC)),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: _status == 'closed'
+                                        ? const Color(0xFF64748B)
+                                        : (isDark
+                                            ? const Color(0xFF334155)
+                                            : const Color(0xFFCBD5E1)),
+                                    width: _status == 'closed' ? 1.8 : 1.0,
+                                  ),
                                 ),
-                              ],
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: _status == 'closed'
+                                            ? const Color(0xFF64748B)
+                                            : const Color(0xFF94A3B8),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'CLOSED',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.5,
+                                        color: _status == 'closed'
+                                            ? (isDark ? Colors.white : const Color(0xFF1E293B))
+                                            : (isDark
+                                                ? const Color(0xFF94A3B8)
+                                                : const Color(0xFF64748B)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ],
-                        onChanged: (val) {
-                          if (val != null) setState(() => _status = val);
-                        },
                       ),
                     ],
                   ),
@@ -485,7 +733,7 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
 
                 // Submit Button
                 SizedBox(
-                  height: 48,
+                  height: 52,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _submit,
                     style: ElevatedButton.styleFrom(
@@ -494,24 +742,38 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      elevation: 3,
+                      elevation: 4,
                     ),
                     child: _isLoading
                         ? const SizedBox(
-                            width: 20,
-                            height: 20,
+                            width: 22,
+                            height: 22,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               color: Colors.white,
                             ),
                           )
-                        : Text(
-                            isEdit ? 'Save Case Changes' : 'Create Case',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14.5,
-                              letterSpacing: 0.2,
-                            ),
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                isEdit
+                                    ? Icons.check_circle_outline_rounded
+                                    : Icons.add_circle_outline_rounded,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                isEdit
+                                    ? 'Save Case Changes'
+                                    : 'Create Case Record',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ],
                           ),
                   ),
                 ),
@@ -520,6 +782,10 @@ class _CaseFormScreenState extends ConsumerState<CaseFormScreen> {
           ),
         ),
       ),
-    );
+    ),
+  ],
+),
+),
+);
   }
 }

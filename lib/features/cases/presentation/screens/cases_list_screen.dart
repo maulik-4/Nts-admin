@@ -87,7 +87,10 @@ class CasesListScreen extends ConsumerWidget {
         capability: UserCapability.createCases,
         child: FloatingActionButton.extended(
           heroTag: 'fab_add_case',
-          onPressed: () => context.push('/app/cases/create'),
+          onPressed: () async {
+            await context.push('/app/cases/create');
+            ref.read(casesNotifierProvider.notifier).loadCases();
+          },
           backgroundColor: const Color(0xFF0F1F38),
           foregroundColor: Colors.white,
           elevation: 4,
@@ -121,6 +124,14 @@ class CasesListScreen extends ConsumerWidget {
                       ? const Color(0xFF94A3B8)
                       : const Color(0xFF64748B),
                 ),
+                suffixIcon: ref.watch(caseSearchQueryProvider).isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        onPressed: () {
+                          ref.read(caseSearchQueryProvider.notifier).state = '';
+                        },
+                      )
+                    : null,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
@@ -200,7 +211,10 @@ class CasesListScreen extends ConsumerWidget {
                     title: 'No Cases Found',
                     message: 'No legal cases match your search query or filter criteria.',
                     actionLabel: 'Create New Case',
-                    onAction: () => context.push('/app/cases/create'),
+                    onAction: () async {
+                      await context.push('/app/cases/create');
+                      ref.read(casesNotifierProvider.notifier).loadCases();
+                    },
                   );
                 }
 

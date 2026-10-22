@@ -68,7 +68,8 @@ class HearingsNotifier extends StateNotifier<AsyncValue<List<Hearing>>> {
 
   Future<void> loadHearings() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() => _repository.getHearings());
+    final res = await AsyncValue.guard(() => _repository.getHearings());
+    if (mounted) state = res;
   }
 
   Future<Hearing> createHearing(CreateHearingRequest request) async {

@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-
 import '../../../../core/utils/app_alerts.dart';
 import '../../../../shared/widgets/error_state_widget.dart';
-import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
-import '../../../../shared/widgets/status_badge.dart';
 import '../../../cases/presentation/providers/cases_notifier.dart';
 import '../../../communications/presentation/widgets/communication_preference_dialog.dart';
 import '../../../communications/presentation/widgets/whatsapp_composer_modal.dart';
+import '../../../dashboard/presentation/providers/dashboard_notifier.dart';
 import '../../../documents/presentation/widgets/document_share_dialog.dart';
 import '../../data/repositories/clients_repository.dart';
 import '../providers/clients_notifier.dart';
@@ -40,17 +37,35 @@ class ClientDetailScreen extends ConsumerWidget {
     final casesAsync = ref.watch(casesNotifierProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final cardBg = isDark ? const Color(0xFF131D33) : Colors.white;
+    final borderColor =
+        isDark ? const Color(0xFF1E2D4A) : const Color(0xFFE2E8F0);
+    final dividerColor =
+        isDark ? const Color(0xFF1E2D4A) : const Color(0xFFF1F5F9);
+    final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSecondary =
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final actionTileBg =
+        isDark ? const Color(0xFF0C1322) : const Color(0xFFF8FAFC);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'Client Details',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+          ),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             tooltip: 'Edit Client',
-            onPressed: () => context.push('/app/clients/$clientId/edit'),
+            onPressed: () async {
+              await context.push('/app/clients/$clientId/edit');
+              ref.invalidate(clientDetailProvider(clientId));
+              ref.read(clientsNotifierProvider.notifier).loadClients();
+            },
           ),
           IconButton(
             icon: const Icon(
@@ -70,252 +85,237 @@ class ClientDetailScreen extends ConsumerWidget {
                   .toList() ??
               [];
 
-          final dateFormatted = client.createdAt != null
-              ? DateFormat('MMM d, yyyy').format(client.createdAt!)
-              : 'Unrecorded';
-
-          final accentColor = client.isActive
-              ? const Color(0xFF10B981)
-              : const Color(0xFF94A3B8);
-
           return SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header Card
-                LexCard(
-                  borderRadius: 20,
-                  leftAccentColor: accentColor,
+                // 1. Contact Information Card matching 3.png
+                Container(
                   padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: borderColor),
+                    boxShadow: isDark
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 52,
-                            height: 52,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isDark
-                                  ? const Color(0xFF1E293B)
-                                  : const Color(0xFFEFF6FF),
-                              border: Border.all(
-                                color: isDark
-                                    ? const Color(0xFF334155)
-                                    : const Color(0xFFDBEAFE),
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                client.name.isNotEmpty
-                                    ? client.name.substring(0, 1).toUpperCase()
-                                    : 'C',
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF2563EB),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  client.name,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
-                                    color: isDark
-                                        ? Colors.white
-                                        : const Color(0xFF0F172A),
-                                  ),
-                                ),
-                                const SizedBox(height: 3),
-                                Text(
-                                  'Client since $dateFormatted',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: isDark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF64748B),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          StatusBadge(
-                            status: client.isActive ? 'Active' : 'Inactive',
-                            showDot: true,
-                          ),
-                        ],
+                      // Client Avatar Icon Container
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isDark
+                              ? const Color(0xFF1E2D4A)
+                              : const Color(0xFFEFF6FF),
+                        ),
+                        child: Icon(
+                          Icons.person,
+                          size: 30,
+                          color: isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF2563EB),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      // Phone Row
+                      _buildContactRow(
+                        icon: Icons.phone_outlined,
+                        label: 'Phone',
+                        value: client.phone.isNotEmpty
+                            ? client.phone
+                            : 'Not provided',
+                        textPrimary: textPrimary,
+                        textSecondary: textSecondary,
+                      ),
+                      Divider(color: dividerColor, height: 24),
+                      // Email Row
+                      _buildContactRow(
+                        icon: Icons.email_outlined,
+                        label: 'Email',
+                        value: client.email != null && client.email!.isNotEmpty
+                            ? client.email!
+                            : 'Not provided',
+                        textPrimary: textPrimary,
+                        textSecondary: textSecondary,
+                      ),
+                      Divider(color: dividerColor, height: 24),
+                      // Address Row
+                      _buildContactRow(
+                        icon: Icons.home_outlined,
+                        label: 'Address',
+                        value: client.address.isNotEmpty
+                            ? client.address
+                            : (client.city != null && client.city!.isNotEmpty
+                                ? client.city!
+                                : 'Not provided'),
+                        textPrimary: textPrimary,
+                        textSecondary: textSecondary,
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
 
-                // Contact Information
-                LexCard(
-                  borderRadius: 18,
+                // 2. Client Portal & Communications Card (2x2 Grid) matching 3.png
+                Container(
                   padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: borderColor),
+                    boxShadow: isDark
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
                           Icon(
-                            Icons.contact_mail_outlined,
-                            size: 18,
-                            color: Theme.of(context).colorScheme.primary,
+                            Icons.link_rounded,
+                            size: 20,
+                            color: isDark
+                                ? const Color(0xFF38BDF8)
+                                : const Color(0xFF0284C7),
                           ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Contact Information',
+                          const SizedBox(width: 10),
+                          Text(
+                            'Client Portal & Communications',
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 16,
                               fontWeight: FontWeight.w700,
+                              color: textPrimary,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
-                      _buildInfoRow(
-                        context,
-                        'Phone',
-                        client.phone,
-                        Icons.phone_outlined,
-                      ),
-                      if (client.email != null && client.email!.isNotEmpty) ...[
-                        const Divider(height: 18),
-                        _buildInfoRow(
-                          context,
-                          'Email',
-                          client.email!,
-                          Icons.email_outlined,
-                        ),
-                      ],
-                      if (client.city != null && client.city!.isNotEmpty) ...[
-                        const Divider(height: 18),
-                        _buildInfoRow(
-                          context,
-                          'City',
-                          client.city!,
-                          Icons.location_city_outlined,
-                        ),
-                      ],
-                      const Divider(height: 18),
-                      _buildInfoRow(
-                        context,
-                        'Address',
-                        client.address,
-                        Icons.home_outlined,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Portal & Client Communication Actions Card
-                LexCard(
-                  borderRadius: 18,
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                      // Row 1 of 2x2 grid
                       Row(
                         children: [
-                          Icon(
-                            Icons.handshake_outlined,
-                            size: 18,
-                            color: Theme.of(context).colorScheme.primary,
+                          Expanded(
+                            child: _buildPortalActionTile(
+                              icon: Icons.person_add_alt_1_rounded,
+                              label: 'Invite to\nPortal',
+                              isDark: isDark,
+                              actionTileBg: actionTileBg,
+                              borderColor: borderColor,
+                              textPrimary: textPrimary,
+                              onTap: () {
+                                InviteClientDialog.show(
+                                  context,
+                                  initialEmail: client.email,
+                                  initialName: client.name,
+                                );
+                              },
+                            ),
                           ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Client Portal & Communications',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildPortalActionTile(
+                              icon: Icons.description_outlined,
+                              label: 'Shared\nDocuments',
+                              isDark: isDark,
+                              actionTileBg: actionTileBg,
+                              borderColor: borderColor,
+                              textPrimary: textPrimary,
+                              onTap: () {
+                                DocumentShareDialog.show(
+                                  context,
+                                  clientId: client.id,
+                                  clientName: client.name,
+                                );
+                              },
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 14),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
+                      const SizedBox(height: 12),
+                      // Row 2 of 2x2 grid
+                      Row(
                         children: [
-                          OutlinedButton.icon(
-                            icon: const Icon(
-                              Icons.person_add_alt_1_rounded,
-                              size: 16,
+                          Expanded(
+                            child: _buildPortalActionTile(
+                              icon: Icons.chat_bubble_rounded,
+                              iconColor: const Color(0xFF25D366),
+                              isWhatsApp: true,
+                              label: 'Send\nWhatsApp',
+                              isDark: isDark,
+                              actionTileBg: actionTileBg,
+                              borderColor: borderColor,
+                              textPrimary: textPrimary,
+                              onTap: () {
+                                WhatsAppComposerModal.show(
+                                  context,
+                                  clientId: client.id,
+                                  recipientName: client.name,
+                                  recipientNumber: client.phone,
+                                );
+                              },
                             ),
-                            label: const Text('Invite to Portal'),
-                            onPressed: () {
-                              InviteClientDialog.show(
-                                context,
-                                initialEmail: client.email,
-                                initialName: client.name,
-                              );
-                            },
                           ),
-                          OutlinedButton.icon(
-                            icon: const Icon(
-                              Icons.folder_shared_outlined,
-                              size: 16,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildPortalActionTile(
+                              icon: Icons.tune_rounded,
+                              label: 'Preferences',
+                              isDark: isDark,
+                              actionTileBg: actionTileBg,
+                              borderColor: borderColor,
+                              textPrimary: textPrimary,
+                              onTap: () {
+                                CommunicationPreferenceDialog.show(
+                                  context,
+                                  clientId: client.id,
+                                  clientName: client.name,
+                                  phoneNumber: client.phone,
+                                );
+                              },
                             ),
-                            label: const Text('Shared Documents'),
-                            onPressed: () {
-                              DocumentShareDialog.show(
-                                context,
-                                clientId: client.id,
-                                clientName: client.name,
-                              );
-                            },
-                          ),
-                          OutlinedButton.icon(
-                            icon: const Icon(
-                              Icons.chat_bubble_rounded,
-                              size: 16,
-                              color: Color(0xFF25D366),
-                            ),
-                            label: const Text('Send WhatsApp'),
-                            onPressed: () {
-                              WhatsAppComposerModal.show(
-                                context,
-                                clientId: client.id,
-                                recipientName: client.name,
-                                recipientNumber: client.phone,
-                              );
-                            },
-                          ),
-                          OutlinedButton.icon(
-                            icon: const Icon(Icons.tune_rounded, size: 16),
-                            label: const Text('Preferences'),
-                            onPressed: () {
-                              CommunicationPreferenceDialog.show(
-                                context,
-                                clientId: client.id,
-                                clientName: client.name,
-                                phoneNumber: client.phone,
-                              );
-                            },
                           ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
 
-                // Associated Cases Card
-                LexCard(
-                  borderRadius: 18,
+                // 3. Associated Cases Card matching 3.png
+                Container(
                   padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: borderColor),
+                    boxShadow: isDark
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -325,47 +325,98 @@ class ClientDetailScreen extends ConsumerWidget {
                           Row(
                             children: [
                               Icon(
-                                Icons.folder_shared_outlined,
-                                size: 18,
-                                color: Theme.of(context).colorScheme.primary,
+                                Icons.folder_outlined,
+                                size: 20,
+                                color: isDark
+                                    ? const Color(0xFF38BDF8)
+                                    : const Color(0xFF0284C7),
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Cases (${associatedCases.length})',
-                                style: const TextStyle(
-                                  fontSize: 15,
+                                'Cases',
+                                style: TextStyle(
+                                  fontSize: 16,
                                   fontWeight: FontWeight.w700,
+                                  color: textPrimary,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF1E2D4A)
+                                      : const Color(0xFFEFF6FF),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '${associatedCases.length}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: isDark
+                                        ? const Color(0xFF38BDF8)
+                                        : const Color(0xFF2563EB),
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          TextButton.icon(
-                            onPressed: () {
-                              AppAlerts.showWarning(
-                                context,
-                                'New Case creation is currently locked. Please review your Subscription & Quotas.',
-                              );
-                              context.push('/app/more/subscriptions');
-                            },
-                            icon: const Icon(
-                              Icons.lock_outline_rounded,
-                              size: 16,
+                          InkWell(
+                            onTap: () => context.push(
+                              '/app/cases/create?clientId=${client.id}',
                             ),
-                            label: const Text('Add Case (Locked)'),
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF1E2D4A)
+                                    : const Color(0xFFEFF6FF),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.add_circle,
+                                    size: 16,
+                                    color: isDark
+                                        ? const Color(0xFF38BDF8)
+                                        : const Color(0xFF2563EB),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Add case',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark
+                                          ? const Color(0xFF38BDF8)
+                                          : const Color(0xFF2563EB),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 14),
                       if (associatedCases.isEmpty)
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           child: Text(
                             'No cases linked to this client yet.',
                             style: TextStyle(
                               fontSize: 13,
-                              color: isDark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF64748B),
+                              color: textSecondary,
                             ),
                           ),
                         )
@@ -374,18 +425,48 @@ class ClientDetailScreen extends ConsumerWidget {
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: associatedCases.length,
-                          separatorBuilder: (_, _) => const Divider(height: 14),
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 10),
                           itemBuilder: (ctx, idx) {
                             final c = associatedCases[idx];
+                            final isOpen = c.status.toLowerCase() != 'closed';
                             return InkWell(
                               onTap: () => context.push('/app/cases/${c.id}'),
-                              borderRadius: BorderRadius.circular(8),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4,
+                              borderRadius: BorderRadius.circular(14),
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF1E293B)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? const Color(0xFF334155)
+                                        : const Color(0xFFE2E8F0),
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? const Color(0xFF1E2D4A)
+                                            : const Color(0xFFEFF6FF),
+                                        borderRadius:
+                                            BorderRadius.circular(10),
+                                      ),
+                                      child: Icon(
+                                        Icons.description_outlined,
+                                        size: 20,
+                                        color: isDark
+                                            ? const Color(0xFF38BDF8)
+                                            : const Color(0xFF2563EB),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
@@ -393,30 +474,112 @@ class ClientDetailScreen extends ConsumerWidget {
                                         children: [
                                           Text(
                                             c.title,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                               fontSize: 13.5,
                                               fontWeight: FontWeight.w700,
-                                              color: isDark
-                                                  ? Colors.white
-                                                  : const Color(0xFF0F172A),
+                                              color: textPrimary,
                                             ),
                                           ),
                                           const SizedBox(height: 2),
                                           Text(
-                                            '${c.caseNumber} • ${c.courtName}',
+                                            c.caseNumber,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
-                                              fontSize: 12,
-                                              color: isDark
-                                                  ? const Color(0xFF94A3B8)
-                                                  : const Color(0xFF64748B),
+                                              fontSize: 11.5,
+                                              fontWeight: FontWeight.w500,
+                                              color: textSecondary,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 1),
+                                          Text(
+                                            '${c.caseType.isNotEmpty ? c.caseType : 'General'} • ${c.courtName}',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              color: textSecondary,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    StatusBadge(
-                                      status: c.status,
-                                      showDot: true,
+                                    const SizedBox(width: 8),
+                                    // Pill Badge matching 1.png (● OPEN)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isOpen
+                                            ? (isDark
+                                                ? const Color(0xFF064E3B)
+                                                    .withValues(alpha: 0.6)
+                                                : const Color(0xFFDCFCE7))
+                                            : (isDark
+                                                ? const Color(0xFF1E293B)
+                                                : const Color(0xFFF1F5F9)),
+                                        borderRadius:
+                                            BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: isOpen
+                                              ? (isDark
+                                                  ? const Color(0xFF10B981)
+                                                      .withValues(alpha: 0.6)
+                                                  : const Color(0xFF86EFAC))
+                                              : (isDark
+                                                  ? const Color(0xFF475569)
+                                                  : const Color(0xFFCBD5E1)),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 6,
+                                            height: 6,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: isOpen
+                                                  ? (isDark
+                                                      ? const Color(0xFF34D399)
+                                                      : const Color(0xFF16A34A))
+                                                  : (isDark
+                                                      ? const Color(0xFF94A3B8)
+                                                      : const Color(
+                                                          0xFF64748B)),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 5),
+                                          Text(
+                                            c.status.toUpperCase(),
+                                            style: TextStyle(
+                                              color: isOpen
+                                                  ? (isDark
+                                                      ? const Color(0xFF34D399)
+                                                      : const Color(0xFF15803D))
+                                                  : (isDark
+                                                      ? const Color(0xFF94A3B8)
+                                                      : const Color(
+                                                          0xFF475569)),
+                                              fontSize: 10.5,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 0.3,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Icon(
+                                      Icons.chevron_right_rounded,
+                                      size: 18,
+                                      color: isDark
+                                          ? const Color(0xFF64748B)
+                                          : const Color(0xFF94A3B8),
                                     ),
                                   ],
                                 ),
@@ -431,15 +594,15 @@ class ClientDetailScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => Padding(
-          padding: const EdgeInsets.all(16),
+        loading: () => const Padding(
+          padding: EdgeInsets.all(16),
           child: Column(
-            children: const [
-              SkeletonLoader(height: 110, borderRadius: 18),
+            children: [
+              SkeletonLoader(height: 180, borderRadius: 20),
               SizedBox(height: 16),
-              SkeletonLoader(height: 160, borderRadius: 18),
+              SkeletonLoader(height: 180, borderRadius: 20),
               SizedBox(height: 16),
-              SkeletonLoader(height: 140, borderRadius: 18),
+              SkeletonLoader(height: 140, borderRadius: 20),
             ],
           ),
         ),
@@ -451,45 +614,115 @@ class ClientDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoRow(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-  ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
+  Widget _buildContactRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color textPrimary,
+    required Color textSecondary,
+  }) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(
-          icon,
-          size: 18,
-          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-        ),
-        const SizedBox(width: 12),
-        SizedBox(
-          width: 80,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-            ),
+        Icon(icon, size: 20, color: textSecondary),
+        const SizedBox(width: 14),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: textSecondary,
           ),
         ),
+        const SizedBox(width: 12),
         Expanded(
           child: Text(
             value,
+            textAlign: TextAlign.right,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 13.5,
-              fontWeight: FontWeight.w700,
-              color: isDark ? Colors.white : const Color(0xFF0F172A),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: textPrimary,
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPortalActionTile({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required bool isDark,
+    required Color actionTileBg,
+    required Color borderColor,
+    required Color textPrimary,
+    Color? iconColor,
+    bool isWhatsApp = false,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 11),
+          decoration: BoxDecoration(
+            color: actionTileBg,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: borderColor),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: isWhatsApp
+                      ? const Color(0xFF25D366).withValues(alpha: 0.15)
+                      : (isDark
+                          ? const Color(0xFF1E2D4A)
+                          : const Color(0xFFE0F2FE)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  size: 17,
+                  color: iconColor ??
+                      (isDark
+                          ? const Color(0xFF38BDF8)
+                          : const Color(0xFF0284C7)),
+                ),
+              ),
+              const SizedBox(width: 7),
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: textPrimary,
+                      height: 1.25,
+                    ),
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 15,
+                color:
+                    isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -520,6 +753,7 @@ class ClientDetailScreen extends ConsumerWidget {
     if (confirmed == true && context.mounted) {
       try {
         await ref.read(clientsNotifierProvider.notifier).deleteClient(clientId);
+        ref.invalidate(dashboardNotifierProvider);
         if (context.mounted) {
           AppAlerts.showSuccess(context, 'Client profile removed.');
           context.pop();

@@ -20,9 +20,13 @@ class FirmsNotifier extends StateNotifier<AsyncValue<List<TenantFirm>>> {
     state = const AsyncValue.loading();
     try {
       final firms = await _repository.getFirms();
-      state = AsyncValue.data(firms);
+      if (mounted) {
+        state = AsyncValue.data(firms);
+      }
     } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+      if (mounted) {
+        state = AsyncValue.error(e, stack);
+      }
     }
   }
 

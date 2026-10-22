@@ -8,6 +8,7 @@ import '../../../../core/utils/app_alerts.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/lex_text_field.dart';
+import '../../../../shared/widgets/searchable_picker_modal.dart';
 import '../../../cases/presentation/providers/cases_notifier.dart';
 import '../../data/models/hearing_model.dart';
 import '../providers/hearings_notifier.dart';
@@ -218,10 +219,12 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
     final casesAsync = ref.watch(casesNotifierProvider);
 
     return Scaffold(
+      backgroundColor:
+          isDark ? const Color(0xFF0C1322) : const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
           isEdit ? 'Edit Hearing' : 'Schedule Hearing',
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
         ),
       ),
       body: SafeArea(
@@ -232,54 +235,186 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Top Banner matching 2.png
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF0B192C).withValues(alpha: 0.25),
+                        blurRadius: 16,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: Image.asset(
+                            'assets/images/bg.png',
+                            fit: BoxFit.cover,
+                            alignment: Alignment.centerRight,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Color(0xFF071224), Color(0xFF1E3A8A)],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                colors: [
+                                  const Color(0xFF081426).withValues(alpha: 0.95),
+                                  const Color(0xFF0D2240).withValues(alpha: 0.75),
+                                  Colors.transparent,
+                                ],
+                                stops: const [0.0, 0.65, 1.0],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 20,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      children: const [
+                                        Text(
+                                          'Schedule a ',
+                                          style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.white,
+                                            letterSpacing: -0.4,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Hearing',
+                                          style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w800,
+                                            color: Color(0xFFFBBF24),
+                                            letterSpacing: -0.4,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      'Add hearing details and set reminders\nto stay on track.',
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        height: 1.35,
+                                        color: Colors.white.withValues(alpha: 0.8),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1D4ED8),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF1D4ED8)
+                                          .withValues(alpha: 0.4),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.calendar_month_rounded,
+                                  color: Colors.white,
+                                  size: 26,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Form Card matching 2.png
                 LexCard(
-                  borderRadius: 20,
+                  borderRadius: 22,
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF1E293B)
-                              : const Color(0xFFEFF6FF),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: isDark
-                                ? const Color(0xFF334155)
-                                : const Color(0xFFDBEAFE),
+                      // Header inside card
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF1E3A8A).withValues(alpha: 0.3)
+                                  : const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.description_outlined,
+                              size: 20,
+                              color: Color(0xFF2563EB),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          isEdit
-                              ? 'UPDATE HEARING'
-                              : 'HEARING AGENDA SPECIFICATION',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                            color: Color(0xFF2563EB),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Hearing Details',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w800,
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A),
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Fill in the details for the hearing agenda.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDark
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Hearing Details',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: isDark
-                              ? Colors.white
-                              : const Color(0xFF0F172A),
-                        ),
-                      ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 20),
 
-                      // Associated Case Dropdown
+                      // Associated Case Selector (Searchable)
                       Text(
                         'Associated Case *',
                         style: TextStyle(
@@ -297,43 +432,87 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                             return const Text('No active cases available.');
                           }
 
-                          return DropdownButtonFormField<int>(
-                            initialValue: _selectedCaseId,
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 12,
-                              ),
-                              prefixIcon: const Icon(
-                                Icons.folder_open_rounded,
-                                size: 19,
-                              ),
-                              filled: true,
-                              fillColor: isDark
-                                  ? const Color(0xFF1E293B)
-                                  : const Color(0xFFF8FAFC),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            hint: const Text(
-                              'Select Associated Case',
-                              style: TextStyle(fontSize: 13),
-                            ),
-                            items: cases.map((c) {
-                              return DropdownMenuItem<int>(
-                                value: c.id,
-                                child: Text(
-                                  '${c.caseNumber} - ${c.title}',
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 13),
-                                ),
+                          final selectedCase = _selectedCaseId != null
+                              ? cases.where((c) => c.id == _selectedCaseId).firstOrNull
+                              : null;
+
+                          return InkWell(
+                            onTap: () async {
+                              final pickedId = await showSearchablePicker<int>(
+                                context: context,
+                                title: 'Select Associated Case',
+                                searchHint: 'Search by case number or title...',
+                                selectedValue: _selectedCaseId,
+                                items: cases.map((c) {
+                                  return SearchablePickerItem<int>(
+                                    value: c.id,
+                                    label: c.caseNumber,
+                                    subtitle: '${c.title} • ${c.courtName}',
+                                    icon: Icons.folder_rounded,
+                                    iconColor: const Color(0xFF2563EB),
+                                  );
+                                }).toList(),
                               );
-                            }).toList(),
-                            onChanged: (val) =>
-                                setState(() => _selectedCaseId = val),
-                            validator: (val) =>
-                                val == null ? 'Case is required' : null,
+                              if (pickedId != null) {
+                                setState(() => _selectedCaseId = pickedId);
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 13,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF1E293B)
+                                    : const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isDark
+                                      ? const Color(0xFF334155)
+                                      : const Color(0xFFCBD5E1),
+                                  width: 1.0,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.folder_outlined,
+                                    size: 19,
+                                    color: isDark
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      selectedCase != null
+                                          ? '${selectedCase.caseNumber} - ${selectedCase.title}'
+                                          : 'Select Associated Case',
+                                      style: TextStyle(
+                                        fontSize: 13.5,
+                                        fontWeight: selectedCase != null
+                                            ? FontWeight.w600
+                                            : FontWeight.w400,
+                                        color: selectedCase != null
+                                            ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                                            : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    size: 20,
+                                    color: isDark
+                                        ? const Color(0xFF94A3B8)
+                                        : const Color(0xFF64748B),
+                                  ),
+                                ],
+                              ),
+                            ),
                           );
                         },
                         loading: () => const LinearProgressIndicator(),
@@ -346,7 +525,7 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                       LexTextField(
                         controller: _titleController,
                         label: 'Hearing Purpose / Title *',
-                        hintText: 'e.g. Preliminary Hearing, Arguments',
+                        hintText: 'e.g. Preliminary Hearing, Arguments, etc.',
                         prefixIcon: Icons.gavel_outlined,
                         validator: (val) =>
                             Validators.required(val, 'Hearing title'),
@@ -360,8 +539,9 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                           child: LexTextField(
                             controller: _dateController,
                             label: 'Hearing Date *',
-                            hintText: 'YYYY-MM-DD',
-                            prefixIcon: Icons.calendar_today_outlined,
+                            hintText: 'Select Date',
+                            prefixIcon: Icons.calendar_month_outlined,
+                            suffix: const Icon(Icons.calendar_today_rounded, size: 20),
                             validator: (val) =>
                                 Validators.required(val, 'Hearing date'),
                           ),
@@ -369,7 +549,7 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Start & End Time Row
+                      // Start & End Time Row matching 2.png
                       Row(
                         children: [
                           Expanded(
@@ -378,9 +558,12 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                               child: AbsorbPointer(
                                 child: LexTextField(
                                   controller: _startTimeController,
-                                  label: 'Start Time',
-                                  hintText: 'HH:MM:SS',
+                                  label: 'Start Time *',
+                                  hintText: 'HH:MM AM',
                                   prefixIcon: Icons.access_time_rounded,
+                                  suffix: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
+                                  validator: (val) =>
+                                      Validators.required(val, 'Start time'),
                                 ),
                               ),
                             ),
@@ -392,9 +575,12 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                               child: AbsorbPointer(
                                 child: LexTextField(
                                   controller: _endTimeController,
-                                  label: 'End Time',
-                                  hintText: 'HH:MM:SS',
+                                  label: 'End Time *',
+                                  hintText: 'HH:MM AM',
                                   prefixIcon: Icons.access_time_rounded,
+                                  suffix: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
+                                  validator: (val) =>
+                                      Validators.required(val, 'End time'),
                                 ),
                               ),
                             ),
@@ -419,16 +605,16 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                         controller: _judgeNameController,
                         label: 'Judge / Presiding Officer (Optional)',
                         hintText: 'e.g. Hon. Justice R. Sharma',
-                        prefixIcon: Icons.person_pin_outlined,
+                        prefixIcon: Icons.person_outline_rounded,
                       ),
                       const SizedBox(height: 16),
 
                       // Notes
                       LexTextField(
                         controller: _notesController,
-                        label: 'Hearing Notes / Instructions (Optional)',
-                        hintText: 'Add preparation steps, client instructions, or documents to bring...',
-                        prefixIcon: Icons.notes_outlined,
+                        label: 'Additional Notes (Optional)',
+                        hintText: 'Add any important notes, agenda points, or preparations...',
+                        prefixIcon: Icons.description_outlined,
                         maxLines: 3,
                       ),
                     ],
@@ -436,16 +622,16 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Submit Button
+                // Submit Button matching 2.png
                 SizedBox(
-                  height: 48,
+                  height: 50,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F1F38),
+                      backgroundColor: const Color(0xFF132B4F),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 3,
                     ),
@@ -458,15 +644,24 @@ class _HearingFormScreenState extends ConsumerState<HearingFormScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : Text(
-                            isEdit
-                                ? 'Save Hearing Changes'
-                                : 'Schedule Hearing',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14.5,
-                              letterSpacing: 0.2,
-                            ),
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.calendar_month_outlined, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                isEdit
+                                    ? 'Save Hearing Changes'
+                                    : 'Schedule Hearing',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward_rounded, size: 18),
+                            ],
                           ),
                   ),
                 ),

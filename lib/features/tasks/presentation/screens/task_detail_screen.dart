@@ -10,6 +10,7 @@ import '../../../../shared/widgets/lex_button.dart';
 import '../../../../shared/widgets/lex_card.dart';
 import '../../../../shared/widgets/skeleton_loader.dart';
 import '../../../../shared/widgets/status_badge.dart';
+import '../../../dashboard/presentation/providers/dashboard_notifier.dart';
 import '../../data/models/task_model.dart';
 import '../providers/tasks_notifier.dart';
 
@@ -42,6 +43,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
         await ref.read(tasksNotifierProvider.notifier).completeTask(task.id);
       }
       ref.invalidate(taskDetailProvider(widget.taskId));
+      ref.invalidate(dashboardNotifierProvider);
     } catch (e) {
       if (mounted) {
         AppAlerts.showError(context, 'Failed to update task status: $e');
@@ -100,6 +102,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
 
     try {
       await ref.read(tasksNotifierProvider.notifier).deleteTask(widget.taskId);
+      ref.invalidate(dashboardNotifierProvider);
       if (mounted) {
         AppAlerts.showSuccess(context, 'Task deleted successfully.');
         context.pop();
@@ -120,14 +123,6 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
       appBar: AppBar(
         title: const Text('Task Details'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            tooltip: 'Edit Task',
-            onPressed: () async {
-              await context.push('/app/more/tasks/${widget.taskId}/edit');
-              ref.invalidate(taskDetailProvider(widget.taskId));
-            },
-          ),
           IconButton(
             icon: const Icon(Icons.delete_outline, color: LexColors.error),
             tooltip: 'Delete Task',

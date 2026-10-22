@@ -121,43 +121,48 @@ class AssignedCounselCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        counsel.role.isNotEmpty
+                        counsel.role.isNotEmpty && counsel.role != 'staff'
                             ? counsel.role
-                            : 'Legal Counsel',
+                            : 'Lawyer',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 12,
                           color: isDark
                               ? ClientPortalColors.darkSecondaryText
-                              : ClientPortalColors.secondaryText,
+                              : const Color(0xFF64748B),
                         ),
                       ),
                       const SizedBox(height: 1),
                       Text(
                         'Firm Legal Counsel',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 11.5,
                           fontWeight: FontWeight.w500,
                           color: isDark
                               ? ClientPortalColors.darkSecondaryText
-                              : ClientPortalColors.secondaryText,
+                              : const Color(0xFF64748B),
                         ),
                       ),
-                      if (counsel.caseTitle != null &&
-                          counsel.caseTitle!.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          counsel.caseTitle!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                      const SizedBox(height: 4),
+                      Row(
+                        children: const [
+                          Icon(
+                            Icons.apartment_rounded,
+                            size: 14,
                             color: ClientPortalColors.primaryBlue,
                           ),
-                        ),
-                      ],
+                          SizedBox(width: 4),
+                          Text(
+                            'Firm Legal Counsel',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: ClientPortalColors.primaryBlue,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

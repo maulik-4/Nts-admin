@@ -16,31 +16,41 @@ class UpcomingHearingCard extends StatelessWidget {
 
     if (hearing == null) {
       return Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         decoration: BoxDecoration(
           color: isDark
               ? ClientPortalColors.darkCardBackground
-              : ClientPortalColors.cardBackground,
-          borderRadius: BorderRadius.circular(
-            ClientPortalDimensions.cardRadius,
-          ),
+              : Colors.white,
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isDark
                 ? ClientPortalColors.darkBorder
-                : ClientPortalColors.border,
+                : const Color(0xFFF1F5F9),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0F172A).withValues(alpha: isDark ? 0.25 : 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: ClientPortalColors.primaryBlue.withValues(alpha: 0.1),
+                color: const Color(0xFFEFF6FF),
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFFDBEAFE),
+                  width: 1,
+                ),
               ),
               child: const Icon(
-                Icons.event_available_outlined,
-                color: ClientPortalColors.primaryBlue,
+                Icons.calendar_month_outlined,
+                color: Color(0xFF2563EB),
                 size: 22,
               ),
             ),
@@ -54,19 +64,64 @@ class UpcomingHearingCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
                       color: isDark
                           ? ClientPortalColors.darkPrimaryText
-                          : ClientPortalColors.primaryText,
+                          : const Color(0xFF0F172A),
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     'You are all caught up. No court appearances are currently scheduled.',
                     style: TextStyle(
                       fontSize: 12,
+                      height: 1.3,
                       color: isDark
                           ? ClientPortalColors.darkSecondaryText
-                          : ClientPortalColors.secondaryText,
+                          : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Decorative Gavel & Document Graphic matching 4.png
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFFEFF6FF).withValues(alpha: 0.8),
+                    const Color(0xFFDBEAFE).withValues(alpha: 0.4),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(
+                    top: 6,
+                    left: 8,
+                    child: Icon(
+                      Icons.description_outlined,
+                      size: 32,
+                      color: const Color(0xFF93C5FD).withValues(alpha: 0.7),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 6,
+                    right: 6,
+                    child: Transform.rotate(
+                      angle: -0.45,
+                      child: const Icon(
+                        Icons.gavel_rounded,
+                        size: 24,
+                        color: Color(0xFF2563EB),
+                      ),
                     ),
                   ),
                 ],
